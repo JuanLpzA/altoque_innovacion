@@ -1,4 +1,6 @@
 package com.innovacion.altoque.repository;
 
-public interface CategoriaRepository {
-}
+import com.innovacion.altoque.model.Categoria;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CategoriaRepository extends JpaRepository<Categoria, Integer> {}
