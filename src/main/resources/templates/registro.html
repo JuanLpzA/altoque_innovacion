@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Altoque – Registro</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #dde8f5;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-skyline {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            background: linear-gradient(180deg, #d0dff0 0%, #e8f0fa 60%, #dde8f5 100%);
+            overflow: hidden;
+        }
+
+        .bg-skyline svg {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .bottom-wave {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            width: 100%;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .page-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 420px;
+            padding: 0 0 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 24px 20px;
+        }
+
+        .logo-icon { width: 64px; height: 64px; margin-bottom: 8px; }
+
+        .logo-brand {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #1a3a6b;
+            line-height: 1;
+        }
+
+        .logo-brand span { color: #1a56db; }
+
+        .logo-tagline {
+            font-size: .78rem;
+            color: #6b7280;
+            margin-top: 3px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 1.75rem 1.75rem 1.5rem;
+            width: calc(100% - 40px);
+            max-width: 380px;
+            box-shadow: 0 8px 32px rgba(26,86,219,.10), 0 1px 4px rgba(0,0,0,.06);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #111827;
+            text-align: center;
+            margin-bottom: 3px;
+        }
+
+        .card-subtitle {
+            font-size: .8rem;
+            color: #9ca3af;
+            text-align: center;
+            margin-bottom: 1.4rem;
+        }
+
+        .field { margin-bottom: .95rem; }
+
+        .field-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: .78rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        .field-label svg { flex-shrink: 0; color: #6b7280; }
+
+        .field-input {
+            width: 100%;
+            padding: .75rem 1rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: .95rem;
+            color: #111827;
+            background: #f9fafb;
+            outline: none;
+            transition: border-color .2s, background .2s;
+        }
+
+        .field-input:focus { border-color: #1a56db; background: #fff; }
+
+        .field-input::placeholder { color: #c4c9d4; }
+
+        .field-input:read-only {
+            background: #f3f4f6;
+            color: #4b5563;
+            border-color: #e5e7eb;
+            cursor: not-allowed;
+        }
+
+        /* Fila DNI + botón validar */
+        .dni-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .dni-row .field-input { flex: 1; margin: 0; }
+
+        .btn-validar {
+            padding: .75rem .9rem;
+            background: #1a56db;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: .78rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background .15s, transform .1s;
+            flex-shrink: 0;
+        }
+
+        .btn-validar:active { background: #1444b0; transform: scale(.97); }
+        .btn-validar:disabled { background: #9ca3af; cursor: not-allowed; opacity: .7; }
+
+        .btn-primary {
+            width: 100%;
+            padding: .85rem;
+            background: #1a56db;
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: .5rem;
+            letter-spacing: .02em;
+            transition: background .15s, transform .1s;
+        }
+
+        .btn-primary:active { background: #1444b0; transform: scale(.98); }
+        .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; opacity: .7; }
+
+        .msg {
+            border-radius: 10px;
+            padding: .6rem .9rem;
+            font-size: .8rem;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .msg.error   { background: #fef2f2; color: #b91c1c; border-left: 3px solid #f87171; }
+        .msg.success { background: #f0fdf4; color: #15803d; border-left: 3px solid #4ade80; }
+
+        .link-row {
+            text-align: center;
+            margin-top: 1.1rem;
+            font-size: .82rem;
+            color: #6b7280;
+        }
+
+        .link-row a { color: #1a56db; font-weight: 700; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+<div class="bg-skyline">
+    <svg viewBox="0 0 414 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice">
+        <circle cx="340" cy="60" r="28" fill="#c6d9f0" opacity=".5"/>
+        <rect x="18" y="170" width="4" height="80" rx="2" fill="#b8cfe8"/>
+        <rect x="10" y="168" width="20" height="5" rx="2" fill="#b8cfe8"/>
+        <circle cx="20" cy="165" r="5" fill="#d4e5f5" opacity=".7"/>
+        <rect x="0"   y="220" width="30" height="70" rx="2" fill="#bdd3ea"/>
+        <rect x="25"  y="200" width="22" height="90" rx="2" fill="#c5d9ed"/>
+        <rect x="44"  y="230" width="18" height="60" rx="2" fill="#bdd3ea"/>
+        <rect x="60"  y="195" width="28" height="95" rx="2" fill="#b5ceea"/>
+        <rect x="85"  y="215" width="20" height="75" rx="2" fill="#c2d6ec"/>
+        <rect x="102" y="205" width="25" height="85" rx="2" fill="#bbd1e9"/>
+        <rect x="124" y="235" width="16" height="55" rx="2" fill="#c8dcef"/>
+        <rect x="138" y="210" width="22" height="80" rx="2" fill="#b9d0e8"/>
+        <rect x="158" y="225" width="18" height="65" rx="2" fill="#c0d4eb"/>
+        <rect x="174" y="200" width="30" height="90" rx="2" fill="#b8cfe8"/>
+        <rect x="202" y="218" width="20" height="72" rx="2" fill="#c3d7ed"/>
+        <rect x="220" y="208" width="24" height="82" rx="2" fill="#bad1e8"/>
+        <rect x="242" y="230" width="18" height="60" rx="2" fill="#c6daef"/>
+        <rect x="258" y="198" width="28" height="92" rx="2" fill="#b6cde7"/>
+        <rect x="284" y="220" width="20" height="70" rx="2" fill="#c0d4eb"/>
+        <rect x="302" y="205" width="22" height="85" rx="2" fill="#bcd2e9"/>
+        <rect x="322" y="228" width="18" height="62" rx="2" fill="#c5d9ed"/>
+        <rect x="338" y="200" width="26" height="90" rx="2" fill="#b9cfe8"/>
+        <rect x="362" y="215" width="20" height="75" rx="2" fill="#c1d5ec"/>
+        <rect x="380" y="225" width="34" height="65" rx="2" fill="#bdcfe9"/>
+        <rect x="170" y="170" width="70" height="120" rx="3" fill="#b0c8e2"/>
+        <rect x="178" y="155" width="54" height="20" rx="2" fill="#b8d0e6"/>
+        <rect x="192" y="143" width="26" height="14" rx="2" fill="#bdd4e9"/>
+        <rect x="201" y="135" width="8" height="10" rx="1" fill="#a8c2dc"/>
+        <rect x="204" y="110" width="2" height="25" fill="#9ab8d4"/>
+        <polygon points="206,110 214,115 206,120" fill="#7aa4c8" opacity=".7"/>
+        <rect x="178" y="175" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+        <rect x="192" y="175" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+        <rect x="206" y="175" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+        <rect x="220" y="175" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+        <rect x="178" y="192" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+        <rect x="192" y="192" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+        <rect x="206" y="192" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+        <rect x="220" y="192" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+        <ellipse cx="30" cy="270" rx="14" ry="20" fill="#bdd6e8" opacity=".6"/>
+        <rect x="28" y="280" width="4" height="15" fill="#b0c8e0"/>
+        <ellipse cx="385" cy="265" rx="14" ry="18" fill="#c0d8ea" opacity=".6"/>
+        <rect x="383" y="275" width="4" height="15" fill="#b0c8e0"/>
+        <rect x="0" y="285" width="414" height="40" rx="0" fill="#c8daea" opacity=".5"/>
+    </svg>
+</div>
+
+<div class="bottom-wave">
+    <svg viewBox="0 0 414 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;display:block;">
+        <path d="M0,60 C80,10 180,90 260,50 C320,20 370,70 414,45 L414,120 L0,120 Z" fill="#1a56db" opacity=".15"/>
+        <path d="M0,80 C60,50 160,100 250,70 C330,45 380,85 414,65 L414,120 L0,120 Z" fill="#0ea5e9" opacity=".18"/>
+        <path d="M0,95 C70,70 170,110 270,88 C350,70 390,100 414,85 L414,120 L0,120 Z" fill="#1a56db" opacity=".22"/>
+        <rect x="0" y="108" width="414" height="12" fill="#06b6d4" opacity=".3" rx="0"/>
+    </svg>
+</div>
+
+<div class="page-content">
+
+    <div class="header">
+        <svg class="logo-icon" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="8" y="34" width="56" height="30" rx="2" fill="#1a3a6b"/>
+            <rect x="4"  y="60" width="64" height="5" rx="1.5" fill="#1a3a6b"/>
+            <rect x="10" y="56" width="52" height="5" rx="1.5" fill="#1e3f7a"/>
+            <rect x="14" y="34" width="6" height="26" rx="2" fill="#2450a0"/>
+            <rect x="25" y="34" width="6" height="26" rx="2" fill="#2450a0"/>
+            <rect x="36" y="34" width="6" height="26" rx="2" fill="#2450a0"/>
+            <rect x="47" y="34" width="6" height="26" rx="2" fill="#2450a0"/>
+            <path d="M6,34 L36,10 L66,34 Z" fill="#1a3a6b"/>
+            <path d="M12,34 L36,14 L60,34 Z" fill="#1e3f7a"/>
+            <rect x="34.5" y="4" width="3" height="18" rx="1" fill="#1a56db"/>
+            <rect x="37.5" y="4" width="12" height="8" rx="1" fill="#3b82f6"/>
+            <rect x="28" y="46" width="16" height="18" rx="2" fill="#d4e6f5"/>
+            <rect x="14" y="38" width="6" height="6" rx="1" fill="#d4e6f5" opacity=".85"/>
+            <rect x="52" y="38" width="6" height="6" rx="1" fill="#d4e6f5" opacity=".85"/>
+        </svg>
+        <div class="logo-brand">AL<span>Toque</span></div>
+        <div class="logo-tagline">Reporta incidencias fácil y al instante</div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">Crear cuenta</div>
+        <div class="card-subtitle">Completa tus datos para registrarte</div>
+
+        <div class="msg" id="msg"></div>
+
+        <!-- DNI -->
+        <div class="field">
+            <div class="field-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                DNI
+            </div>
+            <div class="dni-row">
+                <input class="field-input" type="text" id="dni" maxlength="8" placeholder="12345678" inputmode="numeric">
+                <button class="btn-validar" type="button" id="btnValidarDni" onclick="buscarDniApi()">Validar DNI</button>
+            </div>
+        </div>
+
+        <!-- Nombre -->
+        <div class="field">
+            <div class="field-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Nombre
+            </div>
+            <input class="field-input" type="text" id="nombre" placeholder="Juan">
+        </div>
+
+        <!-- Apellido -->
+        <div class="field">
+            <div class="field-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Apellido
+            </div>
+            <input class="field-input" type="text" id="apellido" placeholder="Pérez">
+        </div>
+
+        <!-- Teléfono -->
+        <div class="field">
+            <div class="field-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.57 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.76a16 16 0 0 0 6.29 6.29l.97-.97a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.98 16.92z"/></svg>
+                Teléfono <span style="font-weight:400;color:#9ca3af;margin-left:3px;">(opcional)</span>
+            </div>
+            <input class="field-input" type="tel" id="telefono" maxlength="9" placeholder="987654321">
+        </div>
+
+        <!-- Contraseña -->
+        <div class="field">
+            <div class="field-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Contraseña <span style="font-weight:400;color:#9ca3af;margin-left:3px;">(6 dígitos)</span>
+            </div>
+            <input class="field-input" type="password" id="pass" maxlength="6" placeholder="••••••" inputmode="numeric">
+        </div>
+
+        <!-- Repetir contraseña -->
+        <div class="field">
+            <div class="field-label">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                Repetir contraseña
+            </div>
+            <input class="field-input" type="password" id="pass2" maxlength="6" placeholder="••••••" inputmode="numeric">
+        </div>
+
+        <button class="btn-primary" onclick="registrar()">Crear cuenta</button>
+
+        <div class="link-row">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></div>
+    </div>
+
+</div>
+
+<script>
+    async function buscarDniApi() {
+        const dniInput = document.getElementById('dni');
+        const dniValor = dniInput.value.trim();
+        const btnValidar = document.getElementById('btnValidarDni');
+        const txtNombre = document.getElementById('nombre');
+        const txtApellido = document.getElementById('apellido');
+        const msgEl = document.getElementById('msg');
+        msgEl.style.display = 'none';
+        if (dniValor.length !== 8 || !/^\d+$/.test(dniValor)) {
+            mostrar('Por favor, ingrese un número de DNI válido de 8 dígitos.', 'error');
+            return;
+        }
+        try {
+            btnValidar.disabled = true;
+            btnValidar.textContent = 'Buscando...';
+            txtNombre.placeholder = "Buscando en RENIEC...";
+            txtApellido.placeholder = "Buscando en RENIEC...";
+            const res = await fetch(`/api/auth/consultar-dni/${dniValor}`);
+            const json = await res.json();
+            if (json.ok && json.data && json.data.nombres) {
+                txtNombre.value = json.data.nombres;
+                txtApellido.value = json.data.apellidos;
+                txtNombre.readOnly = true;
+                txtApellido.readOnly = true;
+                dniInput.readOnly = true;
+                btnValidar.style.display = 'none';
+            } else {
+                mostrar(json.mensaje || 'El DNI no devolvió datos válidos. Ingrese sus datos manualmente.', 'error');
+                liberarCamposManual();
+            }
+        } catch (error) {
+            console.error("Error al conectar con la API de consulta:", error);
+            mostrar('El servicio de consulta RENIEC no está disponible actualmente. Ingrese sus datos manualmente.', 'error');
+            liberarCamposManual();
+        } finally {
+            if (btnValidar.style.display !== 'none') {
+                btnValidar.disabled = false;
+                btnValidar.textContent = 'Validar DNI';
+            }
+        }
+    }
+    function liberarCamposManual() {
+        const txtNombre = document.getElementById('nombre');
+        const txtApellido = document.getElementById('apellido');
+        txtNombre.value = "";
+        txtApellido.value = "";
+        txtNombre.readOnly = false;
+        txtApellido.readOnly = false;
+        txtNombre.placeholder = "Juan";
+        txtApellido.placeholder = "Pérez";
+    }
+    function mostrar(texto, tipo) {
+      const el = document.getElementById('msg');
+      el.textContent = texto;
+      el.className = 'msg ' + tipo;
+      el.style.display = 'block';
+    }
+    async function registrar() {
+      const nombre   = document.getElementById('nombre').value.trim();
+      const apellido = document.getElementById('apellido').value.trim();
+      const dni      = document.getElementById('dni').value.trim();
+      const telefono = document.getElementById('telefono').value.trim();
+      const pass     = document.getElementById('pass').value;
+      const pass2    = document.getElementById('pass2').value;
+      if (!nombre || !apellido || dni.length !== 8 || pass.length !== 6) {
+        mostrar('Completa todos los campos correctamente.', 'error'); return;
+      }
+      if (pass !== pass2) {
+        mostrar('Las contraseñas no coinciden.', 'error'); return;
+      }
+      try {
+        const res  = await fetch('/api/auth/registro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nombre, apellido, dni, contrasena: pass, telefono: telefono || null })
+        });
+        const json = await res.json();
+        if (json.ok) {
+          mostrar('¡Cuenta creada! Redirigiendo...', 'success');
+          setTimeout(() => window.location.href = '/login', 1500);
+        } else {
+          mostrar(json.mensaje, 'error');
+        }
+      } catch {
+        mostrar('Error de conexión.', 'error');
+      }
+    }
+</script>
+</body>
+</html>

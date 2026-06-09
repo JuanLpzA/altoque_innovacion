@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Altoque – Recuperar cuenta</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #dde8f5;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        overflow-x: hidden;
+        position: relative;
+    }
+    .bg-skyline {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        background: linear-gradient(180deg, #d0dff0 0%, #e8f0fa 60%, #dde8f5 100%);
+        overflow: hidden;
+    }
+    .bg-skyline svg { position: absolute; bottom: 0; width: 100%; }
+    .bottom-wave {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        width: 100%;
+        z-index: 1;
+        pointer-events: none;
+    }
+    .page-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 420px;
+        padding: 0 0 140px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .header {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 40px 24px 20px;
+    }
+    .logo-icon { width: 64px; height: 64px; margin-bottom: 8px; }
+    .logo-brand { font-size: 1.9rem; font-weight: 800; letter-spacing: -1px; color: #1a3a6b; line-height: 1; }
+    .logo-brand span { color: #1a56db; }
+    .logo-tagline { font-size: .78rem; color: #6b7280; margin-top: 3px; }
+    .card {
+        background: #fff;
+        border-radius: 24px;
+        padding: 1.75rem 1.75rem 1.5rem;
+        width: calc(100% - 40px);
+        max-width: 380px;
+        box-shadow: 0 8px 32px rgba(26,86,219,.10), 0 1px 4px rgba(0,0,0,.06);
+    }
+    .card-title { font-size: 1.25rem; font-weight: 800; color: #111827; text-align: center; margin-bottom: 3px; }
+    .card-subtitle { font-size: .8rem; color: #9ca3af; text-align: center; margin-bottom: 1.4rem; }
+    .field { margin-bottom: .95rem; }
+    .field-label {
+        display: flex; align-items: center; gap: 6px;
+        font-size: .78rem; font-weight: 600; color: #374151; margin-bottom: 5px;
+    }
+    .field-label svg { flex-shrink: 0; color: #6b7280; }
+    .field-input {
+        width: 100%; padding: .75rem 1rem;
+        border: 1.5px solid #e5e7eb; border-radius: 12px;
+        font-size: .95rem; color: #111827; background: #f9fafb;
+        outline: none; transition: border-color .2s, background .2s;
+    }
+    .field-input:focus { border-color: #1a56db; background: #fff; }
+    .field-input::placeholder { color: #c4c9d4; }
+    .field-input:read-only { background: #f3f4f6; color: #4b5563; border-color: #e5e7eb; cursor: not-allowed; }
+    .dni-row { display: flex; gap: 8px; align-items: stretch; }
+    .dni-row .field-input { flex: 1; margin: 0; }
+    .btn-validar {
+        padding: .75rem .9rem; background: #1a56db; color: #fff;
+        border: none; border-radius: 12px; font-size: .78rem; font-weight: 700;
+        cursor: pointer; white-space: nowrap; transition: background .15s, transform .1s; flex-shrink: 0;
+    }
+    .btn-validar:active { background: #1444b0; transform: scale(.97); }
+    .btn-validar:disabled { background: #9ca3af; cursor: not-allowed; opacity: .7; }
+    .btn-primary {
+        width: 100%; padding: .85rem; background: #1a56db; color: #fff;
+        border: none; border-radius: 14px; font-size: 1rem; font-weight: 700;
+        cursor: pointer; margin-top: .5rem; letter-spacing: .02em;
+        transition: background .15s, transform .1s;
+    }
+    .btn-primary:active { background: #1444b0; transform: scale(.98); }
+    .btn-primary:disabled { background: #9ca3af; cursor: not-allowed; opacity: .7; }
+    .btn-success {
+        width: 100%; padding: .85rem; background: #059669; color: #fff;
+        border: none; border-radius: 14px; font-size: 1rem; font-weight: 700;
+        cursor: pointer; margin-top: .5rem; letter-spacing: .02em;
+        transition: background .15s, transform .1s;
+    }
+    .btn-success:active { background: #047857; transform: scale(.98); }
+    .btn-success:disabled { background: #9ca3af; cursor: not-allowed; opacity: .7; }
+    .link-row { text-align: center; margin-top: 1.1rem; font-size: .82rem; color: #6b7280; }
+    .link-row a { color: #1a56db; font-weight: 700; text-decoration: none; }
+
+    /* Secciones del flujo */
+    .step { display: none; }
+    .step.active { display: block; }
+
+    /* Scanner */
+    .scanner-box {
+        background: #f0f7ff;
+        border: 1.5px dashed #93c5fd;
+        border-radius: 16px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .scanner-title { font-size: .85rem; font-weight: 700; color: #1e3a8a; margin-bottom: 4px; }
+    .scanner-hint { font-size: .75rem; color: #6b7280; margin-bottom: 10px; line-height: 1.4; }
+    .scanner-wrapper {
+        position: relative; width: 100%; height: 200px;
+        overflow: hidden; border-radius: 12px; background: #000;
+    }
+    #video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; display: block; }
+    #canvas { display: none; }
+    .dni-guide {
+        position: absolute; top: 50%; left: 50%;
+        width: 85%; height: 75%;
+        transform: translate(-50%, -50%);
+        border: 2.5px solid #22c55e;
+        border-radius: 10px;
+        box-shadow: 0 0 0 9999px rgba(0,0,0,.4);
+        pointer-events: none;
+    }
+    .scanner-status {
+        text-align: center; font-size: .8rem; font-weight: 600;
+        color: #374151; margin-top: 8px; min-height: 20px;
+    }
+    .btn-capturar {
+        width: 100%; padding: .75rem; background: #16a34a; color: #fff;
+        border: none; border-radius: 12px; font-size: .88rem; font-weight: 700;
+        cursor: pointer; margin-top: 10px; transition: background .15s, transform .1s;
+    }
+    .btn-capturar:active { background: #15803d; transform: scale(.98); }
+    .btn-capturar:disabled { background: #9ca3af; cursor: not-allowed; opacity: .7; }
+
+    /* Divider */
+    .step-divider {
+        display: flex; align-items: center; gap: 8px;
+        margin: 1rem 0; color: #d1d5db; font-size: .75rem;
+    }
+    .step-divider::before, .step-divider::after {
+        content: ''; flex: 1; height: 1px; background: #e5e7eb;
+    }
+
+    /* Badge de paso */
+    .step-badge {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: #eff6ff; color: #1d4ed8;
+        border-radius: 20px; padding: 4px 12px;
+        font-size: .72rem; font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    /* Modal overlay */
+    .modal-overlay {
+        position: fixed; inset: 0; z-index: 100;
+        background: rgba(0,0,0,.55);
+        display: flex; align-items: center; justify-content: center;
+        padding: 20px;
+        opacity: 0; pointer-events: none;
+        transition: opacity .2s;
+    }
+    .modal-overlay.visible { opacity: 1; pointer-events: all; }
+    .modal-box {
+        background: #fff; border-radius: 20px;
+        padding: 1.75rem 1.5rem 1.5rem;
+        width: 100%; max-width: 340px;
+        box-shadow: 0 12px 40px rgba(0,0,0,.18);
+        transform: translateY(20px);
+        transition: transform .2s;
+    }
+    .modal-overlay.visible .modal-box { transform: translateY(0); }
+    .modal-icon { font-size: 2.2rem; text-align: center; margin-bottom: .5rem; }
+    .modal-title { font-size: 1.05rem; font-weight: 800; color: #111827; text-align: center; margin-bottom: .4rem; }
+    .modal-msg { font-size: .85rem; color: #6b7280; text-align: center; line-height: 1.5; margin-bottom: 1.2rem; }
+    .modal-btn {
+        width: 100%; padding: .75rem; border: none; border-radius: 12px;
+        font-size: .95rem; font-weight: 700; cursor: pointer;
+    }
+    .modal-btn.primary { background: #1a56db; color: #fff; }
+    .modal-btn.success { background: #059669; color: #fff; }
+    .modal-btn.danger  { background: #dc2626; color: #fff; }
+  </style>
+</head>
+<body>
+
+<!-- Fondo skyline -->
+<div class="bg-skyline">
+  <svg viewBox="0 0 414 320" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMax slice">
+    <circle cx="340" cy="60" r="28" fill="#c6d9f0" opacity=".5"/>
+    <rect x="18" y="170" width="4" height="80" rx="2" fill="#b8cfe8"/>
+    <rect x="10" y="168" width="20" height="5" rx="2" fill="#b8cfe8"/>
+    <circle cx="20" cy="165" r="5" fill="#d4e5f5" opacity=".7"/>
+    <rect x="0"   y="220" width="30" height="70" rx="2" fill="#bdd3ea"/>
+    <rect x="25"  y="200" width="22" height="90" rx="2" fill="#c5d9ed"/>
+    <rect x="44"  y="230" width="18" height="60" rx="2" fill="#bdd3ea"/>
+    <rect x="60"  y="195" width="28" height="95" rx="2" fill="#b5ceea"/>
+    <rect x="85"  y="215" width="20" height="75" rx="2" fill="#c2d6ec"/>
+    <rect x="102" y="205" width="25" height="85" rx="2" fill="#bbd1e9"/>
+    <rect x="124" y="235" width="16" height="55" rx="2" fill="#c8dcef"/>
+    <rect x="138" y="210" width="22" height="80" rx="2" fill="#b9d0e8"/>
+    <rect x="158" y="225" width="18" height="65" rx="2" fill="#c0d4eb"/>
+    <rect x="174" y="200" width="30" height="90" rx="2" fill="#b8cfe8"/>
+    <rect x="202" y="218" width="20" height="72" rx="2" fill="#c3d7ed"/>
+    <rect x="220" y="208" width="24" height="82" rx="2" fill="#bad1e8"/>
+    <rect x="242" y="230" width="18" height="60" rx="2" fill="#c6daef"/>
+    <rect x="258" y="198" width="28" height="92" rx="2" fill="#b6cde7"/>
+    <rect x="284" y="220" width="20" height="70" rx="2" fill="#c0d4eb"/>
+    <rect x="302" y="205" width="22" height="85" rx="2" fill="#bcd2e9"/>
+    <rect x="322" y="228" width="18" height="62" rx="2" fill="#c5d9ed"/>
+    <rect x="338" y="200" width="26" height="90" rx="2" fill="#b9cfe8"/>
+    <rect x="362" y="215" width="20" height="75" rx="2" fill="#c1d5ec"/>
+    <rect x="380" y="225" width="34" height="65" rx="2" fill="#bdcfe9"/>
+    <rect x="170" y="170" width="70" height="120" rx="3" fill="#b0c8e2"/>
+    <rect x="178" y="155" width="54" height="20" rx="2" fill="#b8d0e6"/>
+    <rect x="192" y="143" width="26" height="14" rx="2" fill="#bdd4e9"/>
+    <rect x="201" y="135" width="8" height="10" rx="1" fill="#a8c2dc"/>
+    <rect x="204" y="110" width="2" height="25" fill="#9ab8d4"/>
+    <polygon points="206,110 214,115 206,120" fill="#7aa4c8" opacity=".7"/>
+    <rect x="178" y="175" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+    <rect x="192" y="175" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+    <rect x="206" y="175" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+    <rect x="220" y="175" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+    <rect x="178" y="192" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+    <rect x="192" y="192" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+    <rect x="206" y="192" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+    <rect x="220" y="192" width="8" height="10" rx="1" fill="#d4e6f5" opacity=".8"/>
+    <ellipse cx="30" cy="270" rx="14" ry="20" fill="#bdd6e8" opacity=".6"/>
+    <rect x="28" y="280" width="4" height="15" fill="#b0c8e0"/>
+    <ellipse cx="385" cy="265" rx="14" ry="18" fill="#c0d8ea" opacity=".6"/>
+    <rect x="383" y="275" width="4" height="15" fill="#b0c8e0"/>
+    <rect x="0" y="285" width="414" height="40" rx="0" fill="#c8daea" opacity=".5"/>
+  </svg>
+</div>
+
+<!-- Ola inferior -->
+<div class="bottom-wave">
+  <svg viewBox="0 0 414 120" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style="width:100%;display:block;">
+    <path d="M0,60 C80,10 180,90 260,50 C320,20 370,70 414,45 L414,120 L0,120 Z" fill="#1a56db" opacity=".15"/>
+    <path d="M0,80 C60,50 160,100 250,70 C330,45 380,85 414,65 L414,120 L0,120 Z" fill="#0ea5e9" opacity=".18"/>
+    <path d="M0,95 C70,70 170,110 270,88 C350,70 390,100 414,85 L414,120 L0,120 Z" fill="#1a56db" opacity=".22"/>
+    <rect x="0" y="108" width="414" height="12" fill="#06b6d4" opacity=".3" rx="0"/>
+  </svg>
+</div>
+
+<!-- Contenido -->
+<div class="page-content">
+  <div class="header">
+    <svg class="logo-icon" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="8" y="34" width="56" height="30" rx="2" fill="#1a3a6b"/>
+      <rect x="4"  y="60" width="64" height="5" rx="1.5" fill="#1a3a6b"/>
+      <rect x="10" y="56" width="52" height="5" rx="1.5" fill="#1e3f7a"/>
+      <rect x="14" y="34" width="6" height="26" rx="2" fill="#2450a0"/>
+      <rect x="25" y="34" width="6" height="26" rx="2" fill="#2450a0"/>
+      <rect x="36" y="34" width="6" height="26" rx="2" fill="#2450a0"/>
+      <rect x="47" y="34" width="6" height="26" rx="2" fill="#2450a0"/>
+      <path d="M6,34 L36,10 L66,34 Z" fill="#1a3a6b"/>
+      <path d="M12,34 L36,14 L60,34 Z" fill="#1e3f7a"/>
+      <rect x="34.5" y="4" width="3" height="18" rx="1" fill="#1a56db"/>
+      <rect x="37.5" y="4" width="12" height="8" rx="1" fill="#3b82f6"/>
+      <rect x="28" y="46" width="16" height="18" rx="2" fill="#d4e6f5"/>
+      <rect x="14" y="38" width="6" height="6" rx="1" fill="#d4e6f5" opacity=".85"/>
+      <rect x="52" y="38" width="6" height="6" rx="1" fill="#d4e6f5" opacity=".85"/>
+    </svg>
+    <div class="logo-brand">AL<span>Toque</span></div>
+    <div class="logo-tagline">Reporta incidencias fácil y al instante</div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Recuperar cuenta</div>
+    <div class="card-subtitle">Verifica tu identidad con tu DNI físico</div>
+
+    <!-- PASO 1: Ingresar DNI -->
+    <div class="step active" id="paso1">
+      <div class="step-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Paso 1 de 3 — Ingresa tu DNI
+      </div>
+      <div class="field">
+        <div class="field-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+          DNI
+        </div>
+        <div class="dni-row">
+          <input class="field-input" type="text" id="dniInput" maxlength="8" placeholder="12345678" inputmode="numeric">
+          <button class="btn-validar" type="button" id="btnVerificarDni" onclick="verificarDniExiste()">Verificar</button>
+        </div>
+      </div>
+      <p style="font-size:.75rem;color:#9ca3af;margin-top:-4px;margin-bottom:.8rem;line-height:1.5;">
+        Ingresa el DNI con el que fuiste registrado. Si realmente eres tú, podrás recuperar el acceso.
+      </p>
+      <div class="link-row">¿Recuerdas tu contraseña? <a href="/login">Inicia sesión</a></div>
+    </div>
+
+    <!-- PASO 2: Escanear DNI con cámara -->
+    <div class="step" id="paso2">
+      <div class="step-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Paso 2 de 3 — Verifica con tu DNI físico
+      </div>
+      <div class="scanner-box">
+        <div class="scanner-title">📷 Sostenga su DNI frente a la cámara</div>
+        <div class="scanner-hint">
+          Enfoca el número de 8 dígitos dentro del recuadro verde. Use la cámara trasera para mejor nitidez. <strong>No se acepta imagen de galería.</strong>
+        </div>
+        <div class="scanner-wrapper">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="canvas"></canvas>
+          <div class="dni-guide"></div>
+        </div>
+        <div class="scanner-status" id="scannerStatus">Iniciando cámara...</div>
+        <button class="btn-capturar" id="btnCapturar" type="button" onclick="capturarYVerificar()" disabled>
+          📸 Capturar y verificar DNI
+        </button>
+      </div>
+      <button class="btn-validar" type="button" onclick="volverPaso1()" style="width:100%;padding:.65rem;border-radius:12px;background:#f3f4f6;color:#374151;font-size:.82rem;">
+        ← Cambiar DNI
+      </button>
+    </div>
+
+    <!-- PASO 3: Nueva contraseña -->
+    <div class="step" id="paso3">
+      <div class="step-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Paso 3 de 3 — Nueva contraseña
+      </div>
+      <div style="background:#f0fdf4;border-radius:12px;padding:.75rem 1rem;margin-bottom:1rem;border-left:3px solid #4ade80;">
+        <p style="font-size:.8rem;color:#15803d;font-weight:600;">✅ Identidad verificada correctamente</p>
+        <p style="font-size:.75rem;color:#166534;margin-top:2px;" id="lblNombreVerificado"></p>
+      </div>
+      <div class="field">
+        <div class="field-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Nueva contraseña <span style="font-weight:400;color:#9ca3af;margin-left:3px;">(6 dígitos)</span>
+        </div>
+        <input class="field-input" type="password" id="nuevaPass" maxlength="6" placeholder="••••••" inputmode="numeric">
+      </div>
+      <div class="field">
+        <div class="field-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Repetir contraseña
+        </div>
+        <input class="field-input" type="password" id="repPass" maxlength="6" placeholder="••••••" inputmode="numeric">
+      </div>
+      <button class="btn-success" id="btnGuardar" onclick="guardarNuevaContrasena()">
+        Restablecer contraseña
+      </button>
+      <div class="link-row" style="margin-top:.9rem;"><a href="/login">← Volver al inicio de sesión</a></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal genérico -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-icon" id="modalIcon"></div>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-msg" id="modalMsg"></div>
+    <button class="modal-btn primary" id="modalBtn" onclick="cerrarModal()">Entendido</button>
+  </div>
+</div>
+
+<script>
+  let stream = null;
+  let dniVerificado = '';
+  let datosUsuario = null;
+
+  /* ───── UTILIDADES ───── */
+  function mostrarModal(icono, titulo, mensaje, tipoBtnClass, callbackBtn) {
+      document.getElementById('modalIcon').textContent = icono;
+      document.getElementById('modalTitle').textContent = titulo;
+      document.getElementById('modalMsg').textContent = mensaje;
+      const btn = document.getElementById('modalBtn');
+      btn.className = 'modal-btn ' + (tipoBtnClass || 'primary');
+      btn.onclick = function() {
+          cerrarModal();
+          if (callbackBtn) callbackBtn();
+      };
+      document.getElementById('modalOverlay').classList.add('visible');
+  }
+
+  function cerrarModal() {
+      document.getElementById('modalOverlay').classList.remove('visible');
+  }
+
+  function irAPaso(n) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('paso' + n).classList.add('active');
+  }
+
+  /* ───── PASO 1: Verificar que el DNI existe ───── */
+  async function verificarDniExiste() {
+      const dni = document.getElementById('dniInput').value.trim();
+      const btn = document.getElementById('btnVerificarDni');
+
+      if (dni.length !== 8 || !/^\d+$/.test(dni)) {
+          mostrarModal('⚠️', 'DNI inválido', 'Por favor ingresa un número de DNI válido de 8 dígitos numéricos.', 'primary');
+          return;
+      }
+      try {
+          btn.disabled = true;
+          btn.textContent = 'Verificando...';
+          /* Usamos el endpoint que ya existe: si el DNI está registrado devuelve error */
+          const res = await fetch(`/api/auth/consultar-dni/${dni}`);
+          const json = await res.json();
+
+          /* Si el DNI NO está registrado no podemos recuperar nada */
+          if (json.ok) {
+              mostrarModal('❌', 'DNI no registrado', 'Este DNI no tiene ninguna cuenta asociada en el sistema. Verifica el número e inténtalo de nuevo.', 'danger');
+              return;
+          }
+          /* Si el mensaje indica que ya está registrado → correcto, podemos continuar */
+          if (json.mensaje && json.mensaje.toLowerCase().includes('registrado')) {
+              dniVerificado = dni;
+              irAPaso(2);
+              iniciarCamara();
+          } else {
+              mostrarModal('❌', 'Error', json.mensaje || 'No se pudo verificar el DNI. Intenta de nuevo.', 'primary');
+          }
+      } catch (err) {
+          console.error(err);
+          mostrarModal('📡', 'Sin conexión', 'No se pudo conectar al servidor. Verifica tu conexión e intenta de nuevo.', 'primary');
+      } finally {
+          btn.disabled = false;
+          btn.textContent = 'Verificar';
+      }
+  }
+
+  /* ───── PASO 2: Cámara OCR ───── */
+  async function iniciarCamara() {
+      const video = document.getElementById('video');
+      const statusEl = document.getElementById('scannerStatus');
+      const btnCap = document.getElementById('btnCapturar');
+      statusEl.textContent = 'Iniciando cámara trasera...';
+      btnCap.disabled = true;
+      detenerCamara();
+      try {
+          /* Intentamos cámara trasera estricta primero */
+          try {
+              stream = await navigator.mediaDevices.getUserMedia({
+                  video: { facingMode: { exact: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+                  audio: false
+              });
+          } catch {
+              stream = await navigator.mediaDevices.getUserMedia({
+                  video: { facingMode: 'environment' },
+                  audio: false
+              });
+          }
+          video.srcObject = stream;
+          video.onloadedmetadata = () => {
+              statusEl.textContent = 'Enfoca el número de tu DNI dentro del recuadro verde';
+              btnCap.disabled = false;
+          };
+      } catch (err) {
+          console.error(err);
+          statusEl.textContent = 'No se pudo acceder a la cámara.';
+          mostrarModal('📷', 'Sin acceso a cámara', 'No se pudo acceder a la cámara trasera del dispositivo. Asegúrate de dar permisos de cámara y vuelve a intentarlo.', 'primary');
+      }
+  }
+
+  function detenerCamara() {
+      if (stream) {
+          stream.getTracks().forEach(t => t.stop());
+          stream = null;
+      }
+  }
+
+  function volverPaso1() {
+      detenerCamara();
+      irAPaso(1);
+  }
+
+  async function capturarYVerificar() {
+      if (!stream) {
+          mostrarModal('📷', 'Cámara no disponible', 'La cámara no está activa. Recarga la página e inténtalo de nuevo.', 'primary');
+          return;
+      }
+      const video = document.getElementById('video');
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+      const btnCap = document.getElementById('btnCapturar');
+      const statusEl = document.getElementById('scannerStatus');
+
+      canvas.width  = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      btnCap.disabled = true;
+      statusEl.textContent = '⏳ Analizando imagen en el servidor...';
+
+      canvas.toBlob(async function(blob) {
+          /* Verificamos que es un blob real de cámara (no galería).
+             El blob proviene directamente del videoFrame, no de un input[type=file]. */
+          const formData = new FormData();
+          formData.append('fotoDni', blob, 'captura_dni.jpg');
+          formData.append('dniIngresado', dniVerificado);
+          try {
+              const res  = await fetch('/api/auth/validar-ocr-servidor', { method: 'POST', body: formData });
+              const json = await res.json();
+              if (json.ok) {
+                  detenerCamara();
+                  datosUsuario = json.data;
+                  /* Mostrar nombre en el paso 3 */
+                  const nombreCompleto = (datosUsuario?.nombre || '') + ' ' + (datosUsuario?.apellido || '');
+                  document.getElementById('lblNombreVerificado').textContent =
+                      nombreCompleto.trim() ? 'Titular: ' + nombreCompleto.trim() : '';
+                  mostrarModal('✅', '¡Identidad verificada!', 'Tu DNI fue reconocido correctamente. Ahora puedes establecer una nueva contraseña.', 'success', function() {
+                      irAPaso(3);
+                  });
+              } else {
+                  statusEl.textContent = 'No se detectó el DNI. Intenta de nuevo.';
+                  mostrarModal('🔍', 'DNI no detectado', json.mensaje || 'No se pudo leer el número de DNI en la imagen. Asegúrate de que el número sea visible y bien enfocado dentro del recuadro verde.', 'primary');
+                  btnCap.disabled = false;
+              }
+          } catch (err) {
+              console.error(err);
+              statusEl.textContent = 'Error de conexión.';
+              mostrarModal('📡', 'Error de conexión', 'No se pudo comunicar con el servidor. Verifica tu conexión e intenta de nuevo.', 'primary');
+              btnCap.disabled = false;
+          }
+      }, 'image/jpeg', 0.92);
+  }
+
+  /* ───── PASO 3: Guardar nueva contraseña ───── */
+  async function guardarNuevaContrasena() {
+      const pass  = document.getElementById('nuevaPass').value;
+      const pass2 = document.getElementById('repPass').value;
+      const btn   = document.getElementById('btnGuardar');
+
+      if (pass.length !== 6 || !/^\d+$/.test(pass)) {
+          mostrarModal('⚠️', 'Contraseña inválida', 'La contraseña debe ser exactamente 6 dígitos numéricos.', 'primary');
+          return;
+      }
+      if (pass !== pass2) {
+          mostrarModal('⚠️', 'No coinciden', 'Las contraseñas ingresadas no coinciden. Vuelve a escribirlas con cuidado.', 'primary');
+          return;
+      }
+      try {
+          btn.disabled = true;
+          btn.textContent = '⏳ Guardando...';
+          const body = {
+              dni:       dniVerificado,
+              nombre:    datosUsuario?.nombre    || '',
+              apellido:  datosUsuario?.apellido  || '',
+              telefono:  datosUsuario?.telefono  || '',
+              contrasena: pass
+          };
+          const res  = await fetch('/api/auth/recuperar-por-dni', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+          });
+          const json = await res.json();
+          if (json.ok) {
+              mostrarModal('🎉', '¡Cuenta recuperada!', 'Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tu nueva contraseña.', 'success', function() {
+                  window.location.href = '/login';
+              });
+          } else {
+              mostrarModal('❌', 'Error al guardar', json.mensaje || 'No se pudo restablecer la contraseña. Intenta de nuevo.', 'danger');
+              btn.disabled = false;
+              btn.textContent = 'Restablecer contraseña';
+          }
+      } catch (err) {
+          console.error(err);
+          mostrarModal('📡', 'Error de conexión', 'No se pudo conectar al servidor. Verifica tu conexión e intenta de nuevo.', 'primary');
+          btn.disabled = false;
+          btn.textContent = 'Restablecer contraseña';
+      }
+  }
+
+  /* Cerrar modal con tap fuera */
+  document.getElementById('modalOverlay').addEventListener('click', function(e) {
+      if (e.target === this) cerrarModal();
+  });
+</script>
+</body>
+</html>
