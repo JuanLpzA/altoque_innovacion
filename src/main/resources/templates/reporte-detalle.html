@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Altoque – Detalle de Reporte</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: #f0f5fb;
+        min-height: 100dvh;
+        padding-bottom: 80px;
+        max-width: 480px;
+        margin: 0 auto;
+        background:
+            linear-gradient(
+                to bottom,
+                #1a3a8f 0,
+                #1a3a8f 210px,
+                #f0f5fb 210px,
+                #f0f5fb 100%
+            );
+    }
+
+    /* HEADER */
+    .header {
+        background: #1a3a8f;
+        padding: 1.1rem 1.2rem 3.2rem;
+    }
+    .header-top {
+        display: flex;
+        align-items: center;
+        gap: .85rem;
+    }
+    .back-btn {
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,.35);
+        background: transparent;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        color: #fff;
+        font-size: 1.15rem;
+        text-decoration: none;
+        flex-shrink: 0;
+    }
+    .back-btn:active { background: rgba(255,255,255,.15); }
+    .header-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -.01em;
+    }
+
+    /* STATS CARD flotante */
+    .stats-card {
+        background: #fff;
+        border-radius: 18px;
+        margin: 0 1rem;
+        margin-top: -2.2rem;
+        padding: 1.1rem 1.1rem 1rem;
+        box-shadow: 0 6px 24px rgba(26,58,143,.13);
+        position: relative;
+        z-index: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: .5rem;
+    }
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        gap: .2rem;
+    }
+    .stat-item + .stat-item {
+        padding-left: .75rem;
+        border-left: 1.5px solid #f3f4f6;
+    }
+    .stat-label {
+        font-size: .65rem;
+        font-weight: 600;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        line-height: 1.2;
+    }
+    .stat-value {
+        font-size: 1.55rem;
+        font-weight: 900;
+        color: #1a3a8f;
+        line-height: 1;
+        letter-spacing: -.02em;
+    }
+    .stat-value.estado-val {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #0fa89a;
+    }
+    .stat-value.pct-val {
+        font-size: 1.5rem;
+    }
+    .stat-sub {
+        font-size: .62rem;
+        color: #9ca3af;
+        line-height: 1.3;
+    }
+
+    /* TABS */
+    .tabs {
+        display: flex;
+        margin: 1rem 1rem .5rem;
+        background: #fff;
+        border-radius: 12px;
+        padding: .25rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    }
+    .tab-btn {
+        flex: 1;
+        padding: .55rem .5rem;
+        border: none;
+        background: transparent;
+        border-radius: 9px;
+        font-size: .74rem;
+        font-weight: 700;
+        color: #9ca3af;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: .35rem;
+        transition: all .18s;
+    }
+    .tab-btn.activo {
+        background: #1a3a8f;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(26,58,143,.25);
+    }
+    .tab-btn i { font-size: .95rem; }
+
+    /* PANEL TABS */
+    .tab-panel { display: none; }
+    .tab-panel.activo { display: block; }
+
+    /* ZONA REFERENCIA */
+    .zona-ref {
+        margin: 0 1rem .65rem;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+        font-size: .75rem;
+        color: #6b7280;
+    }
+    .zona-ref i { color: #ef4444; font-size: 15px; flex-shrink: 0; }
+
+    /* TITULO REPORTE */
+    .reporte-titulo-big {
+        margin: 0 1rem .85rem;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #111827;
+        display: flex;
+        align-items: center;
+        gap: .4rem;
+    }
+    .reporte-titulo-big i { color: #ef4444; font-size: 1rem; }
+
+    /* TABLA MINI REPORTES */
+    .table-card {
+        background: #fff;
+        margin: 0 1rem .85rem;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,.07);
+    }
+    .table-head {
+        display: grid;
+        grid-template-columns: 1fr 90px 60px;
+        padding: .55rem .9rem;
+        background: #f8faff;
+        border-bottom: 1.5px solid #e5e7eb;
+    }
+    .table-head span {
+        font-size: .68rem;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+    }
+    .table-row {
+        display: grid;
+        grid-template-columns: 1fr 90px 60px;
+        padding: .65rem .9rem;
+        border-bottom: 1px solid #f3f4f6;
+        align-items: center;
+    }
+    .table-row:last-child { border-bottom: none; }
+    .persona-cell {
+        display: flex;
+        align-items: center;
+        gap: .55rem;
+    }
+    .avatar {
+        width: 32px; height: 32px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .65rem;
+        font-weight: 800;
+        color: #fff;
+        flex-shrink: 0;
+    }
+    .persona-nombre {
+        font-size: .78rem;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100px;
+    }
+    .fecha-cell {
+        font-size: .72rem;
+        color: #6b7280;
+    }
+    .foto-thumb {
+        width: 46px; height: 36px;
+        border-radius: 8px;
+        object-fit: cover;
+        cursor: pointer;
+    }
+    .foto-thumb-placeholder {
+        width: 46px; height: 36px;
+        border-radius: 8px;
+        background: #e5e7eb;
+        display: flex; align-items: center; justify-content: center;
+        color: #9ca3af;
+        font-size: .85rem;
+    }
+
+    /* BADGE RIESGO */
+    .nivel-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        margin: 0 1rem .85rem;
+        padding: .55rem .9rem;
+        border-radius: 12px;
+        background: #f0fdf4;
+        width: calc(100% - 2rem);
+    }
+    .nivel-badge.ALTO { background: #fef2f2; }
+    .nivel-badge.MEDIO { background: #fffbeb; }
+    .nivel-badge.BAJO { background: #f0fdf4; }
+    .nivel-badge i { font-size: 1.1rem; }
+    .nivel-badge.ALTO i { color: #b91c1c; }
+    .nivel-badge.MEDIO i { color: #b45309; }
+    .nivel-badge.BAJO i { color: #15803d; }
+    .nivel-badge-text {
+        display: flex;
+        flex-direction: column;
+    }
+    .nivel-badge-sub {
+        font-size: .64rem;
+        color: #6b7280;
+    }
+    .nivel-badge-val {
+        font-size: .88rem;
+        font-weight: 800;
+    }
+    .ALTO .nivel-badge-val { color: #b91c1c; }
+    .MEDIO .nivel-badge-val { color: #b45309; }
+    .BAJO .nivel-badge-val { color: #15803d; }
+
+    /* AVANCES MUNICIPALIDAD */
+    .avance-card {
+        background: #fff;
+        margin: 0 1rem .75rem;
+        border-radius: 16px;
+        padding: .9rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    }
+    .avance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: .5rem;
+    }
+    .avance-quien {
+        font-size: .75rem;
+        font-weight: 700;
+        color: #1a3a8f;
+        display: flex;
+        align-items: center;
+        gap: .35rem;
+    }
+    .avance-quien i { font-size: .95rem; }
+    .avance-pct {
+        font-size: .75rem;
+        font-weight: 800;
+        color: #0fa89a;
+        background: #e6faf8;
+        padding: .2rem .5rem;
+        border-radius: 99px;
+    }
+    .avance-comentario {
+        font-size: .8rem;
+        color: #374151;
+        margin-bottom: .55rem;
+        line-height: 1.4;
+    }
+    .avance-img {
+        width: 100%;
+        border-radius: 10px;
+        object-fit: cover;
+        max-height: 140px;
+        margin-bottom: .45rem;
+    }
+    .avance-fecha {
+        font-size: .65rem;
+        color: #9ca3af;
+    }
+    .progress-bar {
+        background: #e5e7eb;
+        border-radius: 99px;
+        height: 5px;
+        margin-top: .5rem;
+        overflow: hidden;
+    }
+    .progress-fill {
+        background: #0fa89a;
+        height: 100%;
+        border-radius: 99px;
+    }
+
+    /* EMPTY STATE */
+    .empty {
+        text-align: center;
+        color: #9ca3af;
+        padding: 2.5rem 1rem;
+        font-size: .85rem;
+    }
+    .empty i { font-size: 2rem; display: block; margin-bottom: .5rem; color: #d1d5db; }
+
+    /* NAV */
+    nav {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        max-width: 480px;
+        margin: 0 auto;
+        background: #fff;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        padding: .45rem 0 .75rem;
+        z-index: 10;
+    }
+    nav a {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: .1rem;
+        font-size: .62rem;
+        font-weight: 600;
+        color: #9ca3af;
+        text-decoration: none;
+    }
+    nav a i { font-size: 1.35rem; }
+    .nav-center {
+        background: #1a3a8f;
+        width: 54px; height: 54px;
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin-top: -22px;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 16px rgba(26,58,143,.35);
+        text-decoration: none;
+    }
+    .nav-center i { color: #fff; font-size: 1.5rem; }
+
+    /* LIGHTBOX */
+    .lightbox {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.88);
+        z-index: 100;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+    }
+    .lightbox.visible { display: flex; }
+    .lightbox img {
+        max-width: 100%;
+        max-height: 80vh;
+        border-radius: 12px;
+        object-fit: contain;
+    }
+    .lightbox-close {
+        position: absolute;
+        top: 1rem; right: 1rem;
+        background: rgba(255,255,255,.15);
+        border: none;
+        color: #fff;
+        width: 38px; height: 38px;
+        border-radius: 50%;
+        font-size: 1.2rem;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+    }
+
+    /* TOAST */
+    .toast {
+        position: fixed;
+        bottom: 90px;
+        left: 50%; transform: translateX(-50%);
+        background: #1e293b;
+        color: #fff;
+        padding: .65rem 1.2rem;
+        border-radius: 99px;
+        font-size: .8rem;
+        font-weight: 600;
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .25s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: .45rem;
+    }
+    .toast.show { opacity: 1; }
+    .toast.error { background: #ef4444; }
+    .toast.success { background: #0fa89a; }
+
+    /* SKELETON */
+    .skeleton {
+        background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.2s infinite;
+        border-radius: 8px;
+    }
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    .skeleton-stats {
+        height: 80px;
+        margin: 0 1rem;
+        margin-top: -2.2rem;
+        border-radius: 18px;
+    }
+    .skeleton-block {
+        height: 110px;
+        margin: .75rem 1rem;
+        border-radius: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <a href="/inicio" class="back-btn" aria-label="Volver">
+      <i class="ti ti-arrow-left"></i>
+    </a>
+    <div class="header-title">REPORTES</div>
+  </div>
+</div>
+
+<!-- STATS CARD -->
+<div id="stats-card" class="skeleton skeleton-stats"></div>
+
+<!-- TABS -->
+<div class="tabs" id="tabs" style="display:none">
+  <button class="tab-btn activo" onclick="switchTab('reportes')">
+    <i class="ti ti-clipboard-list"></i> Reportes
+  </button>
+  <button class="tab-btn" onclick="switchTab('municipalidad')">
+    <i class="ti ti-building"></i> Fotos municipalidad
+  </button>
+</div>
+
+<!-- PANEL: REPORTES CIUDADANOS -->
+<div class="tab-panel activo" id="panel-reportes">
+  <div id="skeleton-reportes">
+    <div class="skeleton skeleton-block"></div>
+    <div class="skeleton skeleton-block"></div>
+  </div>
+</div>
+
+<!-- PANEL: FOTOS MUNICIPALIDAD -->
+<div class="tab-panel" id="panel-municipalidad">
+  <div id="lista-avances"></div>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="cerrarLightbox()">
+  <button class="lightbox-close" onclick="cerrarLightbox()">
+    <i class="ti ti-x"></i>
+  </button>
+  <img id="lightbox-img" src="" alt="Foto ampliada">
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="/inicio">
+    <i class="ti ti-home"></i>
+    <span>Inicio</span>
+  </a>
+  <a href="/nuevo-reporte">
+    <div class="nav-center">
+      <i class="ti ti-plus"></i>
+    </div>
+  </a>
+  <a href="#">
+    <i class="ti ti-user"></i>
+    <span>Perfil</span>
+  </a>
+</nav>
+
+<script>
+  const token = localStorage.getItem('token');
+  if (!token) { window.location.href = '/login'; }
+
+  const params = new URLSearchParams(window.location.search);
+  const idReporte = params.get('id');
+  if (!idReporte) { window.location.href = '/inicio'; }
+
+  let datosReporte = null;
+
+  // ── TOAST ──
+  function showToast(msg, tipo = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + tipo;
+      setTimeout(() => { t.classList.remove('show'); }, 2800);
+  }
+
+  // ── LIGHTBOX ──
+  function abrirLightbox(url) {
+      document.getElementById('lightbox-img').src = url;
+      document.getElementById('lightbox').classList.add('visible');
+  }
+  function cerrarLightbox() {
+      document.getElementById('lightbox').classList.remove('visible');
+  }
+
+  // ── TABS ──
+  function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach((b, i) => {
+          b.classList.toggle('activo', (i === 0 && tab === 'reportes') || (i === 1 && tab === 'municipalidad'));
+      });
+      document.getElementById('panel-reportes').classList.toggle('activo', tab === 'reportes');
+      document.getElementById('panel-municipalidad').classList.toggle('activo', tab === 'municipalidad');
+  }
+
+  // ── FORMATO FECHA ──
+  function formatFecha(iso) {
+      if (!iso) return '—';
+      const d = new Date(iso);
+      return d.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  // ── RENDER ──
+  function renderEstadoColor(estado) {
+      const e = (estado || '').toLowerCase();
+      if (e.includes('resuelto')) return '#15803d';
+      if (e.includes('proceso') || e.includes('progreso')) return '#0fa89a';
+      if (e.includes('rechazado')) return '#ef4444';
+      return '#1a3a8f';
+  }
+
+  function renderDetalle(r) {
+      datosReporte = r;
+
+      // Stats card
+      const statsCard = document.getElementById('stats-card');
+      statsCard.className = 'stats-card';
+      statsCard.innerHTML = `
+          <div class="stat-item">
+              <div class="stat-label">Cantidad de<br>personas</div>
+              <div class="stat-value">${r.miniReportes ? r.miniReportes.length : 0}</div>
+              <div class="stat-sub">Personas que<br>reportaron lo mismo</div>
+          </div>
+          <div class="stat-item">
+              <div class="stat-label">Estado</div>
+              <div class="stat-value estado-val" style="color:${renderEstadoColor(r.estado)}">${capitalizar(r.estado)}</div>
+              <div class="stat-sub">Tu reporte ya está<br>siendo atendido</div>
+          </div>
+          <div class="stat-item">
+              <div class="stat-label">Progreso</div>
+              <div class="stat-value pct-val">${r.porcentajeAvance || 0}%</div>
+              <div class="stat-sub">Porcentaje de<br>avance</div>
+          </div>
+      `;
+
+      // Mostrar tabs
+      document.getElementById('tabs').style.display = 'flex';
+
+      // Panel reportes
+      const panelR = document.getElementById('panel-reportes');
+      document.getElementById('skeleton-reportes').remove();
+
+      const nivelCls = (r.nivelRiesgo || 'BAJO').toUpperCase();
+      const nivelIcono = nivelCls === 'ALTO' ? 'ti-alert-triangle' : nivelCls === 'MEDIO' ? 'ti-alert-circle' : 'ti-shield-check';
+
+      let htmlReportes = '';
+
+      // Zona + título
+      htmlReportes += `
+          <div class="zona-ref">
+              <i class="ti ti-map-pin"></i>
+              <span>${r.zonaReferencia || 'Sin zona de referencia'}</span>
+          </div>
+          <div class="reporte-titulo-big">
+              <i class="ti ti-map-2"></i>
+              ${r.titulo}
+          </div>
+      `;
+
+      // Tabla de mini reportes
+      if (r.miniReportes && r.miniReportes.length > 0) {
+          const filas = r.miniReportes.map(m => `
+              <div class="table-row">
+                  <div class="persona-cell">
+                      <div class="avatar" style="background:${m.colorAvatar}">${m.iniciales}</div>
+                      <span class="persona-nombre">${m.nombreUsuario}</span>
+                  </div>
+                  <div class="fecha-cell">${formatFecha(m.fechaCreacion)}</div>
+                  <div>
+                      ${m.urlFoto
+                          ? `<img class="foto-thumb" src="${m.urlFoto}" alt="foto" onclick="abrirLightbox('${m.urlFoto}')">`
+                          : `<div class="foto-thumb-placeholder"><i class="ti ti-photo"></i></div>`
+                      }
+                  </div>
+              </div>
+          `).join('');
+
+          htmlReportes += `
+              <div class="table-card">
+                  <div class="table-head">
+                      <span>Personas</span>
+                      <span>Fecha</span>
+                      <span>Foto</span>
+                  </div>
+                  ${filas}
+              </div>
+          `;
+      } else {
+          htmlReportes += `<p class="empty"><i class="ti ti-users"></i>Sin personas reportantes aún.</p>`;
+      }
+
+      // Badge nivel riesgo
+      htmlReportes += `
+          <div class="nivel-badge ${nivelCls}">
+              <i class="ti ${nivelIcono}"></i>
+              <div class="nivel-badge-text">
+                  <span class="nivel-badge-sub">Nivel de reporte calificado como</span>
+                  <span class="nivel-badge-val">${nivelCls}</span>
+              </div>
+          </div>
+      `;
+
+      panelR.innerHTML = htmlReportes;
+
+      // Panel avances municipalidad
+      renderAvances(r.avances);
+  }
+
+  function capitalizar(str) {
+      if (!str) return '—';
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
+  function renderAvances(avances) {
+      const cont = document.getElementById('lista-avances');
+      if (!avances || avances.length === 0) {
+          cont.innerHTML = `
+              <p class="empty">
+                  <i class="ti ti-building"></i>
+                  La municipalidad aún no ha registrado avances.
+              </p>`;
+          return;
+      }
+      cont.innerHTML = avances.map(a => `
+          <div class="avance-card">
+              <div class="avance-header">
+                  <span class="avance-quien">
+                      <i class="ti ti-building"></i>
+                      ${a.nombreUsuario}
+                  </span>
+                  <span class="avance-pct">${a.porcentaje}%</span>
+              </div>
+              ${a.comentario ? `<p class="avance-comentario">${a.comentario}</p>` : ''}
+              ${a.urlFoto ? `<img class="avance-img" src="${a.urlFoto}" alt="Avance" onclick="abrirLightbox('${a.urlFoto}')">` : ''}
+              <div class="progress-bar">
+                  <div class="progress-fill" style="width:${a.porcentaje}%"></div>
+              </div>
+              <div class="avance-fecha">${formatFecha(a.fecha)}</div>
+          </div>
+      `).join('');
+  }
+
+  // ── CARGA ──
+  fetch(`/api/reportes/${idReporte}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(res => {
+      if (!res.ok) throw new Error('Error ' + res.status);
+      return res.json();
+  })
+  .then(json => {
+      if (json.data) {
+          renderDetalle(json.data);
+      } else {
+          throw new Error('Sin datos');
+      }
+  })
+  .catch(err => {
+      console.error(err);
+      showToast('No se pudo cargar el reporte', 'error');
+      document.getElementById('stats-card').className = '';
+      document.getElementById('stats-card').innerHTML = `
+          <p class="empty" style="margin:1rem">
+              <i class="ti ti-alert-circle" style="color:#ef4444;font-size:1.5rem"></i>
+              Error cargando el reporte.
+              <br><a href="/inicio" style="color:#1a3a8f;font-weight:700">Volver al inicio</a>
+          </p>`;
+      document.getElementById('skeleton-reportes').innerHTML = '';
+  });
+</script>
+</body>
+</html>

@@ -23,4 +23,7 @@ public class VistasController {
 
     @GetMapping("/recuperar-cuenta")
     public String recuperarCuenta() { return "recuperar-cuenta"; }
+
+    @GetMapping("/reporte-detalle")
+    public String reporteDetalle() { return "reporte-detalle"; }
 }

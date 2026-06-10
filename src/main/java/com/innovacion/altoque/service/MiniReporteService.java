@@ -85,6 +85,11 @@ public class MiniReporteService {
         reporte.setLatitudCentro(new java.math.BigDecimal(latProm));
         reporte.setLongitudCentro(new java.math.BigDecimal(lngProm));
         reporte.setFechaActualizacion(LocalDateTime.now());
+        miniReportes.stream()
+                .map(MiniReporte::getDireccionAprox)
+                .filter(d -> d != null && !d.isBlank())
+                .findFirst()
+                .ifPresent(reporte::setZonaReferencia);
         reporteRepository.save(reporte);
 
         // Marcamos los mini reportes como agrupados y los vinculamos
