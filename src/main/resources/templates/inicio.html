@@ -530,11 +530,14 @@
             return;
         }
         cont.innerHTML = data.map(r => {
-            const estadoNombre = r.estado ? r.estado.nombre : '';
+            const estadoNombre = r.estado || '';
             const badgeCls = estadoBadgeClass(estadoNombre);
-            const imgHtml = r.imagenUrl
-                ? `<img class="reporte-img" src="${r.imagenUrl}" alt="${r.titulo}">`
+            // ← Ahora usa fotoPrincipal del DTO
+            const imgHtml = r.fotoPrincipal
+                ? `<img class="reporte-img" src="${r.fotoPrincipal}" alt="${r.titulo}">`
                 : `<div class="reporte-img-placeholder"><i class="ti ti-photo"></i></div>`;
+            // Dirección: usa zonaReferencia o el primer mini reporte
+            const direccion = r.zonaReferencia || 'Sin dirección';
             return `
             <div class="reporte-card">
                 <div class="reporte-img-wrap">
@@ -545,14 +548,14 @@
                     <div class="reporte-titulo">${r.titulo}</div>
                     <div class="reporte-dir">
                         <i class="ti ti-map-pin"></i>
-                        <span>${r.direccion || 'Sin dirección'}</span>
+                        <span>${direccion}</span>
                     </div>
                     <div class="reporte-footer">
                         <span class="progress-mini">
-                            ${r.categoria ? r.categoria.nombre + ' · ' : ''}
-                            ${r.nivelRiesgo ? nivelBadge(r.nivelRiesgo.nombre) : ''}
+                            ${r.categoria ? r.categoria + ' · ' : ''}
+                            ${r.nivelRiesgo ? nivelBadge(r.nivelRiesgo) : ''}
                         </span>
-                        <a href="#" class="ver-detalle">Ver detalle &rsaquo;</a>
+                        <a href="/reporte-detalle?id=${r.id}" class="ver-detalle">Ver detalle ›</a>
                     </div>
                 </div>
             </div>`;
@@ -561,7 +564,7 @@
         // Stats
         const total = data.length;
         const atendidos = data.filter(r => {
-            const n = r.estado ? r.estado.nombre.toUpperCase() : '';
+            const n = (r.estado || '').toUpperCase();
             return n.includes('PROCESO') || n.includes('PROGRESO') || n.includes('RESUELTO');
         }).length;
         const pct = total > 0 ? Math.round((atendidos / total) * 100) : 0;

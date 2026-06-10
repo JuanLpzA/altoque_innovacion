@@ -26,7 +26,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Vistas HTML: libres para que Thymeleaf las sirva sin bloqueo
                         .requestMatchers("/", "/login", "/registro", "/inicio",
-                                "/nuevo-reporte", "/mis-reportes").permitAll()
+                                "/nuevo-reporte", "/mis-reportes", "/reporte-detalle").permitAll()
                         // SecurityConfig:
                         .requestMatchers("/api/categorias", "/api/niveles-riesgo").permitAll()
                         // Recursos estáticos
@@ -39,6 +39,7 @@ public class SecurityConfig {
                         // Todo lo demás de la API requiere token válido
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
+
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
