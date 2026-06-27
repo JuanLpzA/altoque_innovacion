@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Altoque – Centro de Moderación</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-bg: #1a3a8f;
+      --accent: #0fa89a;
+      --bg: #f0f5fb;
+      --card: #fff;
+      --text: #111827;
+      --muted: #9ca3af;
+      --border: #f3f4f6;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
+
+    .sidebar { width: 220px; background: var(--sidebar-bg); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+    .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .sidebar-brand span { color: var(--accent); }
+    .sidebar-section { padding: .9rem 1.4rem .3rem; font-size: .62rem; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; }
+    .sidebar-nav a { display: flex; align-items: center; gap: .65rem; padding: .62rem 1.4rem; color: rgba(255,255,255,.62); text-decoration: none; font-size: .84rem; font-weight: 500; transition: background .15s, color .15s; }
+    .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+    .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
+    .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
+    .sidebar-footer { margin-top: auto; padding: 1rem 1.4rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .sidebar-user { display: flex; align-items: center; gap: .6rem; }
+    .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .avatar-sm i { color: #fff; font-size: .95rem; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
+    .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
+    .btn-logout:hover { color: #fff; }
+
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: var(--card); padding: .9rem 1.8rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .content { padding: 1.6rem 1.8rem; }
+
+    /* ── INFO BANNER ── */
+    .info-banner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 10px;
+      padding: .8rem 1.1rem;
+      font-size: .8rem;
+      color: #1d4ed8;
+      margin-bottom: 1.2rem;
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+    }
+
+    .info-banner i { font-size: 1rem; flex-shrink: 0; }
+
+    /* ── FILTROS ── */
+    .filtros { display: flex; gap: .7rem; margin-bottom: 1.2rem; flex-wrap: wrap; align-items: center; }
+    .filtro-select { padding: .5rem .8rem; border: 1.5px solid #e5e7eb; border-radius: 9px; font-size: .82rem; color: var(--text); background: var(--card); outline: none; cursor: pointer; }
+    .filtro-select:focus { border-color: var(--sidebar-bg); }
+    .search-wrap { position: relative; flex: 1; min-width: 200px; }
+    .search-wrap i { position: absolute; left: .75rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .95rem; }
+    .search-input { width: 100%; padding: .5rem .8rem .5rem 2.2rem; border: 1.5px solid #e5e7eb; border-radius: 9px; font-size: .82rem; outline: none; }
+    .search-input:focus { border-color: var(--sidebar-bg); }
+
+    /* ── GRID DE CARDS ── */
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+    }
+
+    .mini-card {
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: box-shadow .2s;
+    }
+
+    .mini-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+
+    .mini-card-foto {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: #f3f4f6;
+    }
+
+    .mini-card-foto-placeholder {
+      width: 100%;
+      height: 160px;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mini-card-foto-placeholder i { font-size: 2.5rem; color: #d1d5db; }
+
+    .mini-card-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: .4rem; }
+
+    .mini-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: .5rem; }
+    .mini-card-titulo { font-size: .88rem; font-weight: 700; color: var(--text); flex: 1; }
+
+    .badge { font-size: .63rem; font-weight: 700; padding: .2rem .55rem; border-radius: 99px; }
+    .badge-alto  { background: #fef2f2; color: #b91c1c; }
+    .badge-medio { background: #fffbeb; color: #b45309; }
+    .badge-bajo  { background: #f0fdf4; color: #15803d; }
+    .badge-agrupado { background: #f3f4f6; color: #6b7280; }
+
+    .mini-card-cat { font-size: .72rem; color: var(--muted); font-weight: 600; }
+    .mini-card-desc { font-size: .78rem; color: #6b7280; line-height: 1.5; flex: 1;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .mini-card-meta { display: flex; align-items: center; gap: .4rem; font-size: .72rem; color: var(--muted); }
+    .mini-card-meta i { font-size: .8rem; }
+
+    .mini-card-footer { padding: .8rem 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .mini-user { display: flex; align-items: center; gap: .4rem; font-size: .75rem; color: #374151; font-weight: 500; }
+    .mini-user i { font-size: .85rem; color: var(--muted); }
+
+    .btn-cancelar {
+      font-size: .72rem; font-weight: 700;
+      color: #b91c1c; background: #fef2f2;
+      border: none; border-radius: 7px;
+      padding: .3rem .8rem; cursor: pointer;
+      display: flex; align-items: center; gap: .3rem;
+    }
+
+    .btn-cancelar:hover { background: #fee2e2; }
+
+    .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+    .empty-state i { font-size: 3rem; margin-bottom: 1rem; display: block; opacity: .4; }
+    .empty-state p { font-size: .88rem; }
+
+    /* ── MODAL CONFIRMAR ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--card); border-radius: 16px; padding: 2rem; width: 380px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+    .modal-title { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: .6rem; }
+    .modal-desc { font-size: .83rem; color: #6b7280; line-height: 1.6; margin-bottom: 1.4rem; }
+    .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; }
+    .btn-cancel { padding: .6rem 1.2rem; background: #f3f4f6; border: none; border-radius: 9px; font-size: .85rem; font-weight: 600; cursor: pointer; color: #374151; }
+    .btn-danger { padding: .6rem 1.4rem; background: #ef4444; border: none; border-radius: 9px; font-size: .85rem; font-weight: 700; cursor: pointer; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
+
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #111827; color: #fff; padding: .75rem 1.2rem; border-radius: 10px; font-size: .83rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; transform: translateY(12px); transition: opacity .25s, transform .25s; z-index: 200; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-brand">AL<span>Toque</span></div>
+  <div class="sidebar-section">Principal</div>
+  <nav class="sidebar-nav">
+    <a href="/admin/dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+    <a href="/admin/reportes"><i class="ti ti-clipboard-list"></i> Reportes</a>
+    <a href="/admin/mapa"><i class="ti ti-map-pin"></i> Mapa de incidencias</a>
+    <a href="/admin/evidencias"><i class="ti ti-photo"></i> Evidencias</a>
+    <a href="/admin/moderacion" class="active"><i class="ti ti-shield-check"></i> Centro de moderación</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar-sm"><i class="ti ti-building-community"></i></div>
+      <div class="user-info">
+        <div class="user-name" id="sb-nombre">—</div>
+        <div class="user-role">Municipalidad</div>
+      </div>
+      <button class="btn-logout" onclick="cerrarSesion()"><i class="ti ti-power"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Centro de moderación</div>
+  </div>
+
+  <div class="content">
+    <div class="info-banner">
+      <i class="ti ti-info-circle"></i>
+      Aquí aparecen las solicitudes ciudadanas (mini reportes) que aún no han formado un reporte oficial.
+      Puedes cancelar aquellas con evidencia de baja confianza o irrelevantes.
+    </div>
+
+    <div class="filtros">
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input class="search-input" id="buscar" type="text" placeholder="Buscar por título, categoría o usuario...">
+      </div>
+      <select class="filtro-select" id="filtro-riesgo" onchange="aplicarFiltros()">
+        <option value="">Todos los riesgos</option>
+        <option value="ALTO">Alto</option>
+        <option value="MEDIO">Medio</option>
+        <option value="BAJO">Bajo</option>
+      </select>
+    </div>
+
+    <div class="mini-grid" id="mini-grid">
+      <div style="grid-column:1/-1" class="empty-state">
+        <i class="ti ti-loader"></i>
+        <p>Cargando solicitudes...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR CANCELACIÓN -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title">¿Cancelar esta solicitud?</div>
+    <div class="modal-desc">
+      Esta acción retira la solicitud del flujo de agrupación. No se borrará de la base de datos,
+      pero ya no contará para generar un reporte oficial. Esta acción no se puede deshacer.
+    </div>
+    <input type="hidden" id="modal-id">
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="cerrarModal()">Volver</button>
+      <button class="btn-danger" onclick="confirmarCancelacion()">Sí, cancelar solicitud</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // Guard
+  (function () {
+    if (!localStorage.getItem('token') || localStorage.getItem('rol') !== 'municipalidad')
+      window.location.href = '/';
+  })();
+
+  const TOKEN = localStorage.getItem('token');
+  document.getElementById('sb-nombre').textContent =
+    (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+
+  let todos = [];
+
+  function badgeRiesgo(r) {
+    const n = (r || '').toUpperCase();
+    return `<span class="badge badge-${n.toLowerCase()}">${n}</span>`;
+  }
+
+  function formatFecha(f) {
+    if (!f) return '—';
+    return new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderGrid(items) {
+    const grid = document.getElementById('mini-grid');
+
+    if (items.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1" class="empty-state">
+          <i class="ti ti-mood-happy"></i>
+          <p>No hay solicitudes pendientes de moderación.</p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = items.map(m => {
+      const agrupBadge = m.agrupado
+        ? `<span class="badge badge-agrupado">Agrupado</span>`
+        : badgeRiesgo(m.nivelRiesgo);
+
+      const fotoHTML = m.urlFoto
+        ? `<img class="mini-card-foto" src="${m.urlFoto}" alt="foto" onerror="this.parentElement.innerHTML='<div class=mini-card-foto-placeholder><i class=ti ti-photo></i></div>'">`
+        : `<div class="mini-card-foto-placeholder"><i class="ti ti-photo"></i></div>`;
+
+      return `
+        <div class="mini-card" id="card-${m.id}">
+          ${fotoHTML}
+          <div class="mini-card-body">
+            <div class="mini-card-top">
+              <div class="mini-card-titulo">${m.titulo || '—'}</div>
+              ${agrupBadge}
+            </div>
+            <div class="mini-card-cat">${m.categoria || '—'}</div>
+            <div class="mini-card-desc">${m.descripcion || '—'}</div>
+            <div class="mini-card-meta">
+              <i class="ti ti-map-pin"></i>
+              <span>${m.direccionAprox || 'Sin dirección'}</span>
+            </div>
+            <div class="mini-card-meta">
+              <i class="ti ti-calendar"></i>
+              <span>${formatFecha(m.fechaCreacion)}</span>
+            </div>
+          </div>
+          <div class="mini-card-footer">
+            <div class="mini-user">
+              <i class="ti ti-user"></i>
+              ${m.nombreUsuario || '—'}
+            </div>
+            ${!m.agrupado ? `
+              <button class="btn-cancelar" onclick="abrirModal(${m.id})">
+                <i class="ti ti-ban"></i> Cancelar
+              </button>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function aplicarFiltros() {
+    const buscar = document.getElementById('buscar').value.toLowerCase();
+    const riesgo = document.getElementById('filtro-riesgo').value.toUpperCase();
+
+    const filtrados = todos.filter(m => {
+      const matchBuscar = !buscar ||
+        (m.titulo || '').toLowerCase().includes(buscar) ||
+        (m.categoria || '').toLowerCase().includes(buscar) ||
+        (m.nombreUsuario || '').toLowerCase().includes(buscar);
+      const matchRiesgo = !riesgo || (m.nivelRiesgo || '').toUpperCase() === riesgo;
+      return matchBuscar && matchRiesgo;
+    });
+
+    renderGrid(filtrados);
+  }
+
+  document.getElementById('buscar').addEventListener('input', aplicarFiltros);
+
+  async function cargarMiniReportes() {
+    try {
+      const res  = await fetch('/api/admin/moderacion/mini-reportes', {
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+      const json = await res.json();
+      todos = json.data || [];
+      renderGrid(todos);
+    } catch {
+      document.getElementById('mini-grid').innerHTML = `
+        <div style="grid-column:1/-1" class="empty-state">
+          <i class="ti ti-wifi-off"></i>
+          <p>Error al cargar las solicitudes.</p>
+        </div>`;
+    }
+  }
+
+  // ── Modal ──────────────────────────────────────────────────────
+  function abrirModal(id) {
+    document.getElementById('modal-id').value = id;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function cerrarModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
+  }
+
+  async function confirmarCancelacion() {
+    const id = document.getElementById('modal-id').value;
+    cerrarModal();
+
+    try {
+      const res  = await fetch(`/api/admin/moderacion/mini-reportes/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+      const json = await res.json();
+
+      if (json.ok) {
+        mostrarToast('✓ Solicitud cancelada');
+        todos = todos.filter(m => m.id != id);
+        aplicarFiltros();
+      } else {
+        mostrarToast('Error: ' + (json.mensaje || 'No se pudo cancelar'));
+      }
+    } catch {
+      mostrarToast('Error de conexión');
+    }
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+  document.getElementById('modalOverlay').addEventListener('click', e => {
+    if (e.target === e.currentTarget) cerrarModal();
+  });
+
+  function mostrarToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  async function cerrarSesion() {
+    try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }); }
+    finally { localStorage.clear(); window.location.href = '/'; }
+  }
+
+  cargarMiniReportes();
+</script>
+</body>
+</html>

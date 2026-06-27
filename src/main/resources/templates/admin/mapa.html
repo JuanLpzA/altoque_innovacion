@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Altoque – Mapa de Incidencias</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --sidebar-bg: #1a3a8f;
+      --accent: #0fa89a;
+      --bg: #f0f5fb;
+      --card: #fff;
+      --text: #111827;
+      --muted: #9ca3af;
+      --border: #f3f4f6;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
+
+    .sidebar { width: 220px; background: var(--sidebar-bg); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+    .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .sidebar-brand span { color: var(--accent); }
+    .sidebar-section { padding: .9rem 1.4rem .3rem; font-size: .62rem; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; }
+    .sidebar-nav a { display: flex; align-items: center; gap: .65rem; padding: .62rem 1.4rem; color: rgba(255,255,255,.62); text-decoration: none; font-size: .84rem; font-weight: 500; transition: background .15s, color .15s; }
+    .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+    .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
+    .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
+    .sidebar-footer { margin-top: auto; padding: 1rem 1.4rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .sidebar-user { display: flex; align-items: center; gap: .6rem; }
+    .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .avatar-sm i { color: #fff; font-size: .95rem; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
+    .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
+    .btn-logout:hover { color: #fff; }
+
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: var(--card); padding: .9rem 1.8rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+
+    /* ── LAYOUT MAPA ── */
+    .mapa-layout {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 52px);
+      overflow: hidden;
+    }
+
+    #mapa { flex: 1; height: 100%; min-height: 0; }
+
+    /* ── PANEL LATERAL DETALLE ── */
+    .detalle-panel {
+      width: 320px;
+      flex-shrink: 0;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      transition: width .25s;
+    }
+
+    .detalle-panel.oculto { width: 0; overflow: hidden; border: none; }
+
+    .detalle-head {
+      padding: 1.1rem 1.2rem .8rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: .7rem;
+    }
+
+    .detalle-head-info { flex: 1; min-width: 0; }
+    .detalle-num { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .detalle-titulo { font-size: .95rem; font-weight: 800; color: var(--text); margin-top: .2rem; }
+
+    .btn-cerrar {
+      background: #f3f4f6; border: none; border-radius: 8px;
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; flex-shrink: 0; color: #6b7280; font-size: .95rem;
+    }
+    .btn-cerrar:hover { background: #e5e7eb; }
+
+    .detalle-foto {
+      width: 100%; height: 160px; object-fit: cover;
+      background: #f3f4f6;
+    }
+
+    .detalle-foto-placeholder {
+      width: 100%; height: 160px;
+      background: #f3f4f6;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .detalle-foto-placeholder i { font-size: 2.5rem; color: #d1d5db; }
+
+    .detalle-body { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: .7rem; }
+
+    .detalle-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .badge { font-size: .63rem; font-weight: 700; padding: .2rem .55rem; border-radius: 99px; }
+    .badge-pendiente  { background: #fef2f2; color: #b91c1c; }
+    .badge-proceso    { background: #eff6ff; color: #1d4ed8; }
+    .badge-resuelto   { background: #f0fdf4; color: #15803d; }
+    .badge-rechazado  { background: #f3f4f6; color: #6b7280; }
+    .badge-alto  { background: #fef2f2; color: #b91c1c; }
+    .badge-medio { background: #fffbeb; color: #b45309; }
+    .badge-bajo  { background: #f0fdf4; color: #15803d; }
+
+    .detalle-desc { font-size: .8rem; color: #6b7280; line-height: 1.6; }
+
+    .detalle-avance-label { font-size: .72rem; font-weight: 600; color: var(--muted); }
+    .detalle-avance-bar { height: 8px; background: #f3f4f6; border-radius: 99px; overflow: hidden; margin-top: .3rem; }
+    .detalle-avance-fill { height: 100%; background: var(--accent); border-radius: 99px; }
+
+    .detalle-meta { display: flex; flex-direction: column; gap: .35rem; }
+    .detalle-meta-row { display: flex; align-items: flex-start; gap: .5rem; font-size: .78rem; color: #374151; }
+    .detalle-meta-row i { font-size: .85rem; color: var(--muted); flex-shrink: 0; margin-top: .1rem; }
+
+    .detalle-mini-title { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+
+    .mini-chip {
+      display: flex; align-items: center; gap: .5rem;
+      background: #f9fafb; border-radius: 8px;
+      padding: .5rem .7rem; font-size: .78rem; color: #374151;
+    }
+    .mini-chip i { color: var(--muted); font-size: .8rem; }
+
+    .btn-ver-reporte {
+      display: block; text-align: center;
+      background: var(--sidebar-bg); color: #fff;
+      border: none; border-radius: 10px;
+      padding: .65rem; font-size: .84rem; font-weight: 700;
+      cursor: pointer; text-decoration: none;
+      margin: 0 1.2rem 1.2rem;
+      transition: background .15s;
+    }
+    .btn-ver-reporte:hover { background: #153070; }
+
+    /* ── Leyenda ── */
+    .leyenda {
+      position: absolute;
+      bottom: 1.5rem; left: 1.5rem;
+      background: var(--card);
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: .4rem;
+      font-size: .75rem;
+      color: #374151;
+    }
+
+    .ley-item { display: flex; align-items: center; gap: .5rem; }
+    .ley-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-brand">AL<span>Toque</span></div>
+  <div class="sidebar-section">Principal</div>
+  <nav class="sidebar-nav">
+    <a href="/admin/dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+    <a href="/admin/reportes"><i class="ti ti-clipboard-list"></i> Reportes</a>
+    <a href="/admin/mapa" class="active"><i class="ti ti-map-pin"></i> Mapa de incidencias</a>
+    <a href="/admin/evidencias"><i class="ti ti-photo"></i> Evidencias</a>
+    <a href="/admin/moderacion"><i class="ti ti-shield-check"></i> Centro de moderación</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="avatar-sm"><i class="ti ti-building-community"></i></div>
+      <div class="user-info">
+        <div class="user-name" id="sb-nombre">—</div>
+        <div class="user-role">Municipalidad</div>
+      </div>
+      <button class="btn-logout" onclick="cerrarSesion()"><i class="ti ti-power"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Mapa de incidencias</div>
+  </div>
+
+  <div class="mapa-layout">
+    <!-- MAPA -->
+    <div style="position:relative;flex:1; height:100%; min-height:0;">
+      <div id="mapa"></div>
+
+      <div class="leyenda">
+        <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem">Leyenda</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#ef4444"></div>Pendiente</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#f59e0b"></div>En proceso</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#22c55e"></div>Resuelto</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#9ca3af"></div>Rechazado</div>
+      </div>
+    </div>
+
+    <!-- PANEL DETALLE -->
+    <div class="detalle-panel oculto" id="detalle-panel">
+      <div class="detalle-head">
+        <div class="detalle-head-info">
+          <div class="detalle-num" id="det-num">—</div>
+          <div class="detalle-titulo" id="det-titulo">—</div>
+        </div>
+        <button class="btn-cerrar" onclick="cerrarDetalle()"><i class="ti ti-x"></i></button>
+      </div>
+
+      <div id="det-foto-wrap"></div>
+
+      <div class="detalle-body">
+        <div class="detalle-badges" id="det-badges"></div>
+
+        <div class="detalle-desc" id="det-desc">—</div>
+
+        <div>
+          <div class="detalle-avance-label">Avance: <span id="det-avance-pct">0</span>%</div>
+          <div class="detalle-avance-bar">
+            <div class="detalle-avance-fill" id="det-avance-fill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <div class="detalle-meta" id="det-meta"></div>
+
+        <div>
+          <div class="detalle-mini-title" style="margin-bottom:.5rem">Solicitudes vinculadas (<span id="det-mini-count">0</span>)</div>
+          <div style="display:flex;flex-direction:column;gap:.35rem;" id="det-minis"></div>
+        </div>
+      </div>
+
+      <a id="det-link" href="#" class="btn-ver-reporte">Ver reporte completo</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Guard
+  (function () {
+    if (!localStorage.getItem('token') || localStorage.getItem('rol') !== 'municipalidad')
+      window.location.href = '/';
+  })();
+
+  const TOKEN = localStorage.getItem('token');
+  document.getElementById('sb-nombre').textContent =
+    (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+
+  function estadoColor(estado) {
+    const e = (estado || '').toLowerCase();
+    return e.includes('resuelto')  ? '#22c55e'
+         : e.includes('proceso')   ? '#f59e0b'
+         : e.includes('rechazado') ? '#9ca3af'
+         : '#ef4444';
+  }
+
+  function badgeClase(estado) {
+    const e = (estado || '').toLowerCase();
+    return e.includes('pendiente') ? 'pendiente'
+         : e.includes('proceso')   ? 'proceso'
+         : e.includes('resuelto')  ? 'resuelto'
+         : 'rechazado';
+  }
+
+  function badgeRiesgoClase(r) {
+    return (r || '').toLowerCase();
+  }
+
+  function formatFecha(f) {
+    if (!f) return '—';
+    return new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  let mapaInstance = null;
+
+  async function initMapa() {
+    const res   = await fetch('/api/admin/reportes', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
+    const json  = await res.json();
+    const reportes = json.data || [];
+
+    const centro = reportes.length > 0
+      ? [parseFloat(reportes[0].latitudCentro ?? reportes[0].latitud), parseFloat(reportes[0].longitudCentro ?? reportes[0].longitud)]
+      : [-6.77137, -79.84088];
+
+    mapaInstance = L.map('mapa').setView(centro, 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(mapaInstance);
+
+    reportes.forEach(r => {
+      const lat = parseFloat(r.latitudCentro ?? r.latitud);
+      const lng = parseFloat(r.longitudCentro ?? r.longitud);
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      const color = estadoColor(r.estado);
+      const circle = L.circleMarker([lat, lng], {
+        radius: 12,
+        fillColor: color,
+        color: '#fff',
+        weight: 2.5,
+        fillOpacity: 0.88
+      }).addTo(mapaInstance);
+
+      circle.on('click', () => abrirDetalle(r));
+    });
+  }
+
+  function abrirDetalle(r) {
+    const panel = document.getElementById('detalle-panel');
+    panel.classList.remove('oculto');
+    setTimeout(() => mapaInstance.invalidateSize(), 260);
+
+    document.getElementById('det-num').textContent    = `Reporte #${r.id}`;
+    document.getElementById('det-titulo').textContent = r.titulo || '—';
+    document.getElementById('det-link').href          = `/admin/reporte-detalle?id=${r.id}`;
+
+    // Foto
+    const fotoWrap = document.getElementById('det-foto-wrap');
+    if (r.fotoPrincipal) {
+      fotoWrap.innerHTML = `<img class="detalle-foto" src="${r.fotoPrincipal}" alt="foto"
+        onerror="this.parentElement.innerHTML='<div class=detalle-foto-placeholder><i class=ti ti-photo></i></div>'">`;
+    } else {
+      fotoWrap.innerHTML = `<div class="detalle-foto-placeholder"><i class="ti ti-photo"></i></div>`;
+    }
+
+    // Badges
+    document.getElementById('det-badges').innerHTML = `
+      <span class="badge badge-${badgeClase(r.estado)}">${r.estado || '—'}</span>
+      <span class="badge badge-${badgeRiesgoClase(r.nivelRiesgo)}">${(r.nivelRiesgo || '').toUpperCase()}</span>
+    `;
+
+    // Descripción
+    document.getElementById('det-desc').textContent = r.descripcionConsolidada || '—';
+
+    // Avance
+    const pct = r.porcentajeAvance || 0;
+    document.getElementById('det-avance-pct').textContent   = pct;
+    document.getElementById('det-avance-fill').style.width  = pct + '%';
+
+    // Meta
+    document.getElementById('det-meta').innerHTML = `
+      <div class="detalle-meta-row"><i class="ti ti-tag"></i><span>${r.categoria || '—'}</span></div>
+      <div class="detalle-meta-row"><i class="ti ti-map-pin"></i><span>${r.zonaReferencia || 'Sin zona registrada'}</span></div>
+      <div class="detalle-meta-row"><i class="ti ti-calendar"></i><span>${formatFecha(r.fechaCreacion)}</span></div>
+    `;
+
+    // Mini reportes
+    const minis = r.miniReportes || [];
+    document.getElementById('det-mini-count').textContent = minis.length;
+    document.getElementById('det-minis').innerHTML = minis.length === 0
+      ? '<div style="font-size:.75rem;color:var(--muted)">Sin solicitudes vinculadas</div>'
+      : minis.map(m => `
+          <div class="mini-chip">
+            <i class="ti ti-user-circle"></i>
+            <span>${m.nombreUsuario || '—'}</span>
+          </div>
+        `).join('');
+  }
+
+  function cerrarDetalle() {
+    document.getElementById('detalle-panel').classList.add('oculto');
+    if (mapaInstance) mapaInstance.invalidateSize();
+  }
+
+  async function cerrarSesion() {
+    try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }); }
+    finally { localStorage.clear(); window.location.href = '/'; }
+  }
+
+  initMapa();
+</script>
+</body>
+</html>

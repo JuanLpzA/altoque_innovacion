@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altoque – Reportes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+          --sidebar-bg: #1a3a8f;
+          --accent: #0fa89a;
+          --bg: #f0f5fb;
+          --card: #fff;
+          --text: #111827;
+          --muted: #9ca3af;
+          --border: #f3f4f6;
+        }
+
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: var(--bg);
+          min-height: 100vh;
+          display: flex;
+        }
+
+        /* ── SIDEBAR (igual en todos) ── */
+        .sidebar {
+          width: 220px;
+          background: var(--sidebar-bg);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+        }
+
+        .sidebar-brand {
+          padding: 1.4rem 1.4rem .9rem;
+          font-size: 1.3rem;
+          font-weight: 900;
+          color: #fff;
+          letter-spacing: -.02em;
+          border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .sidebar-brand span { color: var(--accent); }
+        .sidebar-section {
+          padding: .9rem 1.4rem .3rem;
+          font-size: .62rem;
+          font-weight: 700;
+          color: rgba(255,255,255,.3);
+          text-transform: uppercase;
+          letter-spacing: .1em;
+        }
+
+        .sidebar-nav a {
+          display: flex; align-items: center; gap: .65rem;
+          padding: .62rem 1.4rem;
+          color: rgba(255,255,255,.62);
+          text-decoration: none;
+          font-size: .84rem;
+          font-weight: 500;
+          transition: background .15s, color .15s;
+        }
+
+        .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+        .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
+        .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
+
+        .sidebar-footer {
+          margin-top: auto;
+          padding: 1rem 1.4rem;
+          border-top: 1px solid rgba(255,255,255,.08);
+        }
+
+        .sidebar-user { display: flex; align-items: center; gap: .6rem; }
+        .avatar-sm {
+          width: 32px; height: 32px; border-radius: 50%;
+          background: rgba(255,255,255,.13);
+          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .avatar-sm i { color: #fff; font-size: .95rem; }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
+        .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
+        .btn-logout:hover { color: #fff; }
+
+        /* ── MAIN ── */
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .topbar {
+          background: var(--card); padding: .9rem 1.8rem;
+          display: flex; align-items: center; justify-content: space-between;
+          border-bottom: 1px solid var(--border);
+          position: sticky; top: 0; z-index: 10;
+        }
+        .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .content { padding: 1.6rem 1.8rem; }
+
+        /* ── FILTROS ── */
+        .filtros {
+          display: flex;
+          gap: .7rem;
+          margin-bottom: 1.2rem;
+          flex-wrap: wrap;
+          align-items: center;
+        }
+
+        .filtro-select {
+          padding: .5rem .8rem;
+          border: 1.5px solid #e5e7eb;
+          border-radius: 9px;
+          font-size: .82rem;
+          color: var(--text);
+          background: var(--card);
+          outline: none;
+          cursor: pointer;
+        }
+
+        .filtro-select:focus { border-color: var(--sidebar-bg); }
+
+        .search-wrap {
+          position: relative;
+          flex: 1;
+          min-width: 200px;
+        }
+
+        .search-wrap i {
+          position: absolute;
+          left: .75rem; top: 50%;
+          transform: translateY(-50%);
+          color: var(--muted);
+          font-size: .95rem;
+        }
+
+        .search-input {
+          width: 100%;
+          padding: .5rem .8rem .5rem 2.2rem;
+          border: 1.5px solid #e5e7eb;
+          border-radius: 9px;
+          font-size: .82rem;
+          outline: none;
+        }
+
+        .search-input:focus { border-color: var(--sidebar-bg); }
+
+        /* ── TABLA ── */
+        .card-tabla {
+          background: var(--card);
+          border-radius: 14px;
+          box-shadow: 0 2px 10px rgba(0,0,0,.05);
+          overflow: hidden;
+        }
+
+        table { width: 100%; border-collapse: collapse; }
+
+        th {
+          text-align: left;
+          font-size: .68rem;
+          font-weight: 700;
+          color: var(--muted);
+          text-transform: uppercase;
+          letter-spacing: .05em;
+          padding: .75rem 1.2rem;
+          border-bottom: 1px solid var(--border);
+          background: #fafafa;
+        }
+
+        td {
+          padding: .85rem 1.2rem;
+          font-size: .83rem;
+          color: #374151;
+          border-bottom: 1px solid var(--border);
+          vertical-align: middle;
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafbff; }
+
+        .badge {
+          font-size: .65rem; font-weight: 700;
+          padding: .22rem .6rem;
+          border-radius: 99px;
+        }
+
+        .badge-pendiente  { background: #fef2f2; color: #b91c1c; }
+        .badge-proceso    { background: #eff6ff; color: #1d4ed8; }
+        .badge-resuelto   { background: #f0fdf4; color: #15803d; }
+        .badge-rechazado  { background: #f3f4f6; color: #6b7280; }
+        .badge-alto       { background: #fef2f2; color: #b91c1c; }
+        .badge-medio      { background: #fffbeb; color: #b45309; }
+        .badge-bajo       { background: #f0fdf4; color: #15803d; }
+
+        .btn-accion {
+          font-size: .72rem; font-weight: 700;
+          color: var(--sidebar-bg); background: #e8f0fe;
+          border: none; border-radius: 7px;
+          padding: .3rem .7rem; cursor: pointer;
+          text-decoration: none; display: inline-block;
+        }
+
+        .btn-accion:hover { background: #d1e0fd; }
+
+        .btn-estado {
+          font-size: .72rem; font-weight: 700;
+          color: #374151; background: #f3f4f6;
+          border: none; border-radius: 7px;
+          padding: .3rem .7rem; cursor: pointer;
+          margin-left: .3rem;
+        }
+
+        .btn-estado:hover { background: #e5e7eb; }
+
+        .avance-bar {
+          width: 80px; height: 6px;
+          background: #f3f4f6; border-radius: 99px;
+          overflow: hidden; display: inline-block; vertical-align: middle;
+        }
+
+        .avance-fill { height: 100%; background: var(--accent); border-radius: 99px; }
+
+        .empty-row td { text-align: center; color: var(--muted); padding: 3rem; }
+
+        /* ── MODAL CAMBIO ESTADO ── */
+        .modal-overlay {
+          position: fixed; inset: 0;
+          background: rgba(0,0,0,.4);
+          display: none;
+          align-items: center; justify-content: center;
+          z-index: 100;
+        }
+
+        .modal-overlay.open { display: flex; }
+
+        .modal {
+          background: var(--card);
+          border-radius: 16px;
+          padding: 2rem;
+          width: 420px;
+          max-width: 95vw;
+          box-shadow: 0 20px 60px rgba(0,0,0,.2);
+        }
+
+        .modal-title {
+          font-size: 1rem; font-weight: 800; color: var(--text);
+          margin-bottom: 1.2rem;
+        }
+
+        .modal-field { margin-bottom: 1rem; }
+
+        .modal-field label {
+          display: block; font-size: .78rem; font-weight: 600;
+          color: #374151; margin-bottom: .35rem;
+        }
+
+        .modal-field select,
+        .modal-field input,
+        .modal-field textarea {
+          width: 100%;
+          padding: .68rem .9rem;
+          border: 1.5px solid #e5e7eb;
+          border-radius: 9px;
+          font-size: .88rem;
+          outline: none;
+          font-family: inherit;
+        }
+
+        .modal-field select:focus,
+        .modal-field input:focus,
+        .modal-field textarea:focus { border-color: var(--sidebar-bg); }
+
+        .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.2rem; }
+
+        .btn-cancel {
+          padding: .6rem 1.2rem;
+          background: #f3f4f6; border: none; border-radius: 9px;
+          font-size: .85rem; font-weight: 600; cursor: pointer; color: #374151;
+        }
+
+        .btn-confirm {
+          padding: .6rem 1.4rem;
+          background: var(--sidebar-bg); border: none; border-radius: 9px;
+          font-size: .85rem; font-weight: 700; cursor: pointer; color: #fff;
+        }
+
+        .btn-confirm:hover { background: #153070; }
+
+        .toast {
+          position: fixed; bottom: 1.5rem; right: 1.5rem;
+          background: #111827; color: #fff;
+          padding: .75rem 1.2rem;
+          border-radius: 10px;
+          font-size: .83rem;
+          font-weight: 600;
+          box-shadow: 0 8px 24px rgba(0,0,0,.25);
+          opacity: 0;
+          transform: translateY(12px);
+          transition: opacity .25s, transform .25s;
+          z-index: 200;
+        }
+
+        .toast.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <div class="sidebar-brand">AL<span>Toque</span></div>
+    <div class="sidebar-section">Principal</div>
+    <nav class="sidebar-nav">
+        <a href="/admin/dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
+        <a href="/admin/reportes" class="active"><i class="ti ti-clipboard-list"></i> Reportes</a>
+        <a href="/admin/mapa"><i class="ti ti-map-pin"></i> Mapa de incidencias</a>
+        <a href="/admin/evidencias"><i class="ti ti-photo"></i> Evidencias</a>
+        <a href="/admin/moderacion"><i class="ti ti-shield-check"></i> Centro de moderación</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="avatar-sm"><i class="ti ti-building-community"></i></div>
+            <div class="user-info">
+                <div class="user-name" id="sb-nombre">—</div>
+                <div class="user-role">Municipalidad</div>
+            </div>
+            <button class="btn-logout" onclick="cerrarSesion()"><i class="ti ti-power"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-title">Reportes</div>
+    </div>
+
+    <div class="content">
+        <div class="filtros">
+            <div class="search-wrap">
+                <i class="ti ti-search"></i>
+                <input class="search-input" id="buscar" type="text" placeholder="Buscar por título o zona...">
+            </div>
+            <select class="filtro-select" id="filtro-estado" onchange="aplicarFiltros()">
+                <option value="">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="en proceso">En proceso</option>
+                <option value="resuelto">Resuelto</option>
+                <option value="rechazado">Rechazado</option>
+            </select>
+            <select class="filtro-select" id="filtro-riesgo" onchange="aplicarFiltros()">
+                <option value="">Todos los riesgos</option>
+                <option value="ALTO">Alto</option>
+                <option value="MEDIO">Medio</option>
+                <option value="BAJO">Bajo</option>
+            </select>
+        </div>
+
+        <div class="card-tabla">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Título</th>
+                    <th>Categoría</th>
+                    <th>Riesgo</th>
+                    <th>Estado</th>
+                    <th>Avance</th>
+                    <th>Fuentes</th>
+                    <th>Fecha</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tabla-body">
+                <tr class="empty-row"><td colspan="9">Cargando reportes...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CAMBIO ESTADO -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <div class="modal-title">Actualizar estado del reporte</div>
+        <input type="hidden" id="modal-id">
+
+        <div class="modal-field">
+            <label>Nuevo estado</label>
+            <select id="modal-estado">
+                <option value="pendiente">Pendiente</option>
+                <option value="en proceso">En proceso</option>
+                <option value="resuelto">Resuelto</option>
+                <option value="rechazado">Rechazado</option>
+            </select>
+        </div>
+
+        <div class="modal-field">
+            <label>Porcentaje de avance (%)</label>
+            <input type="number" id="modal-porcentaje" min="0" max="100" placeholder="0 – 100">
+        </div>
+
+        <div class="modal-field">
+            <label>Comentario (opcional)</label>
+            <textarea id="modal-comentario" rows="3" placeholder="Describe el avance o motivo del cambio..."></textarea>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn-confirm" onclick="confirmarCambio()">Guardar cambios</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // Guard
+    (function () {
+      const token = localStorage.getItem('token');
+      const rol   = localStorage.getItem('rol');
+      if (!token || rol !== 'municipalidad') window.location.href = '/';
+    })();
+
+    const TOKEN = localStorage.getItem('token');
+    document.getElementById('sb-nombre').textContent =
+      (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+
+    let todosLosReportes = [];
+
+    // ── Formateo ──────────────────────────────────────────────────
+    function badgeEstado(e) {
+      const n = (e || '').toLowerCase();
+      const cls = n.includes('pendiente') ? 'pendiente'
+                : n.includes('proceso')   ? 'proceso'
+                : n.includes('resuelto')  ? 'resuelto'
+                : 'rechazado';
+      return `<span class="badge badge-${cls}">${e}</span>`;
+    }
+
+    function badgeRiesgo(r) {
+      const n = (r || '').toUpperCase();
+      return `<span class="badge badge-${n.toLowerCase()}">${n}</span>`;
+    }
+
+    function formatFecha(f) {
+      if (!f) return '—';
+      return new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function renderTabla(reportes) {
+      const tbody = document.getElementById('tabla-body');
+      if (reportes.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="9">No hay reportes con ese criterio.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = reportes.map(r => `
+        <tr>
+          <td style="color:var(--muted);font-size:.75rem">#${r.id}</td>
+          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600">${r.titulo || '—'}</td>
+          <td>${r.categoria || '—'}</td>
+          <td>${badgeRiesgo(r.nivelRiesgo)}</td>
+          <td>${badgeEstado(r.estado)}</td>
+          <td>
+            <div class="avance-bar">
+              <div class="avance-fill" style="width:${r.porcentajeAvance || 0}%"></div>
+            </div>
+            <span style="font-size:.72rem;color:var(--muted);margin-left:.3rem">${r.porcentajeAvance || 0}%</span>
+          </td>
+          <td style="text-align:center">${r.totalMiniReportes ?? '—'}</td>
+          <td style="font-size:.75rem;color:var(--muted)">${formatFecha(r.fechaCreacion)}</td>
+          <td>
+            <a href="/admin/reporte-detalle?id=${r.id}" class="btn-accion">Ver</a>
+            <button class="btn-estado" onclick="abrirModal(${r.id}, '${r.estado}', ${r.porcentajeAvance || 0})">
+              <i class="ti ti-edit" style="font-size:.8rem"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function aplicarFiltros() {
+      const buscar = document.getElementById('buscar').value.toLowerCase();
+      const estado = document.getElementById('filtro-estado').value.toLowerCase();
+      const riesgo = document.getElementById('filtro-riesgo').value.toUpperCase();
+
+      const filtrados = todosLosReportes.filter(r => {
+        const matchBuscar = !buscar ||
+          (r.titulo || '').toLowerCase().includes(buscar) ||
+          (r.zonaReferencia || '').toLowerCase().includes(buscar);
+        const matchEstado = !estado || (r.estado || '').toLowerCase().includes(estado);
+        const matchRiesgo = !riesgo || (r.nivelRiesgo || '').toUpperCase() === riesgo;
+        return matchBuscar && matchEstado && matchRiesgo;
+      });
+
+      renderTabla(filtrados);
+    }
+
+    document.getElementById('buscar').addEventListener('input', aplicarFiltros);
+
+    async function cargarReportes() {
+      try {
+        const res  = await fetch('/api/admin/reportes', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
+        const json = await res.json();
+        todosLosReportes = json.data || [];
+        renderTabla(todosLosReportes);
+      } catch {
+        document.getElementById('tabla-body').innerHTML =
+          '<tr class="empty-row"><td colspan="9">Error al cargar reportes.</td></tr>';
+      }
+    }
+
+    // ── Modal ─────────────────────────────────────────────────────
+    function abrirModal(id, estadoActual, porcentajeActual) {
+      document.getElementById('modal-id').value          = id;
+      document.getElementById('modal-estado').value      = estadoActual;
+      document.getElementById('modal-porcentaje').value  = porcentajeActual;
+      document.getElementById('modal-comentario').value  = '';
+      document.getElementById('modalOverlay').classList.add('open');
+    }
+
+    function cerrarModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+    }
+
+    async function confirmarCambio() {
+      const id         = document.getElementById('modal-id').value;
+      const estado     = document.getElementById('modal-estado').value;
+      const porcentaje = parseInt(document.getElementById('modal-porcentaje').value) || 0;
+      const comentario = document.getElementById('modal-comentario').value.trim();
+
+      try {
+        const res = await fetch(`/api/admin/reportes/${id}/estado`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + TOKEN
+          },
+          body: JSON.stringify({ estado, porcentaje, comentario })
+        });
+
+        const json = await res.json();
+        cerrarModal();
+
+        if (json.ok) {
+          mostrarToast('✓ Estado actualizado correctamente');
+          await cargarReportes();
+        } else {
+          mostrarToast('Error: ' + (json.mensaje || 'No se pudo actualizar'));
+        }
+      } catch {
+        mostrarToast('Error de conexión');
+        cerrarModal();
+      }
+    }
+
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+    document.getElementById('modalOverlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) cerrarModal();
+    });
+
+    // ── Toast ─────────────────────────────────────────────────────
+    function mostrarToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    async function cerrarSesion() {
+      try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }); }
+      finally { localStorage.clear(); window.location.href = '/'; }
+    }
+
+    cargarReportes();
+</script>
+</body>
+</html>

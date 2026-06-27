@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface AvanceReporteRepository extends JpaRepository<AvanceReporte, Integer> {
     List<AvanceReporte> findByReporteIdOrderByFechaDesc(Integer reporteId);
+    List<AvanceReporte> findAllByOrderByFechaDesc();
 }
