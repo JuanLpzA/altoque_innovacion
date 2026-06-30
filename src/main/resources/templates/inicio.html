@@ -360,9 +360,19 @@
             </div>
         </div>
         <div class="header-actions">
-            <button class="icon-btn" aria-label="Notificaciones">
+            <a href="/notificaciones" class="icon-btn" aria-label="Notificaciones" style="position:relative; text-decoration:none;">
                 <i class="ti ti-bell"></i>
-            </button>
+                <span id="notif-badge" style="
+                    display:none;
+                    position:absolute; top:-2px; right:-2px;
+                    background:#ef4444; color:#fff;
+                    font-size:.62rem; font-weight:800;
+                    min-width:17px; height:17px; padding:0 3px;
+                    border-radius:99px;
+                    display:flex; align-items:center; justify-content:center;
+                    border:2px solid #1a3a8f;
+                "></span>
+            </a>
             <button class="icon-btn" aria-label="Cerrar sesión" onclick="ejecutarCerrarSesion()">
                 <i class="ti ti-power"></i>
             </button>
@@ -395,7 +405,7 @@
             <i class="ti ti-plus"></i>
         </div>
     </a>
-    <a href="#" class="accion-btn">
+    <a href="/mapa-reportes" class="accion-btn">
         <i class="ti ti-search a-icon"></i>
         <span class="a-label">Búsqueda</span>
     </a>
@@ -422,7 +432,7 @@
             <i class="ti ti-plus"></i>
         </div>
     </a>
-    <a href="#">
+    <a href="/perfil">
         <i class="ti ti-user"></i>
         <span>Perfil</span>
     </a>
@@ -500,57 +510,107 @@
         document.getElementById('stats-barra').style.width = pct + '%';
     }
 
+    // ── Fetch con timeout + reintento automático ──────────────────
+    async function fetchConReintento(url, opciones = {}, intentos = 2, timeoutMs = 8000) {
+        for (let intento = 1; intento <= intentos; intento++) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { ...opciones, signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return await res.json();
+            } catch (err) {
+                clearTimeout(timeoutId);
+                if (intento === intentos) throw err;
+                // pequeña espera antes de reintentar (backoff simple)
+                await new Promise(r => setTimeout(r, 600));
+            }
+        }
+    }
+
     function cargarReportesCercanos(lat, lng) {
-        fetch(`/api/reportes/cercanos?lat=${lat}&lng=${lng}`, {
-            headers: { 'Authorization': 'Bearer ' + token }
-        })
-        .then(r => r.json())
+        const cont = document.getElementById('lista-reportes');
+        cont.innerHTML = '<p class="empty">Cargando reportes cercanos...</p>';
+
+        fetchConReintento(
+            `/api/reportes/cercanos?lat=${lat}&lng=${lng}`,
+            { headers: { 'Authorization': 'Bearer ' + token } }
+        )
         .then(json => { renderReportes(json.data); })
         .catch(() => {
-            document.getElementById('lista-reportes').innerHTML =
-                '<p class="empty">No se pudieron cargar los reportes.</p>';
+            cont.innerHTML = `
+                <p class="empty">No se pudieron cargar los reportes.
+                <br><a href="#" onclick="cargarConUbicacion(); return false;" style="color:#1a3a8f;font-weight:700;">Reintentar</a></p>`;
         });
     }
 
-    // ── GEOLOCALIZACIÓN CON TIMEOUT DE SEGURIDAD ──────────────
-    let yaCargoUbicacion = false;
+    // ── GEOLOCALIZACIÓN ──────────────────────────────────────────
+    const COORD_DEFECTO = { lat: -6.7714, lng: -79.8409 };
 
-    function cargarConUbicacion() {
-        if (!navigator.geolocation) {
-            cargarReportesCercanos(-6.7714, -79.8409);
-            return;
-        }
-
-        // Si geolocation no responde en 4s, usa coordenadas por defecto
-        const timeout = setTimeout(() => {
-            if (!yaCargoUbicacion) {
-                yaCargoUbicacion = true;
-                cargarReportesCercanos(-6.7714, -79.8409);
-            }
-        }, 4000);
-
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                if (!yaCargoUbicacion) {
-                    yaCargoUbicacion = true;
-                    clearTimeout(timeout);
-                    cargarReportesCercanos(pos.coords.latitude, pos.coords.longitude);
-                }
-            },
-            () => {
-                if (!yaCargoUbicacion) {
-                    yaCargoUbicacion = true;
-                    clearTimeout(timeout);
-                    cargarReportesCercanos(-6.7714, -79.8409);
-                }
-            },
-            { timeout: 5000, maximumAge: 60000 }
-        );
+    function guardarUltimaUbicacion(lat, lng) {
+        try {
+            localStorage.setItem('ultima_ubicacion', JSON.stringify({ lat, lng, ts: Date.now() }));
+        } catch (e) { /* no crítico */ }
     }
 
-    cargarConUbicacion();
-    // ──────────────────────────────────────────────────────────
+    function obtenerUltimaUbicacionGuardada() {
+        try {
+            const raw = localStorage.getItem('ultima_ubicacion');
+            if (!raw) return null;
+            const datos = JSON.parse(raw);
+            if (Date.now() - datos.ts > 24 * 60 * 60 * 1000) return null; // máx 24h
+            return datos;
+        } catch (e) {
+            return null;
+        }
+    }
 
+    let ultimaCoordCargada = null;
+
+    function cargarSiCambioSignificativo(lat, lng) {
+        if (ultimaCoordCargada) {
+            const dLat = Math.abs(ultimaCoordCargada.lat - lat);
+            const dLng = Math.abs(ultimaCoordCargada.lng - lng);
+            if (dLat < 0.001 && dLng < 0.001) return; // diferencia menor a ~100m, no recargar
+        }
+        ultimaCoordCargada = { lat, lng };
+        guardarUltimaUbicacion(lat, lng);
+        cargarReportesCercanos(lat, lng);
+    }
+
+    function cargarConUbicacion() {
+        // ── Paso 0 (INSTANTÁNEO, 0ms de espera) ──
+        // Mostramos algo de inmediato con la última ubicación real conocida,
+        // o la coordenada por defecto si es la primera vez que se usa la app.
+        // Esto elimina por completo la espera percibida al entrar a la página.
+        const guardada = obtenerUltimaUbicacionGuardada();
+        const coordInicial = guardada || COORD_DEFECTO;
+        cargarSiCambioSignificativo(coordInicial.lat, coordInicial.lng);
+
+        if (!navigator.geolocation) return;
+
+        // ── Paso 1 (en paralelo, no bloquea nada) ──
+        // Intento rápido con posición en caché del dispositivo, por si es
+        // distinta a la que ya mostramos (ej. usuario cambió de lugar).
+        navigator.geolocation.getCurrentPosition(
+            pos => cargarSiCambioSignificativo(pos.coords.latitude, pos.coords.longitude),
+            () => { /* nada que hacer, ya mostramos algo en el paso 0 */ },
+            { timeout: 2000, maximumAge: Infinity, enableHighAccuracy: false }
+        );
+
+        // ── Paso 2 (en paralelo, no bloquea nada) ──
+        // Ubicación fresca y precisa con más margen de tiempo. Si llega y es
+        // distinta a lo ya mostrado, se corrige automáticamente.
+        navigator.geolocation.getCurrentPosition(
+            pos => cargarSiCambioSignificativo(pos.coords.latitude, pos.coords.longitude),
+            () => { /* nada que hacer */ },
+            { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
+        );
+    }
+    cargarConUbicacion();
+
+    // ── Buscador local ──────────────────────────────────────────
     document.getElementById('buscar-input').addEventListener('input', function () {
         const q = this.value.toLowerCase();
         document.querySelectorAll('.reporte-card').forEach(card => {
@@ -559,6 +619,7 @@
         });
     });
 
+    // ── Logout ─────────────────────────────────────────────────
     async function ejecutarCerrarSesion() {
         try {
             const t = localStorage.getItem('token');
@@ -575,6 +636,26 @@
             window.location.href = '/login';
         }
     }
+
+    // ── Badge de notificaciones no leídas ─────────────────────────
+    async function cargarBadgeNotificaciones() {
+        try {
+            const json = await fetchConReintento('/api/notificaciones/no-leidas-count', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const count = json.data || 0;
+            const badge = document.getElementById('notif-badge');
+            if (count > 0) {
+                badge.textContent = count > 9 ? '9+' : count;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch (e) {
+            // si falla, simplemente no mostramos badge; no es crítico
+        }
+    }
+    cargarBadgeNotificaciones();
 </script>
 </body>
 </html>

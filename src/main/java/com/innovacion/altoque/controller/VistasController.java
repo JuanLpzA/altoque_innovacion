@@ -28,6 +28,15 @@ public class VistasController {
     @GetMapping("/inicio")
     public String inicio() { return "inicio"; }
 
+    @GetMapping("/notificaciones")
+    public String notificaciones() { return "notificaciones"; }
+
+    @GetMapping("/mapa-reportes")
+    public String mapaReportes() { return "mapa-reportes"; }
+
+    @GetMapping("/perfil")
+    public String perfil() { return "perfil"; }
+
     @GetMapping("/nuevo-reporte")
     public String nuevoReporte() { return "nuevo-reporte"; }
 
@@ -40,7 +49,6 @@ public class VistasController {
     @GetMapping("/reporte-detalle")
     public String reporteDetalle() { return "reporte-detalle"; }
 
-    // Pública: establecer contraseña por primera vez o resetear (vía token por correo)
     @GetMapping("/establecer-contrasena")
     public String establecerContrasena() { return "establecer-contrasena"; }
 

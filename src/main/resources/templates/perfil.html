@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Altoque – Mi perfil</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            min-height: 100dvh;
+            padding-bottom: 80px;
+            max-width: 480px;
+            margin: 0 auto;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #1a3a8f 0,
+                    #1a3a8f 240px,
+                    #f0f5fb 240px,
+                    #f0f5fb 100%
+                );
+        }
+        /* ── HEADER ── */
+        .header {
+            background: #1a3a8f;
+            padding: 1.1rem 1.2rem 3.2rem;
+            position: relative;
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header-left { display: flex; align-items: center; gap: .75rem; }
+        .avatar-circle {
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.2);
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .avatar-circle i { color: #fff; font-size: 1.35rem; }
+        .header-name { font-size: 1.25rem; font-weight: 800; color: #fff; letter-spacing: -.01em; line-height: 1.1; }
+        .header-sub { font-size: .72rem; color: rgba(255,255,255,.7); margin-top: 1px; }
+        .icon-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,.35);
+            background: transparent;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            color: #fff;
+            font-size: 1.05rem;
+            text-decoration: none;
+            position: relative;
+        }
+        /* ── TARJETA PERFIL ── */
+        .perfil-card {
+            background: #fff;
+            border-radius: 18px;
+            margin: 0 1rem;
+            margin-top: -2.2rem;
+            padding: 1.6rem 1.3rem 1.5rem;
+            box-shadow: 0 6px 24px rgba(26,58,143,.13);
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+        .avatar-grande {
+            width: 84px; height: 84px;
+            border-radius: 50%;
+            background: #eef3fd;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: .9rem;
+        }
+        .avatar-grande i { color: #1a3a8f; font-size: 2.4rem; }
+        .perfil-nombre {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1.25;
+        }
+        .perfil-dni {
+            font-size: .8rem;
+            color: #6b7280;
+            margin-top: .3rem;
+            display: flex;
+            align-items: center;
+            gap: .35rem;
+        }
+        .perfil-dni i { font-size: .9rem; color: #9ca3af; }
+        /* ── STATS CARD ── */
+        .stats-card {
+            background: #fff;
+            border-radius: 18px;
+            margin: 1rem 1rem 0;
+            padding: 1.1rem 1.3rem 1.2rem;
+            box-shadow: 0 2px 14px rgba(0,0,0,.06);
+        }
+        .stats-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .stats-icon-box {
+            width: 46px; height: 46px;
+            border-radius: 12px;
+            background: #e8f0fe;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .stats-icon-box i { color: #1a3a8f; font-size: 1.4rem; }
+        .stats-num { font-size: 1.7rem; font-weight: 900; color: #1a3a8f; line-height: 1; }
+        .stats-label { font-size: .72rem; color: #6b7280; font-weight: 600; margin-top: .15rem; }
+        .impacto-divider { width: 1px; background: #e5e7eb; align-self: stretch; margin: 0 .3rem; }
+        .impacto-wrap { flex: 1; text-align: center; }
+        .impacto-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .3rem;
+            font-size: .72rem;
+            font-weight: 800;
+            padding: .35rem .8rem;
+            border-radius: 99px;
+            text-transform: uppercase;
+            letter-spacing: .03em;
+        }
+        .impacto-bajo  { background: #f0fdf4; color: #15803d; }
+        .impacto-medio { background: #fffbeb; color: #b45309; }
+        .impacto-alto  { background: #fef2f2; color: #b91c1c; }
+        .impacto-label { font-size: .68rem; color: #9ca3af; font-weight: 600; margin-top: .4rem; }
+        /* ── ACCIONES ── */
+        .acciones-perfil { padding: 1rem; display: flex; flex-direction: column; gap: .75rem; }
+        .accion-row {
+            background: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 1rem 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: .85rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,.05);
+            cursor: pointer;
+            text-decoration: none;
+            width: 100%;
+        }
+        .accion-row .ar-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .accion-row .ar-icon i { font-size: 1.2rem; }
+        .ar-icon.azul  { background: #e8f0fe; }
+        .ar-icon.azul i { color: #1a3a8f; }
+        .ar-icon.rojo  { background: #fef2f2; }
+        .ar-icon.rojo i { color: #b91c1c; }
+        .accion-row .ar-label {
+            font-size: .88rem;
+            font-weight: 700;
+            color: #1e293b;
+            flex: 1;
+            text-align: left;
+        }
+        .accion-row.salir .ar-label { color: #b91c1c; }
+        .accion-row i.ti-chevron-right { color: #d1d5db; font-size: 1.1rem; }
+        /* ── NAV INFERIOR ── */
+        nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            max-width: 480px;
+            margin: 0 auto;
+            background: #fff;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: .45rem 0 .75rem;
+            z-index: 10;
+        }
+        nav a {
+            display: flex; flex-direction: column; align-items: center; gap: .1rem;
+            font-size: .62rem; font-weight: 600; color: #9ca3af; text-decoration: none;
+        }
+        nav a.activo { color: #1a3a8f; }
+        nav a i { font-size: 1.35rem; }
+        .nav-center {
+            background: #1a3a8f;
+            width: 54px; height: 54px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin-top: -22px;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 16px rgba(26,58,143,.35);
+            text-decoration: none;
+        }
+        .nav-center i { color: #fff; font-size: 1.5rem; }
+        /* ── ESTADOS DE CARGA ── */
+        .skeleton {
+            background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+            background-size: 200% 100%;
+            animation: skeleton-anim 1.3s infinite;
+            border-radius: 6px;
+            color: transparent !important;
+            display: inline-block;
+        }
+        @keyframes skeleton-anim {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+<!-- ── HEADER ── -->
+<div class="header">
+    <div class="header-top">
+        <div class="header-left">
+            <div class="avatar-circle"><i class="ti ti-user"></i></div>
+            <div>
+                <div class="header-name">Mi perfil</div>
+                <div class="header-sub">Información de tu cuenta</div>
+            </div>
+        </div>
+        <button class="icon-btn" aria-label="Cerrar sesión" onclick="ejecutarCerrarSesion()">
+            <i class="ti ti-power"></i>
+        </button>
+    </div>
+</div>
+
+<!-- ── TARJETA PERFIL ── -->
+<div class="perfil-card">
+    <div class="avatar-grande"><i class="ti ti-user"></i></div>
+    <div class="perfil-nombre" id="perfil-nombre"><span class="skeleton">Cargando nombre</span></div>
+    <div class="perfil-dni">
+        <i class="ti ti-id"></i>
+        <span id="perfil-dni"><span class="skeleton">00000000</span></span>
+    </div>
+</div>
+
+<!-- ── STATS + IMPACTO ── -->
+<div class="stats-card">
+    <div class="stats-row">
+        <div class="stats-icon-box"><i class="ti ti-clipboard-list"></i></div>
+        <div>
+            <div class="stats-num" id="stats-total"><span class="skeleton">00</span></div>
+            <div class="stats-label">Reportes enviados</div>
+        </div>
+        <div class="impacto-divider"></div>
+        <div class="impacto-wrap">
+            <span class="impacto-badge impacto-bajo" id="impacto-badge">—</span>
+            <div class="impacto-label">Nivel de impacto</div>
+        </div>
+    </div>
+</div>
+
+<!-- ── ACCIONES ── -->
+<div class="acciones-perfil">
+    <a href="/mis-reportes" class="accion-row">
+        <div class="ar-icon azul"><i class="ti ti-clipboard-list"></i></div>
+        <span class="ar-label">Mis Reportes</span>
+        <i class="ti ti-chevron-right"></i>
+    </a>
+    <button class="accion-row salir" onclick="ejecutarCerrarSesion()">
+        <div class="ar-icon rojo"><i class="ti ti-logout"></i></div>
+        <span class="ar-label">Cerrar sesión</span>
+        <i class="ti ti-chevron-right"></i>
+    </button>
+</div>
+
+<!-- ── NAV INFERIOR ── -->
+<nav>
+    <a href="/inicio">
+        <i class="ti ti-home"></i>
+        <span>Inicio</span>
+    </a>
+    <a href="/nuevo-reporte">
+        <div class="nav-center">
+            <i class="ti ti-plus"></i>
+        </div>
+    </a>
+    <a href="/perfil" class="activo">
+        <i class="ti ti-user"></i>
+        <span>Perfil</span>
+    </a>
+</nav>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login'; }
+
+    async function fetchConReintento(url, opciones = {}, intentos = 2, timeoutMs = 8000) {
+        for (let intento = 1; intento <= intentos; intento++) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { ...opciones, signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return await res.json();
+            } catch (err) {
+                clearTimeout(timeoutId);
+                if (intento === intentos) throw err;
+                await new Promise(r => setTimeout(r, 600));
+            }
+        }
+    }
+
+    function calcularImpacto(total) {
+        if (total > 10) return { texto: 'Alto', clase: 'impacto-alto' };
+        if (total > 5)  return { texto: 'Medio', clase: 'impacto-medio' };
+        return { texto: 'Bajo', clase: 'impacto-bajo' };
+    }
+
+    function renderPerfil(data) {
+        document.getElementById('perfil-nombre').textContent =
+            `${data.nombre || ''} ${data.apellido || ''}`.trim();
+        document.getElementById('perfil-dni').textContent = data.dni || 'Sin DNI registrado';
+
+        const total = data.totalReportes || 0;
+        document.getElementById('stats-total').textContent = total;
+
+        const impacto = calcularImpacto(total);
+        const badge = document.getElementById('impacto-badge');
+        badge.textContent = impacto.texto;
+        badge.className = 'impacto-badge ' + impacto.clase;
+    }
+
+    // Mostramos algo de inmediato con lo que ya está en localStorage
+    // (sin esperar al fetch), y luego se corrige/completa con la data real.
+    function renderPerfilInicial() {
+        const nombre = localStorage.getItem('nombre') || '';
+        const apellido = localStorage.getItem('apellido') || '';
+        if (nombre || apellido) {
+            document.getElementById('perfil-nombre').textContent = `${nombre} ${apellido}`.trim();
+        }
+    }
+    renderPerfilInicial();
+
+    async function cargarPerfil() {
+        try {
+            const json = await fetchConReintento('/api/usuarios/me', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            renderPerfil(json.data);
+        } catch (e) {
+            document.getElementById('perfil-nombre').textContent =
+                localStorage.getItem('nombre') ? `${localStorage.getItem('nombre')} ${localStorage.getItem('apellido') || ''}` : 'No se pudo cargar';
+            document.getElementById('perfil-dni').textContent = '—';
+            document.getElementById('stats-total').textContent = '—';
+            document.getElementById('impacto-badge').textContent = '—';
+        }
+    }
+    cargarPerfil();
+
+    async function ejecutarCerrarSesion() {
+        try {
+            const t = localStorage.getItem('token');
+            if (t) {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + t }
+                });
+            }
+        } catch (e) {
+            console.error("Error al revocar el token:", e);
+        } finally {
+            localStorage.clear();
+            window.location.href = '/login';
+        }
+    }
+</script>
+</body>
+</html>
