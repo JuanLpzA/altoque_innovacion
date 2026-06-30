@@ -28,17 +28,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
-
         String header = request.getHeader("Authorization");
-
         if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
             if (jwtUtil.esValido(token)) {
-                String dni = jwtUtil.extraerDni(token);
-                String rol  = jwtUtil.extraerRol(token);
-
-                Usuario usuario = usuarioRepository.findByDni(dni).orElse(null);
-                if (usuario != null && usuario.getActivo()) {
+                Integer idUsuario = jwtUtil.extraerIdUsuario(token);
+                String rol = jwtUtil.extraerRol(token);
+                Usuario usuario = usuarioRepository.findById(idUsuario).orElse(null);
+                if (usuario != null && Boolean.TRUE.equals(usuario.getActivo())) {
+                    // El rol que va en la autoridad de Spring Security es el que viene en el token,
+                    // así se respeta el rol vigente al momento del login (admin u operador).
                     var auth = new UsernamePasswordAuthenticationToken(
                             usuario, null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + rol.toUpperCase()))

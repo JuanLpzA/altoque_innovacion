@@ -24,11 +24,11 @@ public class AuthController {
 
     @PostMapping("/registro")
     public ResponseEntity<ApiResponse<String>> registro(@Valid @RequestBody RegistroRequest req) {
-        try{
-        usuarioService.registrar(req);
-        return ResponseEntity.ok(ApiResponse.ok("Registro exitoso", null));
+        try {
+            usuarioService.registrar(req);
+            return ResponseEntity.ok(ApiResponse.ok("Registro exitoso", null));
         } catch (IllegalArgumentException e) {
-        return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
 
@@ -40,12 +40,13 @@ public class AuthController {
             return ResponseEntity.status(403)
                     .body(ApiResponse.error("Cuenta desactivada"));
         }
-        if (!passwordEncoder.matches(req.getContrasena(), usuario.getContrasena())) {
+        if (usuario.getContrasena() == null ||
+                !passwordEncoder.matches(req.getContrasena(), usuario.getContrasena())) {
             return ResponseEntity.status(401)
                     .body(ApiResponse.error("DNI o contraseña incorrectos"));
         }
 
-        String token = jwtUtil.generarToken(usuario.getDni(), usuario.getRol().getNombre());
+        String token = jwtUtil.generarToken(usuario.getId(), usuario.getRol().getNombre());
         JwtResponse jwt = new JwtResponse(
                 token,
                 usuario.getNombre(),
@@ -54,9 +55,10 @@ public class AuthController {
         );
         return ResponseEntity.ok(ApiResponse.ok("Sesión iniciada", jwt));
     }
+
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<String>> logout(jakarta.servlet.http.HttpServletRequest request,
-                                    jakarta.servlet.http.HttpServletResponse response) {
+                                                      jakarta.servlet.http.HttpServletResponse response) {
 
         org.springframework.security.core.Authentication auth =
                 org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();

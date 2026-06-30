@@ -4,9 +4,7 @@ import com.innovacion.altoque.model.MiniReporte;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import org.springframework.data.domain.Pageable;
-
 import java.util.List;
 
 public interface MiniReporteRepository extends JpaRepository<MiniReporte, Integer> {
@@ -34,4 +32,6 @@ public interface MiniReporteRepository extends JpaRepository<MiniReporte, Intege
                 ORDER BY m.fechaCreacion DESC
             """)
     List<MiniReporte> findNoAgrupadosRecientes(Pageable pageable);
+
+    long countByUsuarioId(Integer usuarioId);
 }

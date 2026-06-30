@@ -325,29 +325,7 @@
 <body>
 
 <!-- SIDEBAR -->
-<div class="sidebar">
-    <div class="sidebar-brand">AL<span>Toque</span></div>
-    <div class="sidebar-section">Principal</div>
-    <nav class="sidebar-nav">
-        <a href="/admin/dashboard" class="active"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
-        <a href="/admin/reportes"><i class="ti ti-clipboard-list"></i> Reportes</a>
-        <a href="/admin/mapa"><i class="ti ti-map-pin"></i> Mapa de incidencias</a>
-        <a href="/admin/evidencias"><i class="ti ti-photo"></i> Evidencias</a>
-        <a href="/admin/moderacion"><i class="ti ti-shield-check"></i> Centro de moderación</a>
-    </nav>
-    <div class="sidebar-footer">
-        <div class="sidebar-user">
-            <div class="avatar-sm"><i class="ti ti-building-community"></i></div>
-            <div class="user-info">
-                <div class="user-name" id="sb-nombre">—</div>
-                <div class="user-role">Municipalidad</div>
-            </div>
-            <button class="btn-logout" onclick="cerrarSesion()" title="Cerrar sesión">
-                <i class="ti ti-power"></i>
-            </button>
-        </div>
-    </div>
-</div>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('dashboard')}"></div>
 
 <!-- MAIN -->
 <div class="main">
@@ -438,17 +416,15 @@
     </div>
 </div>
 
+<script src="/js/admin-guard.js?1"></script>
+
 <script>
     // ── Guard ──────────────────────────────────────────────────────
-    (function () {
-      const token = localStorage.getItem('token');
-      const rol   = localStorage.getItem('rol');
-      if (!token || rol !== 'municipalidad') window.location.href = '/';
-    })();
 
-    const TOKEN = localStorage.getItem('token');
-    document.getElementById('sb-nombre').textContent =
-      (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+
+    const TOKEN = window.ADMIN_TOKEN;
+
+
     document.getElementById('topbar-fecha').textContent =
       new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -670,19 +646,9 @@
       }
     }
 
-    async function cerrarSesion() {
-      try {
-        await fetch('/api/auth/logout', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + TOKEN }
-        });
-      } finally {
-        localStorage.clear();
-        window.location.href = '/';
-      }
-    }
 
     cargarDashboard();
+
 </script>
 </body>
 </html>

@@ -179,27 +179,9 @@
     </style>
 </head>
 <body>
-<div class="sidebar">
-    <div class="sidebar-brand">AL<span>Toque</span></div>
-    <div class="sidebar-section">Principal</div>
-    <nav class="sidebar-nav">
-        <a href="/admin/dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</a>
-        <a href="/admin/reportes" class="active"><i class="ti ti-clipboard-list"></i> Reportes</a>
-        <a href="/admin/mapa"><i class="ti ti-map-pin"></i> Mapa de incidencias</a>
-        <a href="/admin/evidencias"><i class="ti ti-photo"></i> Evidencias</a>
-        <a href="/admin/moderacion"><i class="ti ti-shield-check"></i> Centro de moderación</a>
-    </nav>
-    <div class="sidebar-footer">
-        <div class="sidebar-user">
-            <div class="avatar-sm"><i class="ti ti-building-community"></i></div>
-            <div class="user-info">
-                <div class="user-name" id="sb-nombre">—</div>
-                <div class="user-role">Municipalidad</div>
-            </div>
-            <button class="btn-logout" onclick="cerrarSesion()"><i class="ti ti-power"></i></button>
-        </div>
-    </div>
-</div>
+<div th:replace="~{admin/fragments/sidebar :: sidebar('reportes')}"></div>
+
+
 <div class="main">
     <div class="topbar">
         <a href="/admin/reportes" class="btn-back"><i class="ti ti-arrow-left"></i> Reportes</a>
@@ -393,16 +375,13 @@
     </div>
 </div>
 <div class="toast" id="toast"></div>
+
+<script src="/js/admin-guard.js"></script>
 <script>
-    (function () {
-      if (!localStorage.getItem('token') || localStorage.getItem('rol') !== 'municipalidad')
-        window.location.href = '/';
-    })();
-    const TOKEN      = localStorage.getItem('token');
+    const TOKEN = window.ADMIN_TOKEN;
     const params     = new URLSearchParams(location.search);
     const REPORTE_ID = params.get('id');
-    document.getElementById('sb-nombre').textContent =
-      (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+
     if (!REPORTE_ID) window.location.href = '/admin/reportes';
     let reporteActual    = null;
     let miniReportesData  = [];
@@ -758,11 +737,10 @@
         mousedownEnOverlay = false;
       });
     });
-    async function cerrarSesion() {
-      try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }); }
-      finally { localStorage.clear(); window.location.href = '/'; }
-    }
+
     cargar();
+
+
 </script>
 </body>
 </html>

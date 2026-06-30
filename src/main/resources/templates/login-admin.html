@@ -335,9 +335,7 @@
   }
 
   // ── Login ────────────────────────────────────────────────────────────────────
-  const token = localStorage.getItem('token');
-  const rol   = localStorage.getItem('rol');
-  if (token && rol === 'municipalidad') window.location.href = '/admin/dashboard';
+
 
   async function iniciarSesion() {
     const email    = document.getElementById('email').value.trim();

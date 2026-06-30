@@ -40,6 +40,10 @@ public class VistasController {
     @GetMapping("/reporte-detalle")
     public String reporteDetalle() { return "reporte-detalle"; }
 
+    // Pública: establecer contraseña por primera vez o resetear (vía token por correo)
+    @GetMapping("/establecer-contrasena")
+    public String establecerContrasena() { return "establecer-contrasena"; }
+
     // Vistas admin
     @GetMapping("/admin/login")
     public String adminLogin() { return "login-admin"; }
@@ -61,4 +65,7 @@ public class VistasController {
 
     @GetMapping("/admin/evidencias")
     public String adminEvidencias() { return "admin/evidencias"; }
+
+    @GetMapping("/admin/usuarios")
+    public String adminUsuarios() { return "admin/usuarios"; }
 }

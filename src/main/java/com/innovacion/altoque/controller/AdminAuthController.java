@@ -12,10 +12,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
+
 @RestController
 @RequestMapping("/api/admin/auth")
 @RequiredArgsConstructor
 public class AdminAuthController {
+
+    private static final Set<String> ROLES_MUNICIPALES =
+            Set.of("municipalidad_admin", "municipalidad_operador");
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
@@ -26,14 +31,19 @@ public class AdminAuthController {
         Usuario usuario = usuarioRepository.findByEmail(req.getEmail())
                 .orElse(null);
 
-        if (usuario == null || !usuario.getActivo()) {
+        if (usuario == null || !Boolean.TRUE.equals(usuario.getActivo())) {
             return ResponseEntity.status(401)
                     .body(ApiResponse.error("Credenciales incorrectas"));
         }
 
-        if (!"municipalidad".equalsIgnoreCase(usuario.getRol().getNombre())) {
+        if (!ROLES_MUNICIPALES.contains(usuario.getRol().getNombre().toLowerCase())) {
             return ResponseEntity.status(403)
                     .body(ApiResponse.error("Sin acceso al panel municipal"));
+        }
+
+        if (usuario.getContrasena() == null) {
+            return ResponseEntity.status(403)
+                    .body(ApiResponse.error("Esta cuenta aún no ha sido activada. Revisa tu correo para establecer tu contraseña."));
         }
 
         if (!passwordEncoder.matches(req.getContrasena(), usuario.getContrasena())) {
@@ -41,7 +51,7 @@ public class AdminAuthController {
                     .body(ApiResponse.error("Credenciales incorrectas"));
         }
 
-        String token = jwtUtil.generarToken(usuario.getDni(), usuario.getRol().getNombre());
+        String token = jwtUtil.generarToken(usuario.getId(), usuario.getRol().getNombre());
         JwtResponse jwt = new JwtResponse(token, usuario.getNombre(),
                 usuario.getApellido(), usuario.getRol().getNombre());
         return ResponseEntity.ok(ApiResponse.ok("Sesión iniciada", jwt));
