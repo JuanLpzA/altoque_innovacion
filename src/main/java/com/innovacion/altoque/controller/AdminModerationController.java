@@ -21,6 +21,11 @@ public class AdminModerationController {
         return ResponseEntity.ok(ApiResponse.ok("OK", adminService.listarMiniReportesPendientes(50)));
     }
 
+    @GetMapping("/mini-reportes/{id}")
+    public ResponseEntity<ApiResponse<AdminMiniReporteItem>> detalle(@PathVariable Integer id) {
+        return ResponseEntity.ok(ApiResponse.ok("OK", adminService.obtenerMiniReportePorId(id)));
+    }
+
     @DeleteMapping("/mini-reportes/{id}")
     public ResponseEntity<ApiResponse<String>> cancelar(@PathVariable Integer id) {
         adminService.cancelarMiniReporte(id);

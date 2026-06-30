@@ -45,8 +45,6 @@ public class UsuarioService {
         Usuario usuarioExistente = usuarioRepository.findByDni(req.getDni())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        usuarioExistente.setNombre(req.getNombre());
-        usuarioExistente.setApellido(req.getApellido());
         usuarioExistente.setTelefono(req.getTelefono());
         usuarioExistente.setContrasena(passwordEncoder.encode(req.getContrasena()));
 

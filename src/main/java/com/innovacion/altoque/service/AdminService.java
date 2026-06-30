@@ -5,10 +5,10 @@ import com.innovacion.altoque.model.*;
 import com.innovacion.altoque.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -35,7 +35,7 @@ public class AdminService {
         long pendientes = 0, enProceso = 0, resueltos = 0;
         for (Reporte r : delMes) {
             String e = r.getEstado().getNombre().toLowerCase();
-            if (e.contains("pendiente"))  pendientes++;
+            if (e.contains("pendiente")) pendientes++;
             else if (e.contains("proceso")) enProceso++;
             else if (e.contains("resuelto")) resueltos++;
         }
@@ -72,7 +72,6 @@ public class AdminService {
         return stats;
     }
 
-
     public List<AdminReporteListItem> listarReportes() {
         return reporteRepository.findAllByOrderByFechaCreacionDesc()
                 .stream().map(this::toListItem).collect(Collectors.toList());
@@ -80,7 +79,6 @@ public class AdminService {
 
     private AdminReporteListItem toListItem(Reporte r) {
         List<ReporteMiniReporte> rels = reporteMiniReporteRepository.findByReporteId(r.getId());
-
         String foto = rels.stream()
                 .map(rel -> rel.getMiniReporte().getUrlFoto())
                 .filter(u -> u != null && !u.isBlank())
@@ -113,30 +111,33 @@ public class AdminService {
     }
 
     @Transactional
-    public void cambiarEstado(Integer reporteId, String nuevoEstado,
-                              String comentario, Integer porcentaje, Usuario admin) {
+    public void rechazarReporte(Integer reporteId, List<String> motivos, String observacion, Usuario admin) {
         Reporte reporte = reporteRepository.findById(reporteId)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
-        EstadoReporte estado = estadoReporteRepository.findByNombreIgnoreCase(nuevoEstado)
-                .orElseThrow(() -> new RuntimeException("Estado no válido: " + nuevoEstado));
 
-        reporte.setEstado(estado);
-        if (porcentaje != null) {
-            reporte.setPorcentajeAvance(porcentaje.shortValue());
+        String estadoActual = reporte.getEstado().getNombre().toLowerCase();
+        if (estadoActual.contains("resuelto") || estadoActual.contains("rechazado")) {
+            throw new RuntimeException("No se puede rechazar un reporte que ya está " + estadoActual);
         }
+
+        EstadoReporte estadoRechazado = estadoReporteRepository.findByNombreIgnoreCase("rechazado")
+                .orElseThrow(() -> new RuntimeException("Estado 'rechazado' no configurado"));
+
+        reporte.setEstado(estadoRechazado);
         reporte.setFechaActualizacion(LocalDateTime.now());
         reporteRepository.save(reporte);
 
-        // Historial
+        String motivosTexto = String.join("; ", motivos);
+        String comentarioCompleto = "Motivos: " + motivosTexto + " | Observación: " + observacion;
+
         HistorialEstado historial = new HistorialEstado();
         historial.setReporte(reporte);
-        historial.setEstado(estado);
+        historial.setEstado(estadoRechazado);
         historial.setUsuario(admin);
-        historial.setComentario(comentario);
+        historial.setComentario(comentarioCompleto);
         historialEstadoRepository.save(historial);
 
-        // Notificar
-        String msg = "Tu reporte \"" + reporte.getTitulo() + "\" cambió a estado: " + nuevoEstado;
+        String msg = "Tu reporte \"" + reporte.getTitulo() + "\" fue rechazado. Motivo: " + observacion;
         reporteMiniReporteRepository.findByReporteId(reporteId).forEach(rel -> {
             Notificacion noti = new Notificacion();
             noti.setUsuario(rel.getMiniReporte().getUsuario());
@@ -145,7 +146,6 @@ public class AdminService {
             notificacionRepository.save(noti);
         });
     }
-
 
     public List<AdminMiniReporteItem> listarMiniReportes() {
         return miniReporteRepository.findAllByOrderByFechaCreacionDesc()
@@ -158,6 +158,12 @@ public class AdminService {
                 .stream().map(this::toMiniItem).collect(Collectors.toList());
     }
 
+    public AdminMiniReporteItem obtenerMiniReportePorId(Integer id) {
+        MiniReporte m = miniReporteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mini reporte no encontrado"));
+        return toMiniItem(m);
+    }
+
     @Transactional
     public void cancelarMiniReporte(Integer miniReporteId) {
         MiniReporte mr = miniReporteRepository.findById(miniReporteId)
@@ -166,8 +172,85 @@ public class AdminService {
         miniReporteRepository.save(mr);
     }
 
-    public List<AvanceReporte> listarEvidencias() {
-        return avanceReporteRepository.findAllByOrderByFechaDesc();
+    public List<AdminAvanceItem> listarEvidencias() {
+        return avanceReporteRepository.findAllByOrderByFechaDesc()
+                .stream().map(this::toAvanceItem).collect(Collectors.toList());
+    }
+
+    private AdminAvanceItem toAvanceItem(AvanceReporte a) {
+        Reporte r = a.getReporte();
+        AdminAvanceItem item = new AdminAvanceItem();
+        item.setId(a.getId());
+        item.setReporteId(r.getId());
+        item.setReporteTitulo(r.getTitulo());
+        item.setCategoria(r.getCategoria().getNombre());
+        item.setNivelRiesgo(r.getNivelRiesgo().getNombre());
+        item.setEstadoReporte(r.getEstado().getNombre());
+        item.setZonaReferencia(r.getZonaReferencia());
+        item.setComentario(a.getComentario());
+        item.setUrlFoto(a.getUrlFoto());
+        item.setPorcentaje(a.getPorcentaje() == null ? 0 : a.getPorcentaje());
+        item.setNombreUsuario(a.getUsuario().getNombre() + " " + a.getUsuario().getApellido());
+        item.setFecha(a.getFecha());
+        return item;
+    }
+
+
+    public AdminEvidenciaResumen obtenerResumenAvances() {
+        final int UMBRAL_DIAS_ATRASO = 5;
+
+        List<Reporte> activos = reporteRepository.findAllByOrderByFechaCreacionDesc().stream()
+                .filter(r -> {
+                    String e = r.getEstado().getNombre().toLowerCase();
+                    return e.contains("pendiente") || e.contains("proceso");
+                })
+                .collect(Collectors.toList());
+
+        List<AvanceReporte> todosAvances = avanceReporteRepository.findAllByOrderByFechaDesc();
+
+        Map<Integer, LocalDateTime> ultimoAvancePorReporte = new HashMap<>();
+        for (AvanceReporte a : todosAvances) {
+            ultimoAvancePorReporte.merge(
+                    a.getReporte().getId(), a.getFecha(),
+                    (f1, f2) -> f1.isAfter(f2) ? f1 : f2);
+        }
+
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime haceUnaSemana = ahora.minusDays(7);
+        long avancesUltimos7Dias = todosAvances.stream()
+                .filter(a -> a.getFecha().isAfter(haceUnaSemana))
+                .count();
+
+        List<AdminEvidenciaResumen.ReporteAtrasadoItem> atrasados = new ArrayList<>();
+        for (Reporte r : activos) {
+            LocalDateTime referencia = ultimoAvancePorReporte.getOrDefault(r.getId(), r.getFechaCreacion());
+            long dias = Duration.between(referencia, ahora).toDays();
+            if (dias >= UMBRAL_DIAS_ATRASO) {
+                AdminEvidenciaResumen.ReporteAtrasadoItem item = new AdminEvidenciaResumen.ReporteAtrasadoItem();
+                item.setReporteId(r.getId());
+                item.setTitulo(r.getTitulo());
+                item.setCategoria(r.getCategoria().getNombre());
+                item.setNivelRiesgo(r.getNivelRiesgo().getNombre());
+                item.setEstado(r.getEstado().getNombre());
+                item.setPorcentajeAvance(r.getPorcentajeAvance() == null ? 0 : r.getPorcentajeAvance());
+                item.setDiasSinAvance(dias);
+                item.setZonaReferencia(r.getZonaReferencia());
+                atrasados.add(item);
+            }
+        }
+        atrasados.sort((a, b) -> Long.compare(b.getDiasSinAvance(), a.getDiasSinAvance()));
+
+        double promedio = activos.isEmpty() ? 0 : activos.stream()
+                .mapToInt(r -> r.getPorcentajeAvance() == null ? 0 : r.getPorcentajeAvance())
+                .average().orElse(0);
+
+        AdminEvidenciaResumen resumen = new AdminEvidenciaResumen();
+        resumen.setTotalAvances(todosAvances.size());
+        resumen.setAvancesUltimos7Dias(avancesUltimos7Dias);
+        resumen.setTotalReportesActivos(activos.size());
+        resumen.setPromedioPorcentajeActivos(Math.round(promedio));
+        resumen.setReportesAtrasados(atrasados);
+        return resumen;
     }
 
     private AdminMiniReporteItem toMiniItem(MiniReporte m) {

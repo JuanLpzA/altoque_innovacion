@@ -344,6 +344,15 @@
         <p style="font-size:.8rem;color:#15803d;font-weight:600;">✅ Identidad verificada correctamente</p>
         <p style="font-size:.75rem;color:#166534;margin-top:2px;" id="lblNombreVerificado"></p>
       </div>
+
+      <div class="field">
+        <div class="field-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          Tu número de Teléfono / Celular
+        </div>
+        <input class="field-input" type="text" id="nuevoTelefono" maxlength="9" placeholder="987654321" inputmode="numeric">
+      </div>
+
       <div class="field">
         <div class="field-label">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -359,7 +368,7 @@
         <input class="field-input" type="password" id="repPass" maxlength="6" placeholder="••••••" inputmode="numeric">
       </div>
       <button class="btn-success" id="btnGuardar" onclick="guardarNuevaContrasena()">
-        Restablecer contraseña
+        Restablecer contraseña y actualizar datos
       </button>
       <div class="link-row" style="margin-top:.9rem;"><a href="/login">← Volver al inicio de sesión</a></div>
     </div>
@@ -487,63 +496,111 @@
       detenerCamara();
       irAPaso(1);
   }
+async function capturarYVerificar() {
+    if (!stream) {
+        mostrarModal('📷', 'Cámara no disponible', 'La cámara no está activa. Recarga la página e inténtalo de nuevo.', 'primary');
+        return;
+    }
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const btnCap = document.getElementById('btnCapturar');
+    const statusEl = document.getElementById('scannerStatus');
 
-  async function capturarYVerificar() {
-      if (!stream) {
-          mostrarModal('📷', 'Cámara no disponible', 'La cámara no está activa. Recarga la página e inténtalo de nuevo.', 'primary');
-          return;
-      }
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      const btnCap = document.getElementById('btnCapturar');
-      const statusEl = document.getElementById('scannerStatus');
+    btnCap.disabled = true;
+    statusEl.textContent = '⏳ Optimizando y enviando captura...';
 
-      canvas.width  = video.videoWidth;
-      canvas.height = video.videoHeight;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // 1. Definir una resolución máxima optimizada para OCR rápido (reduce drásticamente los KB de red)
+    const MAX_ANCHO_OCR = 1000;
+    let anchoDestino = video.videoWidth;
+    let altoDestino = video.videoHeight;
 
-      btnCap.disabled = true;
-      statusEl.textContent = '⏳ Analizando imagen en el servidor...';
+    if (anchoDestino > MAX_ANCHO_OCR) {
+        const escala = MAX_ANCHO_OCR / video.videoWidth;
+        anchoDestino = MAX_ANCHO_OCR;
+        altoDestino = video.videoHeight * escala;
+    }
 
-      canvas.toBlob(async function(blob) {
-          /* Verificamos que es un blob real de cámara (no galería).
-             El blob proviene directamente del videoFrame, no de un input[type=file]. */
-          const formData = new FormData();
-          formData.append('fotoDni', blob, 'captura_dni.jpg');
-          formData.append('dniIngresado', dniVerificado);
-          try {
-              const res  = await fetch('/api/auth/validar-ocr-servidor', { method: 'POST', body: formData });
-              const json = await res.json();
-              if (json.ok) {
-                  detenerCamara();
-                  datosUsuario = json.data;
-                  /* Mostrar nombre en el paso 3 */
-                  const nombreCompleto = (datosUsuario?.nombre || '') + ' ' + (datosUsuario?.apellido || '');
-                  document.getElementById('lblNombreVerificado').textContent =
-                      nombreCompleto.trim() ? 'Titular: ' + nombreCompleto.trim() : '';
-                  mostrarModal('✅', '¡Identidad verificada!', 'Tu DNI fue reconocido correctamente. Ahora puedes establecer una nueva contraseña.', 'success', function() {
-                      irAPaso(3);
-                  });
-              } else {
-                  statusEl.textContent = 'No se detectó el DNI. Intenta de nuevo.';
-                  mostrarModal('🔍', 'DNI no detectado', json.mensaje || 'No se pudo leer el número de DNI en la imagen. Asegúrate de que el número sea visible y bien enfocado dentro del recuadro verde.', 'primary');
-                  btnCap.disabled = false;
-              }
-          } catch (err) {
-              console.error(err);
-              statusEl.textContent = 'Error de conexión.';
-              mostrarModal('📡', 'Error de conexión', 'No se pudo comunicar con el servidor. Verifica tu conexión e intenta de nuevo.', 'primary');
-              btnCap.disabled = false;
-          }
-      }, 'image/jpeg', 0.92);
-  }
+    // 2. Ajustar el tamaño del lienzo oculto
+    canvas.width = anchoDestino;
+    canvas.height = altoDestino;
+
+    // 3. Simular el recorte del recuadro verde (85% de ancho y 75% de alto según tus estilos CSS)
+    // Esto evita que Tesseract procese el fondo innecesario del entorno
+    const porcentajeAncho = 0.85;
+    const porcentajeAlto = 0.75;
+
+    const cropAncho = anchoDestino * porcentajeAncho;
+    const cropAlto = altoDestino * porcentajeAlto;
+    const cropX = (anchoDestino - cropAncho) / 2;
+    const cropY = (altoDestino - cropAlto) / 2;
+
+    // Dibujamos en el canvas recortando solo la zona del DNI físico
+    ctx.drawImage(
+        video,
+        (video.videoWidth - (video.videoWidth * porcentajeAncho)) / 2,
+        (video.videoHeight - (video.videoHeight * porcentajeAlto)) / 2,
+        video.videoWidth * porcentajeAncho,
+        video.videoHeight * porcentajeAlto, // Origen (Video)
+        cropX, cropY, cropAncho, cropAlto // Destino (Canvas)
+    );
+
+    // 4. Compresión balanceada a JPEG (0.80 es perfecto para mantener nitidez de texto y pesar mínimo)
+    canvas.toBlob(async function(blob) {
+        if (!blob) {
+            statusEl.textContent = 'Error al procesar la imagen.';
+            btnCap.disabled = false;
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('fotoDni', blob, 'captura_dni.jpg');
+        formData.append('dniIngresado', dniVerificado);
+
+        try {
+            // El envío ahora será instantáneo porque el archivo pesa muy poco
+            const res  = await fetch('/api/auth/validar-ocr-servidor', { method: 'POST', body: formData });
+            const json = await res.json();
+
+            if (json.ok) {
+                detenerCamara();
+                datosUsuario = json.data;
+
+                const nombreCompleto = (datosUsuario?.nombre || '') + ' ' + (datosUsuario?.apellido || '');
+                document.getElementById('lblNombreVerificado').textContent =
+                    nombreCompleto.trim() ? 'Titular: ' + nombreCompleto.trim() : '';
+
+                // Cargar el teléfono en el input del paso 3 para su edición
+                document.getElementById('nuevoTelefono').value = datosUsuario?.telefono || '';
+
+                mostrarModal('✅', '¡Identidad verificada!', 'Tu DNI fue reconocido en tiempo récord. Ahora puedes establecer una nueva contraseña.', 'success', function() {
+                    irAPaso(3);
+                });
+            } else {
+                statusEl.textContent = 'No se detectó el DNI. Intenta de nuevo.';
+                mostrarModal('🔍', 'DNI no detectado', json.mensaje || 'No se pudo leer el número. Asegúrate de que el número sea visible y esté bien iluminado.', 'primary');
+                btnCap.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+            statusEl.textContent = 'Error de conexión.';
+            mostrarModal('📡', 'Error de conexión', 'No se pudo comunicar con el servidor. Verifica tu conexión e intenta de nuevo.', 'primary');
+            btnCap.disabled = false;
+        }
+    }, 'image/jpeg', 0.80);
+}
 
   /* ───── PASO 3: Guardar nueva contraseña ───── */
   async function guardarNuevaContrasena() {
       const pass  = document.getElementById('nuevaPass').value;
       const pass2 = document.getElementById('repPass').value;
+      const tel   = document.getElementById('nuevoTelefono').value.trim();
       const btn   = document.getElementById('btnGuardar');
+
+      if (tel.length !== 9 || !/^\d+$/.test(tel)) {
+          mostrarModal('⚠️', 'Teléfono inválido', 'Por favor ingresa un número de teléfono celular válido de 9 dígitos numéricos.', 'primary');
+          return;
+      }
 
       if (pass.length !== 6 || !/^\d+$/.test(pass)) {
           mostrarModal('⚠️', 'Contraseña inválida', 'La contraseña debe ser exactamente 6 dígitos numéricos.', 'primary');
@@ -558,9 +615,7 @@
           btn.textContent = '⏳ Guardando...';
           const body = {
               dni:       dniVerificado,
-              nombre:    datosUsuario?.nombre    || '',
-              apellido:  datosUsuario?.apellido  || '',
-              telefono:  datosUsuario?.telefono  || '',
+              telefono:  tel,
               contrasena: pass
           };
           const res  = await fetch('/api/auth/recuperar-por-dni', {

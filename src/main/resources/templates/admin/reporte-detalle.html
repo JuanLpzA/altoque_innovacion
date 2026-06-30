@@ -19,8 +19,6 @@
           --border: #f3f4f6;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
-
-        /* SIDEBAR */
         .sidebar { width: 220px; background: var(--sidebar-bg); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
         .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
         .sidebar-brand span { color: var(--accent); }
@@ -38,42 +36,21 @@
         .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
         .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
         .btn-logout:hover { color: #fff; }
-
-        /* MAIN */
         .main { flex: 1; display: flex; flex-direction: column; min-width: 0; overflow-y: auto; }
         .topbar { background: var(--card); padding: .9rem 1.8rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
         .btn-back { display: flex; align-items: center; gap: .4rem; font-size: .82rem; font-weight: 600; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: none; transition: color .15s; }
         .btn-back:hover { color: var(--text); }
         .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
-
         .content { padding: 1.6rem 1.8rem; display: flex; flex-direction: column; gap: 1.2rem; }
-
-        /* HERO CARD */
-        .hero-card {
-          background: var(--card);
-          border-radius: 16px;
-          box-shadow: 0 2px 10px rgba(0,0,0,.05);
-          overflow: hidden;
-        }
-
+        .hero-card { background: var(--card); border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.05); overflow: hidden; }
         .hero-foto-wrap { position: relative; height: 240px; background: #f3f4f6; overflow: hidden; }
         .hero-foto { width: 100%; height: 100%; object-fit: cover; }
         .hero-foto-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
         .hero-foto-placeholder i { font-size: 3.5rem; color: #d1d5db; }
-
-        .hero-overlay {
-          position: absolute; inset: 0;
-          background: linear-gradient(to top, rgba(0,0,0,.55) 0%, transparent 55%);
-          display: flex; align-items: flex-end;
-          padding: 1.2rem 1.4rem;
-        }
-
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.55) 0%, transparent 55%); display: flex; align-items: flex-end; padding: 1.2rem 1.4rem; }
         .hero-titulo { font-size: 1.2rem; font-weight: 800; color: #fff; line-height: 1.3; }
-
         .hero-body { padding: 1.2rem 1.4rem; display: flex; flex-wrap: wrap; gap: 1.2rem; align-items: flex-start; }
-
         .hero-info { flex: 1; min-width: 200px; display: flex; flex-direction: column; gap: .6rem; }
-
         .badges { display: flex; gap: .4rem; flex-wrap: wrap; }
         .badge { font-size: .65rem; font-weight: 700; padding: .22rem .6rem; border-radius: 99px; }
         .badge-pendiente { background: #fef2f2; color: #b91c1c; }
@@ -83,144 +60,125 @@
         .badge-alto  { background: #fef2f2; color: #b91c1c; }
         .badge-medio { background: #fffbeb; color: #b45309; }
         .badge-bajo  { background: #f0fdf4; color: #15803d; }
-
         .meta-row { display: flex; align-items: flex-start; gap: .5rem; font-size: .82rem; color: #374151; }
         .meta-row i { font-size: .9rem; color: var(--muted); margin-top: .1rem; flex-shrink: 0; }
-
         .desc-text { font-size: .85rem; color: #6b7280; line-height: 1.65; }
-
-        /* AVANCE */
         .avance-wrap { flex-shrink: 0; min-width: 160px; display: flex; flex-direction: column; align-items: center; gap: .5rem; }
-        .avance-circle {
-          position: relative;
-          width: 100px; height: 100px;
-        }
+        .avance-circle { position: relative; width: 100px; height: 100px; }
         .avance-circle svg { transform: rotate(-90deg); }
         .avance-circle-bg { fill: none; stroke: #f3f4f6; stroke-width: 8; }
         .avance-circle-fill { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset .6s ease; }
-        .avance-pct-label {
-          position: absolute; inset: 0;
-          display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
+        .avance-pct-label { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .avance-pct-num  { font-size: 1.3rem; font-weight: 900; color: var(--text); }
         .avance-pct-sub  { font-size: .62rem; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
         .avance-label    { font-size: .72rem; color: var(--muted); font-weight: 600; }
-
-        /* ACCIONES RÁPIDAS */
-        .acciones-card {
-          background: var(--card);
-          border-radius: 16px;
-          box-shadow: 0 2px 10px rgba(0,0,0,.05);
-          padding: 1.2rem 1.4rem;
-        }
-        .acciones-title { font-size: .88rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; }
-        .acciones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: .7rem; }
-
-        .estado-btn {
-          display: flex; align-items: center; gap: .6rem;
-          padding: .7rem .9rem;
-          border: 1.5px solid var(--border);
-          border-radius: 10px;
-          background: #fafafa;
-          cursor: pointer;
-          font-size: .82rem; font-weight: 600; color: #374151;
-          transition: border-color .15s, background .15s;
-          text-align: left;
-        }
-        .estado-btn:hover { border-color: var(--sidebar-bg); background: #f0f5ff; }
-        .estado-btn.activo { border-color: var(--sidebar-bg); background: #eff6ff; color: var(--sidebar-bg); }
-        .estado-btn i { font-size: 1rem; }
-
-        /* GRID INFERIOR */
+        .acciones-card { background: var(--card); border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.05); padding: 1.2rem 1.4rem; }
+        .acciones-title { font-size: .88rem; font-weight: 700; color: var(--text); margin-bottom: 1rem; display: flex; align-items: center; justify-content: space-between; }
+        .acciones-fila { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; flex-wrap: wrap; }
+        .estado-actual-row { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; flex: 1 1 240px; min-width: 220px; }
+        .estado-pill { display: flex; align-items: center; gap: .5rem; padding: .55rem 1rem; border-radius: 10px; font-size: .85rem; font-weight: 700; flex-shrink: 0; }
+        .estado-pill.pendiente { background: #fef2f2; color: #b91c1c; }
+        .estado-pill.proceso   { background: #eff6ff; color: #1d4ed8; }
+        .estado-pill.resuelto  { background: #f0fdf4; color: #15803d; }
+        .estado-pill.rechazado { background: #f3f4f6; color: #6b7280; }
+        .estado-hint { font-size: .76rem; color: var(--muted); }
+        .acciones-grid { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: flex-end; flex: 1 1 360px; }
+        .btn-accion-principal { display: flex; align-items: center; justify-content: center; gap: .6rem; flex: 1; min-width: 190px; padding: 1rem 1.4rem; border: none; border-radius: 12px; cursor: pointer; font-size: .95rem; font-weight: 700; transition: filter .15s, transform .15s; }
+        .btn-accion-principal i { font-size: 1.15rem; }
+        .btn-accion-principal:hover { filter: brightness(0.95); transform: translateY(-1px); }
+        .btn-accion-principal:disabled { opacity: .45; cursor: not-allowed; filter: none; transform: none; }
+        .btn-avance { background: var(--sidebar-bg); color: #fff; }
+        .btn-rechazar { background: #fef2f2; color: #b91c1c; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
-
-        /* CARD GENÉRICA */
         .card { background: var(--card); border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.05); overflow: hidden; }
         .card-head { padding: 1rem 1.3rem .8rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
         .card-title { font-size: .9rem; font-weight: 700; color: var(--text); }
         .card-count { font-size: .75rem; color: var(--muted); font-weight: 600; }
         .card-body  { padding: 1rem 1.3rem; }
-
-        /* MINI REPORTES */
         .mini-list { display: flex; flex-direction: column; gap: .8rem; max-height: 400px; overflow-y: auto; }
-
-        .mini-item {
-          display: flex; gap: .8rem; align-items: flex-start;
-          border: 1px solid var(--border); border-radius: 10px;
-          overflow: hidden;
-        }
-
-        .mini-foto {
-          width: 72px; height: 72px; object-fit: cover;
-          background: #f3f4f6; flex-shrink: 0;
-        }
-        .mini-foto-ph {
-          width: 72px; height: 72px; background: #f3f4f6;
-          display: flex; align-items: center; justify-content: center; flex-shrink: 0;
-        }
+        .mini-item { display: flex; gap: .8rem; align-items: flex-start; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; cursor: pointer; transition: border-color .15s, background .15s; }
+        .mini-item:hover { border-color: var(--sidebar-bg); background: #f8faff; }
+        .mini-foto { width: 72px; height: 72px; object-fit: cover; background: #f3f4f6; flex-shrink: 0; }
+        .mini-foto-ph { width: 72px; height: 72px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .mini-foto-ph i { font-size: 1.6rem; color: #d1d5db; }
-
         .mini-info { flex: 1; padding: .6rem .8rem .6rem 0; min-width: 0; }
         .mini-user { font-size: .8rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: .35rem; }
         .mini-user i { color: var(--muted); font-size: .85rem; }
-        .mini-user-avatar {
-          width: 22px; height: 22px; border-radius: 50%;
-          display: flex; align-items: center; justify-content: center;
-          font-size: .62rem; font-weight: 700; color: #fff; flex-shrink: 0;
-        }
+        .mini-user-avatar { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .62rem; font-weight: 700; color: #fff; flex-shrink: 0; }
         .mini-fecha { font-size: .7rem; color: var(--muted); margin-top: .15rem; }
-
-        /* AVANCES / HISTORIAL */
+        .mini-titulo-prev { font-size: .73rem; color: #6b7280; margin-top: .15rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .avance-list { display: flex; flex-direction: column; gap: .9rem; }
-
         .avance-item { display: flex; flex-direction: column; gap: .5rem; }
-
         .avance-top { display: flex; align-items: center; gap: .7rem; }
-        .avance-avatar {
-          width: 30px; height: 30px; border-radius: 50%;
-          background: var(--sidebar-bg);
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-        }
+        .avance-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--sidebar-bg); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .avance-avatar i { color: #fff; font-size: .85rem; }
         .avance-user  { font-size: .8rem; font-weight: 700; color: var(--text); }
         .avance-fecha { font-size: .7rem; color: var(--muted); }
         .avance-pct-badge { margin-left: auto; background: #f0fdf4; color: #15803d; font-size: .68rem; font-weight: 700; padding: .18rem .5rem; border-radius: 99px; }
-
         .avance-foto { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; background: #f3f4f6; }
         .avance-comentario { font-size: .8rem; color: #6b7280; line-height: 1.55; background: #f9fafb; border-radius: 8px; padding: .6rem .8rem; }
-
         .avance-divider { border: none; border-top: 1px solid var(--border); margin: .2rem 0; }
-
-        /* MAPA MINI */
+        .avance-sin-foto-tag { font-size: .65rem; font-weight: 700; color: #b45309; background: #fffbeb; padding: .15rem .5rem; border-radius: 99px; display: inline-block; width: fit-content; }
         #mapa-mini { width: 100%; height: 220px; border-radius: 0 0 16px 16px; }
-
-        /* MODAL CAMBIO ESTADO */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: center; justify-content: center; z-index: 100; }
+        /* ── MODALES ──
+           Leaflet usa z-index internos de hasta 700 (tile pane, marker pane, popup pane).
+           Por eso el overlay de los modales necesita ir muy por encima de eso. */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 1rem; }
         .modal-overlay.open { display: flex; }
-        .modal { background: var(--card); border-radius: 16px; padding: 2rem; width: 420px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
-        .modal-title { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: 1.2rem; }
+        .modal { background: var(--card); border-radius: 16px; padding: 1.8rem; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+        .modal-title { font-size: 1.02rem; font-weight: 800; color: var(--text); margin-bottom: .3rem; display: flex; align-items: center; gap: .5rem; }
+        .modal-subtitle { font-size: .78rem; color: var(--muted); margin-bottom: 1.2rem; }
         .modal-field { margin-bottom: 1rem; }
         .modal-field label { display: block; font-size: .78rem; font-weight: 600; color: #374151; margin-bottom: .35rem; }
-        .modal-field select, .modal-field input, .modal-field textarea {
-          width: 100%; padding: .68rem .9rem; border: 1.5px solid #e5e7eb;
-          border-radius: 9px; font-size: .88rem; outline: none; font-family: inherit;
+        .modal-field select, .modal-field input[type="text"], .modal-field input[type="number"], .modal-field textarea {
+          width: 100%; padding: .68rem .9rem; border: 1.5px solid #e5e7eb; border-radius: 9px; font-size: .88rem; outline: none; font-family: inherit;
         }
         .modal-field select:focus, .modal-field input:focus, .modal-field textarea:focus { border-color: var(--sidebar-bg); }
+        .modal-error { font-size: .76rem; color: #b91c1c; margin-top: .35rem; display: none; }
+        .modal-error.show { display: block; }
         .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.2rem; }
         .btn-cancel  { padding: .6rem 1.2rem; background: #f3f4f6; border: none; border-radius: 9px; font-size: .85rem; font-weight: 600; cursor: pointer; color: #374151; }
         .btn-confirm { padding: .6rem 1.4rem; background: var(--sidebar-bg); border: none; border-radius: 9px; font-size: .85rem; font-weight: 700; cursor: pointer; color: #fff; }
         .btn-confirm:hover { background: #153070; }
-
-        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #111827; color: #fff; padding: .75rem 1.2rem; border-radius: 10px; font-size: .83rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; transform: translateY(12px); transition: opacity .25s, transform .25s; z-index: 200; }
+        .btn-confirm.danger { background: #b91c1c; }
+        .btn-confirm.danger:hover { background: #991515; }
+        .check-row { display: flex; align-items: flex-start; gap: .55rem; font-size: .8rem; color: #374151; padding: .5rem 0; }
+        .check-row input { margin-top: .2rem; flex-shrink: 0; cursor: pointer; }
+        .check-row label { cursor: pointer; line-height: 1.4; }
+        .file-drop { border: 1.5px dashed #d1d5db; border-radius: 10px; padding: 1rem; text-align: center; cursor: pointer; font-size: .8rem; color: var(--muted); transition: border-color .15s, background .15s; }
+        .file-drop:hover { border-color: var(--sidebar-bg); background: #f8faff; }
+        .file-drop.has-file { border-color: var(--accent); color: var(--text); background: #f0fdfa; }
+        .file-drop i { font-size: 1.4rem; display: block; margin-bottom: .3rem; }
+        .preview-img { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; margin-top: .6rem; }
+        .motivos-list { display: flex; flex-direction: column; gap: .2rem; margin-bottom: .6rem; }
+        .pct-actual-tag { font-size: .7rem; color: var(--muted); font-weight: 600; margin-top: .3rem; }
+        .pct-num-caption { font-size: .68rem; color: var(--muted); font-weight: 600; flex-shrink: 0; min-width: 122px; }
+        .pct-num-row { display: flex; align-items: center; gap: .7rem; margin-bottom: .6rem; }
+        .pct-num-row input[type="number"] { flex: 1; }
+        .pct-slider-row { display: flex; align-items: center; gap: .7rem; }
+        .pct-slider-row input[type="range"] {
+          flex: 1; height: 6px; border-radius: 99px; background: #e5e7eb; appearance: none; -webkit-appearance: none; outline: none; cursor: pointer;
+        }
+        .pct-slider-row input[type="range"]::-webkit-slider-thumb {
+          appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+        }
+        .pct-slider-row input[type="range"]::-moz-range-thumb {
+          width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+        }
+        .pct-slider-row input[type="range"]:disabled { opacity: .4; cursor: not-allowed; }
+        .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #111827; color: #fff; padding: .75rem 1.2rem; border-radius: 10px; font-size: .83rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; transform: translateY(12px); transition: opacity .25s, transform .25s; z-index: 2100; }
         .toast.show { opacity: 1; transform: translateY(0); }
-
+        .toast.error { background: #b91c1c; }
         .empty-msg { text-align: center; padding: 2rem; color: var(--muted); font-size: .83rem; }
+        .detalle-mini-foto { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; background: #f3f4f6; margin-bottom: 1rem; }
+        .detalle-mini-row { display: flex; gap: .6rem; padding: .55rem 0; border-bottom: 1px solid var(--border); font-size: .83rem; }
+        .detalle-mini-row:last-child { border-bottom: none; }
+        .detalle-mini-row i { color: var(--muted); font-size: 1rem; margin-top: .1rem; flex-shrink: 0; width: 18px; }
+        .detalle-mini-label { font-weight: 600; color: #374151; min-width: 90px; flex-shrink: 0; }
+        .detalle-mini-value { color: #6b7280; flex: 1; }
     </style>
 </head>
 <body>
-
-<!-- SIDEBAR -->
 <div class="sidebar">
     <div class="sidebar-brand">AL<span>Toque</span></div>
     <div class="sidebar-section">Principal</div>
@@ -242,17 +200,12 @@
         </div>
     </div>
 </div>
-
-<!-- MAIN -->
 <div class="main">
     <div class="topbar">
         <a href="/admin/reportes" class="btn-back"><i class="ti ti-arrow-left"></i> Reportes</a>
         <div class="topbar-title" id="topbar-titulo">Detalle de reporte</div>
     </div>
-
     <div class="content">
-
-        <!-- HERO -->
         <div class="hero-card">
             <div class="hero-foto-wrap">
                 <div id="hero-foto-contenido">
@@ -285,30 +238,29 @@
                 </div>
             </div>
         </div>
-
-        <!-- ACCIONES -->
         <div class="acciones-card">
-            <div class="acciones-title">Cambiar estado del reporte</div>
-            <div class="acciones-grid">
-                <button class="estado-btn" id="btn-pendiente"  onclick="abrirModalEstado('pendiente')">
-                    <i class="ti ti-clock" style="color:#b91c1c"></i> Pendiente
-                </button>
-                <button class="estado-btn" id="btn-en proceso" onclick="abrirModalEstado('en proceso')">
-                    <i class="ti ti-refresh" style="color:#1d4ed8"></i> En proceso
-                </button>
-                <button class="estado-btn" id="btn-resuelto"  onclick="abrirModalEstado('resuelto')">
-                    <i class="ti ti-circle-check" style="color:#15803d"></i> Resuelto
-                </button>
-                <button class="estado-btn" id="btn-rechazado" onclick="abrirModalEstado('rechazado')">
-                    <i class="ti ti-ban" style="color:#6b7280"></i> Rechazado
-                </button>
+            <div class="acciones-title">
+                <span>Estado del reporte</span>
+            </div>
+            <div class="acciones-fila">
+                <div class="estado-actual-row">
+                    <span id="estado-pill" class="estado-pill pendiente">
+                        <i class="ti ti-clock"></i>
+                        <span id="estado-pill-text">Pendiente</span>
+                    </span>
+                    <span class="estado-hint" id="estado-hint">El estado avanza solo al registrar un avance verificado.</span>
+                </div>
+                <div class="acciones-grid">
+                    <button class="btn-accion-principal btn-avance" id="btn-abrir-avance" onclick="abrirModalAvance()">
+                        <i class="ti ti-circle-plus"></i> Registrar avance
+                    </button>
+                    <button class="btn-accion-principal btn-rechazar" id="btn-abrir-rechazo" onclick="abrirModalRechazo()">
+                        <i class="ti ti-ban"></i> Rechazar reporte
+                    </button>
+                </div>
             </div>
         </div>
-
-        <!-- GRID: MINI REPORTES + AVANCES -->
         <div class="grid-2">
-
-            <!-- MINI REPORTES -->
             <div class="card">
                 <div class="card-head">
                     <span class="card-title">Solicitudes vinculadas</span>
@@ -320,8 +272,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- HISTORIAL DE AVANCES -->
             <div class="card">
                 <div class="card-head">
                     <span class="card-title">Historial de avances</span>
@@ -333,64 +283,132 @@
                     </div>
                 </div>
             </div>
-
         </div>
-
-        <!-- MAPA -->
         <div class="card">
             <div class="card-head">
                 <span class="card-title">Ubicación de la incidencia</span>
             </div>
             <div id="mapa-mini"></div>
         </div>
-
     </div>
 </div>
-
-<!-- MODAL CAMBIO ESTADO -->
-<div class="modal-overlay" id="modalOverlay">
+<div class="modal-overlay" id="modalDetalleMini">
     <div class="modal">
-        <div class="modal-title" id="modal-titulo-text">Cambiar estado</div>
-        <input type="hidden" id="modal-estado-val">
-
-        <div class="modal-field">
-            <label>Porcentaje de avance (%)</label>
-            <input type="number" id="modal-porcentaje" min="0" max="100" placeholder="0 – 100">
-        </div>
-
-        <div class="modal-field">
-            <label>Comentario (opcional)</label>
-            <textarea id="modal-comentario" rows="3" placeholder="Describe el avance o motivo del cambio..."></textarea>
-        </div>
-
+        <div class="modal-title"><i class="ti ti-file-text"></i> Detalle de la solicitud</div>
+        <div class="modal-subtitle">Información completa enviada por el ciudadano</div>
+        <div id="detalle-mini-foto-wrap"></div>
+        <div id="detalle-mini-body"></div>
         <div class="modal-actions">
-            <button class="btn-cancel" onclick="cerrarModal()">Cancelar</button>
-            <button class="btn-confirm" onclick="confirmarCambio()">Guardar</button>
+            <button class="btn-cancel" onclick="cerrarModal('modalDetalleMini')">Cerrar</button>
         </div>
     </div>
 </div>
-
+<div class="modal-overlay" id="modalAvance">
+    <div class="modal">
+        <div class="modal-title"><i class="ti ti-circle-plus"></i> Registrar avance</div>
+        <div class="modal-subtitle">El estado del reporte se actualizará automáticamente según el porcentaje.</div>
+        <div class="modal-field">
+            <label>Foto de evidencia</label>
+            <div class="file-drop" id="avance-file-drop" onclick="document.getElementById('avance-foto-input').click()">
+                <i class="ti ti-camera-plus"></i>
+                <span id="avance-file-text">Toca para subir una foto del avance</span>
+            </div>
+            <input type="file" id="avance-foto-input" accept="image/*" style="display:none" onchange="onFotoAvanceSeleccionada(event)">
+            <img id="avance-preview" class="preview-img" style="display:none">
+        </div>
+        <div class="check-row">
+            <input type="checkbox" id="avance-sin-foto" onchange="toggleSinFoto()">
+            <label for="avance-sin-foto">Confirmo que hubo un avance real en este reporte, pero actualmente no cuento con evidencia fotográfica.</label>
+        </div>
+        <div class="modal-field">
+            <label>Comentario del avance</label>
+            <textarea id="avance-comentario" rows="3" placeholder="Describe qué se hizo o qué avance se logró..."></textarea>
+        </div>
+        <div class="modal-field">
+            <label>Porcentaje de avance acumulado (%)</label>
+            <div class="pct-num-row">
+                <span class="pct-num-caption">Escribe el número</span>
+                <input type="number" id="avance-porcentaje" min="0" max="100" placeholder="0 – 100">
+            </div>
+            <div class="pct-slider-row">
+                <span class="pct-num-caption">O desliza para ajustar</span>
+                <input type="range" id="avance-porcentaje-slider" min="0" max="100" step="1">
+            </div>
+            <div class="pct-actual-tag" id="avance-pct-actual-tag">Avance actual: 0%. El nuevo valor debe ser mayor (mínimo +1%).</div>
+            <div class="modal-error" id="avance-error"></div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModal('modalAvance')">Cancelar</button>
+            <button class="btn-confirm" id="btn-confirmar-avance" onclick="confirmarAvance()">Guardar avance</button>
+        </div>
+    </div>
+</div>
+<div class="modal-overlay" id="modalRechazo">
+    <div class="modal">
+        <div class="modal-title"><i class="ti ti-ban" style="color:#b91c1c"></i> Rechazar reporte</div>
+        <div class="modal-subtitle">Esta acción es definitiva. Selecciona los motivos y describe la observación antes de confirmar.</div>
+        <div class="modal-field">
+            <label>Motivos del rechazo</label>
+            <div class="motivos-list">
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="Se verificó en campo y la incidencia ya no existe o fue resuelta antes de la visita">
+                    <label>Se verificó en campo y la incidencia ya no existe o fue resuelta antes de la visita</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="El problema fue solucionado por gestión externa (otra entidad, vecinos, empresa privada, etc.)">
+                    <label>El problema fue solucionado por gestión externa (otra entidad, vecinos, empresa privada, etc.)</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="El reporte es duplicado de otro ya existente">
+                    <label>El reporte es duplicado de otro ya existente</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="La incidencia no corresponde a competencia municipal">
+                    <label>La incidencia no corresponde a competencia municipal</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="Información insuficiente o ubicación incorrecta para verificar">
+                    <label>Información insuficiente o ubicación incorrecta para verificar</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="Reporte falso, malintencionado o sin evidencia válida">
+                    <label>Reporte falso, malintencionado o sin evidencia válida</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="Otro (especificado en observaciones)">
+                    <label>Otro (especificado en observaciones)</label>
+                </div>
+            </div>
+            <div class="modal-error" id="rechazo-error-motivos">Selecciona al menos un motivo.</div>
+        </div>
+        <div class="modal-field">
+            <label>Observación (obligatoria)</label>
+            <textarea id="rechazo-observacion" rows="3" placeholder="Explica con detalle la razón del rechazo..."></textarea>
+            <div class="modal-error" id="rechazo-error-obs">La observación es obligatoria.</div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModal('modalRechazo')">Cancelar</button>
+            <button class="btn-confirm danger" onclick="confirmarRechazo()">Confirmar rechazo</button>
+        </div>
+    </div>
+</div>
 <div class="toast" id="toast"></div>
-
 <script>
-    // ── Guard ──────────────────────────────────────────────────────
     (function () {
       if (!localStorage.getItem('token') || localStorage.getItem('rol') !== 'municipalidad')
         window.location.href = '/';
     })();
-
     const TOKEN      = localStorage.getItem('token');
     const params     = new URLSearchParams(location.search);
     const REPORTE_ID = params.get('id');
-
     document.getElementById('sb-nombre').textContent =
       (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
-
     if (!REPORTE_ID) window.location.href = '/admin/reportes';
-
-    // ── Helpers ────────────────────────────────────────────────────
+    let reporteActual    = null;
+    let miniReportesData  = [];
+    let avanceFotoFile    = null;
+    let guardandoAvance   = false;
     const AVATAR_COLORS = ['#1a3a8f','#0fa89a','#ef4444','#f59e0b','#8b5cf6','#ec4899','#06b6d4'];
-
     function badgeClase(estado) {
       const e = (estado || '').toLowerCase();
       return e.includes('pendiente') ? 'pendiente'
@@ -398,29 +416,31 @@
            : e.includes('resuelto')  ? 'resuelto'
            : 'rechazado';
     }
-
     function formatFecha(f) {
       if (!f) return '—';
       return new Date(f).toLocaleDateString('es-PE',
         { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     }
-
-    // ── Render hero ────────────────────────────────────────────────
+    function mostrarToast(msg, esError) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.toggle('error', !!esError);
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+    function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+    function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
     function renderHero(r) {
       document.getElementById('topbar-titulo').textContent = `Reporte #${r.id}`;
       document.getElementById('hero-titulo').textContent   = r.titulo || '—';
       document.getElementById('hero-zona').textContent     = r.zonaReferencia || 'Sin zona registrada';
       document.getElementById('hero-fecha').textContent    = formatFecha(r.fechaCreacion);
       document.getElementById('hero-desc').textContent     = r.descripcionConsolidada || '—';
-
-      // foto
       if (r.fotoPrincipal) {
         document.getElementById('hero-foto-contenido').innerHTML =
           `<img class="hero-foto" src="${r.fotoPrincipal}" alt="foto"
              onerror="this.outerHTML='<div class=hero-foto-placeholder><i class=ti ti-photo style=font-size:3.5rem;color:#d1d5db></i></div>'">`;
       }
-
-      // badges
       const estadoCls = badgeClase(r.estado);
       const riesgoCls = (r.nivelRiesgo || '').toLowerCase();
       document.getElementById('hero-badges').innerHTML = `
@@ -428,93 +448,127 @@
         <span class="badge badge-${riesgoCls}">${(r.nivelRiesgo || '').toUpperCase()}</span>
         <span class="badge" style="background:#f0f5fb;color:#1a3a8f">${r.categoria || '—'}</span>
       `;
-
-      // botón activo
-      document.querySelectorAll('.estado-btn').forEach(b => b.classList.remove('activo'));
-      const btnActivo = document.getElementById('btn-' + (r.estado || '').toLowerCase());
-      if (btnActivo) btnActivo.classList.add('activo');
-
-      // avance circular
+      const iconos = { pendiente: 'ti-clock', proceso: 'ti-refresh', resuelto: 'ti-circle-check', rechazado: 'ti-ban' };
+      const pill = document.getElementById('estado-pill');
+      pill.className = 'estado-pill ' + estadoCls;
+      pill.querySelector('i').className = 'ti ' + (iconos[estadoCls] || 'ti-clock');
+      document.getElementById('estado-pill-text').textContent = r.estado || '—';
+      const finalizado = estadoCls === 'resuelto' || estadoCls === 'rechazado';
+      document.getElementById('btn-abrir-avance').disabled  = finalizado;
+      document.getElementById('btn-abrir-rechazo').disabled = finalizado;
+      document.getElementById('estado-hint').textContent = finalizado
+        ? (estadoCls === 'resuelto' ? 'Este reporte ya fue marcado como resuelto.' : 'Este reporte fue rechazado y no admite más cambios.')
+        : 'El estado avanza solo al registrar un avance verificado.';
       const pct    = r.porcentajeAvance || 0;
       const circum = 263.9;
       document.getElementById('avance-num').textContent = pct;
       document.getElementById('avance-arc').style.strokeDashoffset = circum - (circum * pct / 100);
+      document.getElementById('avance-pct-actual-tag').textContent =
+        `Avance actual: ${pct}%. Solo puedes igualar o subir este valor.`;
     }
-
-    // ── Render mini reportes ───────────────────────────────────────
     function renderMinis(minis) {
+      miniReportesData = minis;
       document.getElementById('mini-count').textContent = minis.length;
       const list = document.getElementById('mini-list');
-
       if (minis.length === 0) {
         list.innerHTML = '<div class="empty-msg">Sin solicitudes vinculadas</div>';
         return;
       }
-
       list.innerHTML = minis.map((m, i) => {
         const color   = AVATAR_COLORS[i % AVATAR_COLORS.length];
-        const iniciales = m.iniciales || '?';
+        const iniciales = m.iniciales || (m.nombreUsuario ? m.nombreUsuario.split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase() : '?');
         const fotoHTML = m.urlFoto
           ? `<img class="mini-foto" src="${m.urlFoto}" alt="foto ciudadano"
                onerror="this.outerHTML='<div class=mini-foto-ph><i class=ti ti-photo style=font-size:1.6rem;color:#d1d5db></i></div>'">`
           : `<div class="mini-foto-ph"><i class="ti ti-photo" style="font-size:1.6rem;color:#d1d5db"></i></div>`;
-
         return `
-          <div class="mini-item">
+          <div class="mini-item" onclick="abrirDetalleMini(${m.id})">
             ${fotoHTML}
             <div class="mini-info">
               <div class="mini-user">
                 <div class="mini-user-avatar" style="background:${color}">${iniciales}</div>
                 ${m.nombreUsuario || '—'}
               </div>
+              <div class="mini-titulo-prev">${m.titulo || ''}</div>
               <div class="mini-fecha">${formatFecha(m.fechaCreacion)}</div>
             </div>
           </div>`;
       }).join('');
     }
-
-    // ── Render avances ─────────────────────────────────────────────
+    async function abrirDetalleMini(idMini) {
+      try {
+        const res  = await fetch(`/api/admin/moderacion/mini-reportes/${idMini}`, {
+          headers: { 'Authorization': 'Bearer ' + TOKEN }
+        });
+        const json = await res.json();
+        const m = json.data;
+        if (!m) { mostrarToast('No se pudo cargar el detalle', true); return; }
+        const fotoWrap = document.getElementById('detalle-mini-foto-wrap');
+        fotoWrap.innerHTML = m.urlFoto
+          ? `<img class="detalle-mini-foto" src="${m.urlFoto}" alt="evidencia ciudadano">`
+          : `<div class="detalle-mini-foto" style="display:flex;align-items:center;justify-content:center;"><i class="ti ti-photo" style="font-size:2.5rem;color:#d1d5db"></i></div>`;
+        const riesgoCls = (m.nivelRiesgo || '').toLowerCase();
+        document.getElementById('detalle-mini-body').innerHTML = `
+          <div class="badges" style="margin-bottom:.8rem">
+            <span class="badge badge-${riesgoCls}">${(m.nivelRiesgo || '').toUpperCase()}</span>
+            <span class="badge" style="background:#f0f5fb;color:#1a3a8f">${m.categoria || '—'}</span>
+          </div>
+          <div class="detalle-mini-row"><i class="ti ti-file-text"></i><span class="detalle-mini-label">Título</span><span class="detalle-mini-value">${m.titulo || '—'}</span></div>
+          <div class="detalle-mini-row"><i class="ti ti-align-left"></i><span class="detalle-mini-label">Descripción</span><span class="detalle-mini-value">${m.descripcion || '—'}</span></div>
+          <div class="detalle-mini-row"><i class="ti ti-user"></i><span class="detalle-mini-label">Reportado por</span><span class="detalle-mini-value">${m.nombreUsuario || '—'}</span></div>
+          <div class="detalle-mini-row"><i class="ti ti-calendar"></i><span class="detalle-mini-label">Fecha y hora</span><span class="detalle-mini-value">${formatFecha(m.fechaCreacion)}</span></div>
+          <div class="detalle-mini-row"><i class="ti ti-map-pin"></i><span class="detalle-mini-label">Dirección</span><span class="detalle-mini-value">${m.direccionAprox || '—'}</span></div>
+          <div class="detalle-mini-row"><i class="ti ti-map"></i><span class="detalle-mini-label">Coordenadas</span><span class="detalle-mini-value">${m.latitud ?? '—'}, ${m.longitud ?? '—'}</span></div>
+        `;
+        abrirModal('modalDetalleMini');
+      } catch (e) {
+        console.error(e);
+        mostrarToast('Error al cargar el detalle de la solicitud', true);
+      }
+    }
     function renderAvances(avances) {
       document.getElementById('avance-count').textContent = avances.length;
       const list = document.getElementById('avance-list');
-
       if (avances.length === 0) {
         list.innerHTML = '<div class="empty-msg">Sin avances registrados aún</div>';
         return;
       }
-
       list.innerHTML = avances.map((a, i) => `
         <div class="avance-item">
           <div class="avance-top">
             <div class="avance-avatar"><i class="ti ti-building-community"></i></div>
             <div>
-              <div class="avance-user">${a.nombreUsuario || 'Municipalidad'}</div>
+              <div class="avance-user">${a.usuario ? (a.usuario.nombre + ' ' + a.usuario.apellido) : 'Municipalidad'}</div>
               <div class="avance-fecha">${formatFecha(a.fecha)}</div>
             </div>
             <span class="avance-pct-badge">${a.porcentaje ?? 0}%</span>
           </div>
-          ${a.urlFoto ? `<img class="avance-foto" src="${a.urlFoto}" alt="evidencia">` : ''}
+          ${a.urlFoto
+            ? `<img class="avance-foto" src="${a.urlFoto}" alt="evidencia">`
+            : `<span class="avance-sin-foto-tag"><i class="ti ti-alert-triangle"></i> Sin evidencia fotográfica</span>`}
           ${a.comentario ? `<div class="avance-comentario">${a.comentario}</div>` : ''}
           ${i < avances.length - 1 ? '<hr class="avance-divider">' : ''}
         </div>`
       ).join('');
     }
-
-    // ── Render mapa mini ───────────────────────────────────────────
+    let mapaMiniInstance = null;
+    let mapaMiniMarker   = null;
     function renderMapa(lat, lng, titulo) {
       if (isNaN(lat) || isNaN(lng)) return;
-
-      const map = L.map('mapa-mini', { zoomControl: true, dragging: true }).setView([lat, lng], 16);
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap'
-      }).addTo(map);
-
-      L.circleMarker([lat, lng], {
-        radius: 12, fillColor: '#1a3a8f', color: '#fff', weight: 3, fillOpacity: 0.9
-      }).addTo(map).bindPopup(`<strong>${titulo}</strong>`).openPopup();
+      if (!mapaMiniInstance) {
+        mapaMiniInstance = L.map('mapa-mini', { zoomControl: true, dragging: true }).setView([lat, lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap'
+        }).addTo(mapaMiniInstance);
+        mapaMiniMarker = L.circleMarker([lat, lng], {
+          radius: 12, fillColor: '#1a3a8f', color: '#fff', weight: 3, fillOpacity: 0.9
+        }).addTo(mapaMiniInstance).bindPopup(`<strong>${titulo}</strong>`).openPopup();
+      } else {
+        mapaMiniInstance.setView([lat, lng], mapaMiniInstance.getZoom());
+        mapaMiniMarker.setLatLng([lat, lng]);
+        mapaMiniMarker.setPopupContent(`<strong>${titulo}</strong>`);
+      }
     }
-
-    // ── Carga principal ────────────────────────────────────────────
     async function cargar() {
       try {
         const res  = await fetch(`/api/admin/reportes/${REPORTE_ID}`, {
@@ -522,80 +576,192 @@
         });
         const json = await res.json();
         const r    = json.data;
-
         if (!r) { window.location.href = '/admin/reportes'; return; }
-
+        reporteActual = r;
         renderHero(r);
         renderMinis(r.miniReportes || []);
         renderAvances(r.avances    || []);
-
         const lat = parseFloat(r.latitudCentro);
         const lng = parseFloat(r.longitudCentro);
         renderMapa(lat, lng, r.titulo);
-
       } catch (e) {
         console.error(e);
-        mostrarToast('Error al cargar el reporte');
+        mostrarToast('Error al cargar el reporte', true);
       }
     }
-
-    // ── Modal cambio estado ────────────────────────────────────────
-    function abrirModalEstado(estado) {
-      document.getElementById('modal-estado-val').value   = estado;
-      document.getElementById('modal-titulo-text').textContent = `Cambiar a: ${estado}`;
-      document.getElementById('modal-porcentaje').value   = '';
-      document.getElementById('modal-comentario').value   = '';
-      document.getElementById('modalOverlay').classList.add('open');
+    function abrirModalAvance() {
+      if (document.getElementById('btn-abrir-avance').disabled) return;
+      avanceFotoFile = null;
+      guardandoAvance = false;
+      document.getElementById('avance-foto-input').value = '';
+      document.getElementById('avance-preview').style.display = 'none';
+      document.getElementById('avance-file-drop').classList.remove('has-file');
+      document.getElementById('avance-file-text').textContent = 'Toca para subir una foto del avance';
+      document.getElementById('avance-sin-foto').checked = false;
+      document.getElementById('avance-comentario').value = '';
+      const pctActual = (reporteActual && reporteActual.porcentajeAvance) || 0;
+      const pctMinimo = Math.min(pctActual + 1, 100);
+      const sliderEl  = document.getElementById('avance-porcentaje-slider');
+      const numEl     = document.getElementById('avance-porcentaje');
+      sliderEl.min = pctMinimo;
+      sliderEl.max = 100;
+      sliderEl.value = pctMinimo;
+      sliderEl.disabled = pctActual >= 100;
+      numEl.min = pctMinimo;
+      numEl.max = 100;
+      numEl.value = pctMinimo;
+      numEl.disabled = pctActual >= 100;
+      document.getElementById('avance-pct-actual-tag').textContent = pctActual >= 100
+        ? 'Este reporte ya está al 100% de avance.'
+        : `Avance actual: ${pctActual}%. El nuevo valor debe ser mayor (mínimo ${pctMinimo}%).`;
+      document.getElementById('avance-error').classList.remove('show');
+      const btn = document.getElementById('btn-confirmar-avance');
+      btn.disabled = false;
+      btn.textContent = 'Guardar avance';
+      abrirModal('modalAvance');
     }
-
-    function cerrarModal() {
-      document.getElementById('modalOverlay').classList.remove('open');
+    document.getElementById('avance-porcentaje-slider').addEventListener('input', e => {
+      document.getElementById('avance-porcentaje').value = e.target.value;
+    });
+    document.getElementById('avance-porcentaje').addEventListener('input', e => {
+      document.getElementById('avance-porcentaje-slider').value = e.target.value || 0;
+    });
+    function onFotoAvanceSeleccionada(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      avanceFotoFile = file;
+      document.getElementById('avance-file-drop').classList.add('has-file');
+      document.getElementById('avance-file-text').textContent = file.name;
+      const preview = document.getElementById('avance-preview');
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
     }
-
-    async function confirmarCambio() {
-      const estado     = document.getElementById('modal-estado-val').value;
-      const porcentaje = parseInt(document.getElementById('modal-porcentaje').value) || null;
-      const comentario = document.getElementById('modal-comentario').value.trim();
-
+    function toggleSinFoto() {
+      const sinFoto = document.getElementById('avance-sin-foto').checked;
+      const dropEl  = document.getElementById('avance-file-drop');
+      dropEl.style.opacity = sinFoto ? '0.5' : '1';
+      dropEl.style.pointerEvents = sinFoto ? 'none' : 'auto';
+    }
+    async function confirmarAvance() {
+      if (guardandoAvance) return;
+      const errorEl    = document.getElementById('avance-error');
+      errorEl.classList.remove('show');
+      const sinFoto    = document.getElementById('avance-sin-foto').checked;
+      const comentario = document.getElementById('avance-comentario').value.trim();
+      const porcentaje = parseInt(document.getElementById('avance-porcentaje').value);
+      const pctActual  = (reporteActual && reporteActual.porcentajeAvance) || 0;
+      if (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100) {
+        errorEl.textContent = 'Ingresa un porcentaje válido entre 0 y 100.';
+        errorEl.classList.add('show');
+        return;
+      }
+      if (porcentaje <= pctActual) {
+        errorEl.textContent = `El porcentaje debe ser mayor al avance actual (${pctActual}%). No puede quedar igual.`;
+        errorEl.classList.add('show');
+        return;
+      }
+      if (!avanceFotoFile && !sinFoto) {
+        errorEl.textContent = 'Adjunta una foto de evidencia, o marca el check de confirmación.';
+        errorEl.classList.add('show');
+        return;
+      }
+      const formData = new FormData();
+      formData.append('porcentaje', porcentaje);
+      formData.append('sinFoto', sinFoto);
+      if (comentario) formData.append('comentario', comentario);
+      if (avanceFotoFile) formData.append('foto', avanceFotoFile);
+      guardandoAvance = true;
+      const btn = document.getElementById('btn-confirmar-avance');
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
       try {
-        const res = await fetch(`/api/admin/reportes/${REPORTE_ID}/estado`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
-          body: JSON.stringify({ estado, porcentaje, comentario })
+        const res = await fetch(`/api/avances/${REPORTE_ID}`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + TOKEN },
+          body: formData
         });
         const json = await res.json();
-        cerrarModal();
-
         if (json.ok) {
-          mostrarToast('✓ Estado actualizado');
-          await cargar(); // recargar datos
+          cerrarModal('modalAvance');
+          mostrarToast('✓ Avance registrado correctamente');
+          await cargar();
         } else {
-          mostrarToast('Error: ' + (json.mensaje || 'No se pudo actualizar'));
+          errorEl.textContent = json.mensaje || 'No se pudo registrar el avance';
+          errorEl.classList.add('show');
+          btn.disabled = false;
+          btn.textContent = 'Guardar avance';
+          guardandoAvance = false;
         }
-      } catch {
-        cerrarModal();
-        mostrarToast('Error de conexión');
+      } catch (e) {
+        console.error(e);
+        errorEl.textContent = 'Error de conexión';
+        errorEl.classList.add('show');
+        btn.disabled = false;
+        btn.textContent = 'Guardar avance';
+        guardandoAvance = false;
       }
     }
-
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
-    document.getElementById('modalOverlay').addEventListener('click', e => {
-      if (e.target === e.currentTarget) cerrarModal();
-    });
-
-    // ── Toast ──────────────────────────────────────────────────────
-    function mostrarToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
+    function abrirModalRechazo() {
+      if (document.getElementById('btn-abrir-rechazo').disabled) return;
+      document.querySelectorAll('.motivo-check').forEach(c => c.checked = false);
+      document.getElementById('rechazo-observacion').value = '';
+      document.getElementById('rechazo-error-motivos').classList.remove('show');
+      document.getElementById('rechazo-error-obs').classList.remove('show');
+      abrirModal('modalRechazo');
     }
-
+    async function confirmarRechazo() {
+      const motivos = Array.from(document.querySelectorAll('.motivo-check:checked')).map(c => c.value);
+      const observacion = document.getElementById('rechazo-observacion').value.trim();
+      const errMotivos = document.getElementById('rechazo-error-motivos');
+      const errObs      = document.getElementById('rechazo-error-obs');
+      errMotivos.classList.toggle('show', motivos.length === 0);
+      errObs.classList.toggle('show', observacion.length === 0);
+      if (motivos.length === 0 || observacion.length === 0) return;
+      try {
+        const res = await fetch(`/api/admin/reportes/${REPORTE_ID}/rechazar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+          body: JSON.stringify({ motivos, observacion })
+        });
+        const json = await res.json();
+        if (json.ok) {
+          cerrarModal('modalRechazo');
+          mostrarToast('Reporte rechazado');
+          await cargar();
+        } else {
+          mostrarToast('Error: ' + (json.mensaje || 'No se pudo rechazar'), true);
+        }
+      } catch (e) {
+        console.error(e);
+        mostrarToast('Error de conexión', true);
+      }
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        ['modalDetalleMini', 'modalAvance', 'modalRechazo'].forEach(cerrarModal);
+      }
+    });
+    // Cierre al hacer click fuera del modal, pero solo si TANTO el mousedown
+    // como el click empezaron y terminaron sobre el overlay (no sobre el
+    // contenido del modal). Esto evita que seleccionar texto dentro del modal
+    // y soltar el mouse fuera (o viceversa) cierre el modal sin querer.
+    ['modalDetalleMini', 'modalAvance', 'modalRechazo'].forEach(id => {
+      const overlay = document.getElementById(id);
+      let mousedownEnOverlay = false;
+      overlay.addEventListener('mousedown', e => {
+        mousedownEnOverlay = (e.target === overlay);
+      });
+      overlay.addEventListener('click', e => {
+        if (mousedownEnOverlay && e.target === overlay) {
+          cerrarModal(id);
+        }
+        mousedownEnOverlay = false;
+      });
+    });
     async function cerrarSesion() {
       try { await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + TOKEN } }); }
       finally { localStorage.clear(); window.location.href = '/'; }
     }
-
     cargar();
 </script>
 </body>

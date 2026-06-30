@@ -1,6 +1,6 @@
 package com.innovacion.altoque.controller;
 
-import com.innovacion.altoque.dto.request.CambioEstadoRequest;
+import com.innovacion.altoque.dto.request.RechazoRequest;
 import com.innovacion.altoque.dto.response.ApiResponse;
 import com.innovacion.altoque.dto.response.ReporteDetalleResponse;
 import com.innovacion.altoque.dto.response.admin.AdminReporteListItem;
@@ -34,13 +34,13 @@ public class AdminReporteController {
                 reporteService.toDetalleResponse(reporteService.obtenerPorId(id))));
     }
 
-    @PatchMapping("/{id}/estado")
-    public ResponseEntity<ApiResponse<String>> cambiarEstado(
+
+    @PostMapping("/{id}/rechazar")
+    public ResponseEntity<ApiResponse<String>> rechazar(
             @PathVariable Integer id,
-            @Valid @RequestBody CambioEstadoRequest req,
+            @Valid @RequestBody RechazoRequest req,
             @AuthenticationPrincipal Usuario admin) {
-        adminService.cambiarEstado(id, req.getEstado(), req.getComentario(),
-                req.getPorcentaje(), admin);
-        return ResponseEntity.ok(ApiResponse.ok("Estado actualizado", null));
+        adminService.rechazarReporte(id, req.getMotivos(), req.getObservacion(), admin);
+        return ResponseEntity.ok(ApiResponse.ok("Reporte rechazado", null));
     }
 }
