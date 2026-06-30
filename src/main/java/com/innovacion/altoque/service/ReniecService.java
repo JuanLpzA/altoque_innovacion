@@ -13,7 +13,7 @@ import java.util.Map;
 public class ReniecService {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String API_URL = "https://api.decolecta.com/v1/reniec/dni?numero={dni}";
-    private final String TOKEN = "sk_15654.JuAwr5TuodT5TVsHLjOIoos0QBw1A1Ce";
+    private final String TOKEN = "sk_16813.7PQ2ZVJTG1d3nS7DiFBPYiwJDbSje6GC";
 
     public Reniec consultarDni(String dni) {
         try {

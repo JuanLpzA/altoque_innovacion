@@ -22,9 +22,9 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generarToken(String dni, String rol) {
+    public String generarToken(Integer idUsuario, String rol) {
         return Jwts.builder()
-                .subject(dni)
+                .subject(String.valueOf(idUsuario))
                 .claim("rol", rol)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expiration))
@@ -32,8 +32,8 @@ public class JwtUtil {
                 .compact();
     }
 
-    public String extraerDni(String token) {
-        return parsear(token).getPayload().getSubject();
+    public Integer extraerIdUsuario(String token) {
+        return Integer.valueOf(parsear(token).getPayload().getSubject());
     }
 
     public String extraerRol(String token) {

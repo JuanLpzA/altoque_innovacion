@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Altoque – Mapa de Incidencias</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sidebar-bg: #1a3a8f;
+      --accent: #0fa89a;
+      --bg: #f0f5fb;
+      --card: #fff;
+      --text: #111827;
+      --muted: #9ca3af;
+      --border: #f3f4f6;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
+    .sidebar { width: 220px; background: var(--sidebar-bg); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
+    .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .sidebar-brand span { color: var(--accent); }
+    .sidebar-section { padding: .9rem 1.4rem .3rem; font-size: .62rem; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; }
+    .sidebar-nav a { display: flex; align-items: center; gap: .65rem; padding: .62rem 1.4rem; color: rgba(255,255,255,.62); text-decoration: none; font-size: .84rem; font-weight: 500; transition: background .15s, color .15s; }
+    .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+    .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
+    .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
+    .sidebar-footer { margin-top: auto; padding: 1rem 1.4rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .sidebar-user { display: flex; align-items: center; gap: .6rem; }
+    .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .avatar-sm i { color: #fff; font-size: .95rem; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
+    .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
+    .btn-logout:hover { color: #fff; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: var(--card); padding: .9rem 1.8rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+
+    /* ── MINI DASHBOARD ── */
+    .mini-dash {
+      display: flex; gap: .8rem; padding: .9rem 1.8rem;
+      background: var(--card); border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+    }
+    .mini-card {
+      flex: 1; min-width: 130px;
+      background: #f9fafb; border-radius: 12px;
+      padding: .75rem .9rem;
+      display: flex; flex-direction: column; gap: .15rem;
+    }
+    .mini-card-val { font-size: 1.35rem; font-weight: 800; color: var(--text); }
+    .mini-card-label { font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+    .mini-card.alto    .mini-card-val { color: #b91c1c; }
+    .mini-card.activos .mini-card-val { color: #1d4ed8; }
+    .mini-card.resuelto .mini-card-val { color: #15803d; }
+
+    /* ── FILTROS ── */
+    .filtros-bar {
+      display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
+      padding: .8rem 1.8rem; background: var(--card); border-bottom: 1px solid var(--border);
+    }
+    .filtros-bar label { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-right: -.3rem; }
+    .filtros-bar select {
+      font-size: .8rem; padding: .4rem .6rem; border-radius: 8px;
+      border: 1px solid #e5e7eb; background: #fff; color: var(--text); cursor: pointer;
+    }
+    .chk-wrap { display: flex; align-items: center; gap: .35rem; font-size: .8rem; color: #374151; margin-left: auto; }
+    .filtros-resumen { font-size: .75rem; color: var(--muted); margin-left: .5rem; }
+    .btn-reset-filtros {
+      font-size: .75rem; font-weight: 600; color: var(--sidebar-bg);
+      background: none; border: 1px solid #dbe3f5; border-radius: 8px;
+      padding: .35rem .7rem; cursor: pointer;
+    }
+    .btn-reset-filtros:hover { background: #f0f5fb; }
+
+    /* ── LAYOUT MAPA ── */
+    .mapa-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+    #mapa { flex: 1; height: 100%; min-height: 0; }
+
+    /* ── PANEL LATERAL DETALLE ── */
+    .detalle-panel {
+      width: 320px; flex-shrink: 0; background: var(--card);
+      border-left: 1px solid var(--border); display: flex; flex-direction: column;
+      overflow-y: auto; transition: width .25s;
+    }
+    .detalle-panel.oculto { width: 0; overflow: hidden; border: none; }
+    .detalle-head { padding: 1.1rem 1.2rem .8rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: .7rem; }
+    .detalle-head-info { flex: 1; min-width: 0; }
+    .detalle-num { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .detalle-titulo { font-size: .95rem; font-weight: 800; color: var(--text); margin-top: .2rem; }
+    .btn-cerrar { background: #f3f4f6; border: none; border-radius: 8px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: #6b7280; font-size: .95rem; }
+    .btn-cerrar:hover { background: #e5e7eb; }
+    .detalle-foto { width: 100%; height: 160px; object-fit: cover; background: #f3f4f6; }
+    .detalle-foto-placeholder { width: 100%; height: 160px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; }
+    .detalle-foto-placeholder i { font-size: 2.5rem; color: #d1d5db; }
+    .detalle-body { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: .7rem; }
+    .detalle-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
+    .badge { font-size: .63rem; font-weight: 700; padding: .2rem .55rem; border-radius: 99px; }
+    .badge-pendiente  { background: #fef2f2; color: #b91c1c; }
+    .badge-proceso    { background: #eff6ff; color: #1d4ed8; }
+    .badge-resuelto   { background: #f0fdf4; color: #15803d; }
+    .badge-rechazado  { background: #f3f4f6; color: #6b7280; }
+    .badge-alto  { background: #fef2f2; color: #b91c1c; }
+    .badge-medio { background: #fffbeb; color: #b45309; }
+    .badge-bajo  { background: #f0fdf4; color: #15803d; }
+    .detalle-desc { font-size: .8rem; color: #6b7280; line-height: 1.6; }
+    .detalle-avance-label { font-size: .72rem; font-weight: 600; color: var(--muted); }
+    .detalle-avance-bar { height: 8px; background: #f3f4f6; border-radius: 99px; overflow: hidden; margin-top: .3rem; }
+    .detalle-avance-fill { height: 100%; background: var(--accent); border-radius: 99px; }
+    .detalle-meta { display: flex; flex-direction: column; gap: .35rem; }
+    .detalle-meta-row { display: flex; align-items: flex-start; gap: .5rem; font-size: .78rem; color: #374151; }
+    .detalle-meta-row i { font-size: .85rem; color: var(--muted); flex-shrink: 0; margin-top: .1rem; }
+    .detalle-mini-title { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .mini-chip { display: flex; align-items: center; gap: .5rem; background: #f9fafb; border-radius: 8px; padding: .5rem .7rem; font-size: .78rem; color: #374151; }
+    .mini-chip i { color: var(--muted); font-size: .8rem; }
+    .mini-chip .mc-tit { color: var(--muted); font-size: .72rem; }
+    .btn-ver-reporte { display: block; text-align: center; background: var(--sidebar-bg); color: #fff; border: none; border-radius: 10px; padding: .65rem; font-size: .84rem; font-weight: 700; cursor: pointer; text-decoration: none; margin: 0 1.2rem 1.2rem; transition: background .15s; }
+    .btn-ver-reporte:hover { background: #153070; }
+
+    /* ── Leyenda ── */
+    .leyenda { position: absolute; bottom: 1.5rem; left: 1.5rem; background: var(--card); border-radius: 10px; padding: .75rem 1rem; box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 1000; display: flex; flex-direction: column; gap: .4rem; font-size: .75rem; color: #374151; }
+    .ley-item { display: flex; align-items: center; gap: .5rem; }
+    .ley-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .ley-nota { font-size: .65rem; color: var(--muted); max-width: 170px; line-height: 1.4; margin-top: .15rem; padding-top: .35rem; border-top: 1px solid var(--border); }
+
+
+  </style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('mapa')}"></div>
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Mapa de incidencias</div>
+  </div>
+
+  <!-- MINI DASHBOARD -->
+  <div class="mini-dash">
+    <div class="mini-card">
+      <div class="mini-card-val" id="md-total">0</div>
+      <div class="mini-card-label">Mostrados en mapa</div>
+    </div>
+    <div class="mini-card activos">
+      <div class="mini-card-val" id="md-activos">0</div>
+      <div class="mini-card-label">Activos (pend. + proceso)</div>
+    </div>
+    <div class="mini-card alto">
+      <div class="mini-card-val" id="md-alto">0</div>
+      <div class="mini-card-label">Nivel alto sin resolver</div>
+    </div>
+    <div class="mini-card">
+      <div class="mini-card-val" id="md-minis">0</div>
+      <div class="mini-card-label">Mini-reportes acumulados</div>
+    </div>
+    <div class="mini-card resuelto">
+      <div class="mini-card-val" id="md-resueltos">0</div>
+      <div class="mini-card-label">Resueltos (este mes)</div>
+    </div>
+  </div>
+
+  <!-- FILTROS -->
+  <div class="filtros-bar">
+    <label for="f-estado">Estado</label>
+    <select id="f-estado">
+      <option value="activos" selected>Pendientes + en proceso</option>
+      <option value="pendiente">Solo pendientes</option>
+      <option value="proceso">Solo en proceso</option>
+      <option value="resuelto">Solo resueltos</option>
+      <option value="rechazado">Solo rechazados</option>
+      <option value="todos">Todos los estados</option>
+    </select>
+
+    <label for="f-categoria">Categoría</label>
+    <select id="f-categoria">
+      <option value="todas">Todas</option>
+    </select>
+
+    <label for="f-riesgo">Nivel</label>
+    <select id="f-riesgo">
+      <option value="todos">Todos</option>
+      <option value="ALTO">Alto</option>
+      <option value="MEDIO">Medio</option>
+      <option value="BAJO">Bajo</option>
+    </select>
+
+    <button class="btn-reset-filtros" onclick="resetFiltros()">Limpiar filtros</button>
+    <span class="filtros-resumen" id="filtros-resumen"></span>
+  </div>
+
+  <div class="mapa-layout">
+    <!-- MAPA -->
+    <div style="position:relative;flex:1; height:100%; min-height:0;">
+      <div id="mapa"></div>
+      <div class="leyenda">
+        <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem">Leyenda</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#ef4444"></div>Pendiente</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#f59e0b"></div>En proceso</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#22c55e"></div>Resuelto</div>
+        <div class="ley-item"><div class="ley-dot" style="background:#9ca3af"></div>Rechazado</div>
+        <div class="ley-nota">Si varios reportes están muy cerca, se separan levemente para que puedas ver y abrir cada uno.</div>
+      </div>
+    </div>
+    <!-- PANEL DETALLE -->
+    <div class="detalle-panel oculto" id="detalle-panel">
+      <div class="detalle-head">
+        <div class="detalle-head-info">
+          <div class="detalle-num" id="det-num">—</div>
+          <div class="detalle-titulo" id="det-titulo">—</div>
+        </div>
+        <button class="btn-cerrar" onclick="cerrarDetalle()"><i class="ti ti-x"></i></button>
+      </div>
+      <div id="det-foto-wrap"></div>
+      <div class="detalle-body">
+        <div class="detalle-badges" id="det-badges"></div>
+        <div class="detalle-desc" id="det-desc">—</div>
+        <div>
+          <div class="detalle-avance-label">Avance: <span id="det-avance-pct">0</span>%</div>
+          <div class="detalle-avance-bar">
+            <div class="detalle-avance-fill" id="det-avance-fill" style="width:0%"></div>
+          </div>
+        </div>
+        <div class="detalle-meta" id="det-meta"></div>
+        <div>
+          <div class="detalle-mini-title" style="margin-bottom:.5rem">Solicitudes vinculadas (<span id="det-mini-count">0</span>)</div>
+          <div style="display:flex;flex-direction:column;gap:.35rem;" id="det-minis"></div>
+        </div>
+      </div>
+      <a id="det-link" href="#" class="btn-ver-reporte">Ver reporte completo</a>
+    </div>
+  </div>
+</div>
+
+<script src="/js/admin-guard.js"></script>
+<script>
+  // Guard
+  const TOKEN = window.ADMIN_TOKEN;
+
+
+  function estadoColor(estado) {
+    const e = (estado || '').toLowerCase();
+    return e.includes('resuelto')  ? '#22c55e'
+         : e.includes('proceso')   ? '#f59e0b'
+         : e.includes('rechazado') ? '#9ca3af'
+         : '#ef4444';
+  }
+  function badgeClase(estado) {
+    const e = (estado || '').toLowerCase();
+    return e.includes('pendiente') ? 'pendiente'
+         : e.includes('proceso')   ? 'proceso'
+         : e.includes('resuelto')  ? 'resuelto'
+         : 'rechazado';
+  }
+  function badgeRiesgoClase(r) { return (r || '').toLowerCase(); }
+  function formatFecha(f) {
+    if (!f) return '—';
+    return new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  const RADIO_PUNTO = 12; // radio fijo para todos los círculos, igual que antes
+
+  // Agrupa reportes cuyas coordenadas caen muy cerca entre sí (mismo "clúster" visual)
+  // y les da a cada uno un pequeño offset en abanico alrededor del punto real,
+  // para que nunca queden exactamente uno encima del otro.
+  function dispersarCercanos(lista) {
+    const UMBRAL = 0.00035; // ~35-40m, suficiente para separar visualmente sin desplazar de la zona real
+    const usados = new Array(lista.length).fill(false);
+    const resultado = [];
+
+    for (let i = 0; i < lista.length; i++) {
+      if (usados[i]) continue;
+      const base = lista[i];
+      const latI = parseFloat(base.latitudCentro ?? base.latitud);
+      const lngI = parseFloat(base.longitudCentro ?? base.longitud);
+      if (isNaN(latI) || isNaN(lngI)) { usados[i] = true; continue; }
+
+      const grupo = [{ r: base, idx: i }];
+      usados[i] = true;
+
+      for (let j = i + 1; j < lista.length; j++) {
+        if (usados[j]) continue;
+        const otro = lista[j];
+        const latJ = parseFloat(otro.latitudCentro ?? otro.latitud);
+        const lngJ = parseFloat(otro.longitudCentro ?? otro.longitud);
+        if (isNaN(latJ) || isNaN(lngJ)) continue;
+        if (Math.abs(latI - latJ) < UMBRAL && Math.abs(lngI - lngJ) < UMBRAL) {
+          grupo.push({ r: otro, idx: j });
+          usados[j] = true;
+        }
+      }
+
+      if (grupo.length === 1) {
+        resultado.push({ r: base, lat: latI, lng: lngI });
+      } else {
+        // Repartir en abanico circular alrededor del punto promedio del grupo
+        const radioOffset = 0.00022 + (grupo.length > 5 ? 0.00012 : 0);
+        grupo.forEach((item, k) => {
+          const angulo = (2 * Math.PI * k) / grupo.length;
+          resultado.push({
+            r: item.r,
+            lat: latI + radioOffset * Math.cos(angulo),
+            lng: lngI + radioOffset * Math.sin(angulo)
+          });
+        });
+      }
+    }
+    return resultado;
+  }
+
+  let mapaInstance = null;
+  let TODOS = [];        // dataset completo sin filtrar
+  let marcadores = [];   // referencias a capas activas en el mapa
+
+  async function cargarDatos() {
+    const res  = await fetch('/api/admin/reportes', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
+    const json = await res.json();
+    TODOS = json.data || [];
+    poblarCategorias();
+  }
+
+  function poblarCategorias() {
+    const sel = document.getElementById('f-categoria');
+    const cats = [...new Set(TODOS.map(r => r.categoria).filter(Boolean))].sort();
+    cats.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    });
+  }
+
+  function aplicarFiltros(lista) {
+    const fEstado = document.getElementById('f-estado').value;
+    const fCat    = document.getElementById('f-categoria').value;
+    const fRiesgo = document.getElementById('f-riesgo').value;
+
+    return lista.filter(r => {
+      const estado = (r.estado || '').toLowerCase();
+      let pasaEstado = true;
+      if (fEstado === 'activos')        pasaEstado = estado.includes('pendiente') || estado.includes('proceso');
+      else if (fEstado === 'pendiente') pasaEstado = estado.includes('pendiente');
+      else if (fEstado === 'proceso')   pasaEstado = estado.includes('proceso');
+      else if (fEstado === 'resuelto')  pasaEstado = estado.includes('resuelto');
+      else if (fEstado === 'rechazado') pasaEstado = estado.includes('rechazado');
+      // 'todos' -> pasaEstado se queda true
+
+      const pasaCat    = fCat === 'todas' || r.categoria === fCat;
+      const pasaRiesgo = fRiesgo === 'todos' || (r.nivelRiesgo || '').toUpperCase() === fRiesgo;
+
+      return pasaEstado && pasaCat && pasaRiesgo;
+    });
+  }
+
+  function actualizarMiniDashboard(lista) {
+    const totalMinis = lista.reduce((acc, r) => acc + (r.totalMiniReportes || 0), 0);
+    const activos = lista.filter(r => {
+      const e = (r.estado || '').toLowerCase();
+      return e.includes('pendiente') || e.includes('proceso');
+    }).length;
+    const altoSinResolver = lista.filter(r => {
+      const e = (r.estado || '').toLowerCase();
+      return (r.nivelRiesgo || '').toUpperCase() === 'ALTO' && !e.includes('resuelto') && !e.includes('rechazado');
+    }).length;
+    const hoy = new Date();
+    const resueltosMes = lista.filter(r => {
+      const e = (r.estado || '').toLowerCase();
+      if (!e.includes('resuelto') || !r.fechaCreacion) return false;
+      const f = new Date(r.fechaCreacion);
+      return f.getMonth() === hoy.getMonth() && f.getFullYear() === hoy.getFullYear();
+    }).length;
+
+    document.getElementById('md-total').textContent     = lista.length;
+    document.getElementById('md-activos').textContent    = activos;
+    document.getElementById('md-alto').textContent       = altoSinResolver;
+    document.getElementById('md-minis').textContent      = totalMinis;
+    document.getElementById('md-resueltos').textContent  = resueltosMes;
+
+    document.getElementById('filtros-resumen').textContent =
+      `Mostrando ${lista.length} de ${TODOS.length} reportes`;
+  }
+
+  function renderMapa() {
+    const filtrados = aplicarFiltros(TODOS);
+    actualizarMiniDashboard(filtrados);
+
+    // limpiar marcadores previos
+    marcadores.forEach(m => mapaInstance.removeLayer(m));
+    marcadores = [];
+
+    const dispersos = dispersarCercanos(filtrados);
+
+    dispersos.forEach(({ r, lat, lng }) => {
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      const color = estadoColor(r.estado);
+
+      const circle = L.circleMarker([lat, lng], {
+        radius: RADIO_PUNTO,
+        fillColor: color,
+        color: '#fff',
+        weight: 2.5,
+        fillOpacity: 0.88
+      }).addTo(mapaInstance);
+      circle.on('click', () => abrirDetalle(r));
+      marcadores.push(circle);
+    });
+  }
+
+  async function initMapa() {
+    await cargarDatos();
+    const primero = TODOS[0];
+    const centro = primero
+      ? [parseFloat(primero.latitudCentro ?? primero.latitud), parseFloat(primero.longitudCentro ?? primero.longitud)]
+      : [-6.77137, -79.84088];
+    mapaInstance = L.map('mapa').setView(centro, 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(mapaInstance);
+
+    renderMapa();
+
+    ['f-estado', 'f-categoria', 'f-riesgo'].forEach(id => {
+      document.getElementById(id).addEventListener('change', renderMapa);
+    });
+  }
+
+  function resetFiltros() {
+    document.getElementById('f-estado').value = 'activos';
+    document.getElementById('f-categoria').value = 'todas';
+    document.getElementById('f-riesgo').value = 'todos';
+    renderMapa();
+  }
+
+  function abrirDetalle(r) {
+    const panel = document.getElementById('detalle-panel');
+    panel.classList.remove('oculto');
+    setTimeout(() => mapaInstance.invalidateSize(), 260);
+    document.getElementById('det-num').textContent    = `Reporte #${r.id}`;
+    document.getElementById('det-titulo').textContent = r.titulo || '—';
+    document.getElementById('det-link').href          = `/admin/reporte-detalle?id=${r.id}`;
+
+    const fotoWrap = document.getElementById('det-foto-wrap');
+    if (r.fotoPrincipal) {
+      fotoWrap.innerHTML = `<img class="detalle-foto" src="${r.fotoPrincipal}" alt="foto"
+        onerror="this.parentElement.innerHTML='<div class=detalle-foto-placeholder><i class=ti ti-photo></i></div>'">`;
+    } else {
+      fotoWrap.innerHTML = `<div class="detalle-foto-placeholder"><i class="ti ti-photo"></i></div>`;
+    }
+
+    document.getElementById('det-badges').innerHTML = `
+      <span class="badge badge-${badgeClase(r.estado)}">${r.estado || '—'}</span>
+      <span class="badge badge-${badgeRiesgoClase(r.nivelRiesgo)}">${(r.nivelRiesgo || '').toUpperCase()}</span>
+    `;
+
+    document.getElementById('det-desc').textContent = r.descripcionConsolidada || '—';
+
+    const pct = r.porcentajeAvance || 0;
+    document.getElementById('det-avance-pct').textContent  = pct;
+    document.getElementById('det-avance-fill').style.width = pct + '%';
+
+    document.getElementById('det-meta').innerHTML = `
+      <div class="detalle-meta-row"><i class="ti ti-tag"></i><span>${r.categoria || '—'}</span></div>
+      <div class="detalle-meta-row"><i class="ti ti-map-pin"></i><span>${r.zonaReferencia || 'Sin zona registrada'}</span></div>
+      <div class="detalle-meta-row"><i class="ti ti-calendar"></i><span>${formatFecha(r.fechaCreacion)}</span></div>
+    `;
+
+    // Mini reportes vinculados (todos, no solo el primero)
+    const minis = r.miniReportes || [];
+    document.getElementById('det-mini-count').textContent = minis.length;
+    document.getElementById('det-minis').innerHTML = minis.length === 0
+      ? '<div style="font-size:.75rem;color:var(--muted)">Sin solicitudes vinculadas</div>'
+      : minis.map(m => `
+          <div class="mini-chip">
+            <i class="ti ti-user-circle"></i>
+            <div style="display:flex;flex-direction:column;min-width:0;">
+              <span>${m.nombreUsuario || '—'}</span>
+              ${m.titulo ? `<span class="mc-tit">${m.titulo}</span>` : ''}
+            </div>
+          </div>
+        `).join('');
+  }
+
+  function cerrarDetalle() {
+    document.getElementById('detalle-panel').classList.add('oculto');
+    if (mapaInstance) mapaInstance.invalidateSize();
+  }
+
+
+
+  initMapa();
+
+
+</script>
+</body>
+</html>

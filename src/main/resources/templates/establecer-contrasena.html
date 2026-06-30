@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altoque – Establecer contraseña</title>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: relative;
+          overflow: hidden;
+        }
+        /* Fondo municipalidad */
+        .bg-photo {
+          position: fixed;
+          inset: 0;
+          background-image: url('/fondo_2.png');
+          background-size: cover;
+          background-position: center;
+          filter: brightness(.55);
+          z-index: 0;
+        }
+        /* Card principal — misma proporción que login-admin */
+        .card {
+          position: relative;
+          z-index: 1;
+          background: #fff;
+          width: 480px;
+          max-width: 95vw;
+          border-radius: 4px;
+          overflow: hidden;
+          box-shadow: 0 8px 40px rgba(0,0,0,.45);
+        }
+        /* Barra superior */
+        .top-bar { height: 7px; display: flex; }
+        .top-bar span { flex: 1; }
+        .top-bar span:nth-child(1) { background: #c0392b; }
+        .top-bar span:nth-child(2) { background: #f0c30f; }
+        .top-bar span:nth-child(3) { background: #0fa89a; }
+        .top-bar span:nth-child(4) { background: #1a3a8f; }
+        /* Cabecera */
+        .card-header { padding: 2rem 3rem 1.4rem; text-align: center; }
+        .logo-wrapper { width: 90px; height: 90px; margin: 0 auto 1rem; }
+        .logo-wrapper img { width: 100%; height: 100%; object-fit: contain; }
+        .muni-name {
+          font-size: .95rem; font-weight: 700; color: #111;
+          letter-spacing: .01em; line-height: 1.4; margin-bottom: .4rem;
+          text-transform: uppercase;
+        }
+        .altoque-badge {
+          display: inline-block; background: #1a3a8f; color: #fff;
+          font-size: .72rem; font-weight: 700; letter-spacing: .07em;
+          text-transform: uppercase; padding: .28rem 1rem; border-radius: 2px;
+          margin-bottom: .1rem;
+        }
+        .altoque-badge span { color: #0fa89a; }
+        .system-sub { font-size: .82rem; color: #555; margin-top: .45rem; }
+        /* Cuerpo del formulario */
+        .card-body { padding: .4rem 3rem 2.4rem; }
+        /* Mensajes */
+        .error-msg, .success-msg {
+          display: none;
+          border-left: 4px solid #e53e3e;
+          color: #c53030;
+          background: #fff5f5;
+          padding: .55rem .85rem;
+          font-size: .82rem;
+          border-radius: 2px;
+          margin-bottom: 1rem;
+        }
+        .success-msg {
+          border-left-color: #0fa89a;
+          color: #0d7d72;
+          background: #f0fdfa;
+        }
+        /* Campos */
+        .field { margin-bottom: 1.1rem; }
+        .field-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .38rem; }
+        .field label { display: block; font-size: .83rem; font-weight: 600; color: #222; }
+        .input-wrap { position: relative; }
+        .input-wrap input {
+          width: 100%;
+          padding: .72rem 2.4rem .72rem .9rem;
+          border: 1px solid #d1d5db;
+          border-radius: 6px;
+          font-size: .9rem;
+          color: #111;
+          background: #fafafa;
+          outline: none;
+          transition: border-color .18s, box-shadow .18s;
+        }
+        .input-wrap input:focus {
+          border-color: #1a3a8f;
+          background: #fff;
+          box-shadow: 0 0 0 3px rgba(26,58,143,.09);
+        }
+        .input-icon {
+          position: absolute; right: .8rem; top: 50%; transform: translateY(-50%);
+          color: #aaa; cursor: pointer; display: flex;
+        }
+        .field-hint { font-size: .74rem; color: #9ca3af; margin-top: .35rem; }
+        /* Botón principal */
+        .btn-submit {
+          width: 100%;
+          padding: .85rem;
+          background: #1a4fc4;
+          color: #fff;
+          border: none;
+          border-radius: 6px;
+          font-size: .97rem;
+          font-weight: 700;
+          cursor: pointer;
+          margin-top: .2rem;
+          letter-spacing: .04em;
+          transition: background .15s;
+        }
+        .btn-submit:hover { background: #153db0; }
+        .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
+        /* Estado: enlace inválido */
+        .estado-invalido { text-align: center; padding: .4rem 0 .6rem; }
+        .estado-invalido i {
+          font-size: 2.4rem; color: #c0392b; margin-bottom: .8rem; display: block;
+        }
+        .estado-invalido .titulo { font-weight: 700; color: #111827; margin-bottom: .4rem; font-size: .95rem; }
+        .estado-invalido .desc { font-size: .85rem; color: #6b7280; line-height: 1.5; }
+    </style>
+</head>
+<body>
+<div class="bg-photo"></div>
+<div class="card">
+    <div class="top-bar">
+        <span></span><span></span><span></span><span></span>
+    </div>
+    <div class="card-header">
+        <div class="logo-wrapper">
+            <img th:src="@{/logo_mpch.png}" src="/logo_mpch.png" alt="Logo MPCH">
+        </div>
+        <div class="muni-name">Municipalidad Provincial<br>de Chiclayo</div>
+        <div class="altoque-badge">AL<span>TOQUE</span> &nbsp;·&nbsp; Panel Municipal</div>
+        <div class="system-sub" id="subTitulo">Establece tu contraseña de acceso</div>
+    </div>
+
+    <div class="card-body" id="cardBody">
+        <div class="error-msg" id="errorMsg"></div>
+        <div class="success-msg" id="successMsg"></div>
+
+        <form id="form" onsubmit="return false;">
+            <div class="field">
+                <div class="field-header">
+                    <label for="contrasena">Nueva contraseña</label>
+                </div>
+                <div class="input-wrap">
+                    <input type="password" id="contrasena" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+                    <span class="input-icon" onclick="togglePass('contrasena', 'eyeIcon1')" title="Mostrar/ocultar">
+            <svg id="eyeIcon1" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+                </div>
+                <div class="field-hint">Usa al menos 8 caracteres. Evita contraseñas obvias.</div>
+            </div>
+
+            <div class="field">
+                <div class="field-header">
+                    <label for="confirmar">Confirmar contraseña</label>
+                </div>
+                <div class="input-wrap">
+                    <input type="password" id="confirmar" placeholder="Repite tu contraseña" autocomplete="new-password">
+                    <span class="input-icon" onclick="togglePass('confirmar', 'eyeIcon2')" title="Mostrar/ocultar">
+            <svg id="eyeIcon2" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+                </div>
+            </div>
+
+            <button class="btn-submit" id="btnSubmit" onclick="enviar()">&#187; Guardar contraseña</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const params = new URLSearchParams(location.search);
+    const token  = params.get('token');
+
+    function togglePass(inputId, iconId) {
+      const inp = document.getElementById(inputId);
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    function mostrarError(msg) {
+      document.getElementById('successMsg').style.display = 'none';
+      const err = document.getElementById('errorMsg');
+      err.textContent = msg;
+      err.style.display = 'block';
+    }
+
+    function mostrarExito(msg) {
+      document.getElementById('errorMsg').style.display = 'none';
+      const ok = document.getElementById('successMsg');
+      ok.textContent = msg;
+      ok.style.display = 'block';
+    }
+
+    if (!token) {
+      document.getElementById('subTitulo').textContent = 'Enlace no válido';
+      document.getElementById('cardBody').innerHTML = `
+        <div class="estado-invalido">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin:0 auto .8rem;display:block;color:#c0392b">
+            <path d="M18.36 5.64l-1.42 1.42M5.64 18.36l1.42-1.42M5.64 5.64l1.42 1.42M18.36 18.36l-1.42-1.42M2 12h2M20 12h2M12 2v2M12 20v2"/>
+            <circle cx="12" cy="12" r="6"/>
+          </svg>
+          <div class="titulo">Enlace inválido</div>
+          <div class="desc">Este enlace no contiene la información necesaria. Solicita uno nuevo desde el panel municipal.</div>
+        </div>`;
+    }
+
+    async function enviar() {
+      const contrasena = document.getElementById('contrasena').value;
+      const confirmar  = document.getElementById('confirmar').value;
+
+      if (contrasena.length < 8) {
+        mostrarError('La contraseña debe tener al menos 8 caracteres.');
+        return;
+      }
+      if (contrasena !== confirmar) {
+        mostrarError('Las contraseñas no coinciden.');
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
+      try {
+        const res = await fetch('/api/admin/password/establecer', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token, contrasena })
+        });
+        const json = await res.json();
+        if (json.ok) {
+          mostrarExito('✓ ' + json.mensaje);
+          document.getElementById('form').style.display = 'none';
+          setTimeout(() => window.location.href = '/admin/login', 2200);
+        } else {
+          mostrarError(json.mensaje || 'No se pudo establecer la contraseña.');
+          btn.disabled = false;
+          btn.textContent = '» Guardar contraseña';
+        }
+      } catch {
+        mostrarError('Error de conexión. Intenta nuevamente.');
+        btn.disabled = false;
+        btn.textContent = '» Guardar contraseña';
+      }
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') enviar(); });
+</script>
+</body>
+</html>

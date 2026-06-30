@@ -2,6 +2,7 @@ package com.innovacion.altoque.controller;
 
 import com.innovacion.altoque.dto.response.ApiResponse;
 import com.innovacion.altoque.dto.response.ReporteDetalleResponse;
+import com.innovacion.altoque.dto.response.ReporteMapaResponse;
 import com.innovacion.altoque.model.Reporte;
 import com.innovacion.altoque.repository.ReporteRepository;
 import com.innovacion.altoque.service.ReporteService;
@@ -23,10 +24,8 @@ public class ReporteController {
     public ResponseEntity<ApiResponse<List<ReporteDetalleResponse>>> cercanos(
             @RequestParam BigDecimal lat,
             @RequestParam BigDecimal lng) {
-        List<ReporteDetalleResponse> lista = reporteRepository.findCercanos(lat, lng)
-                .stream()
-                .map(reporteService::toDetalleResponse)
-                .collect(Collectors.toList());
+        List<Reporte> reportes = reporteRepository.findCercanos(lat, lng);
+        List<ReporteDetalleResponse> lista = reporteService.toDetalleResponseBatch(reportes);
         return ResponseEntity.ok(ApiResponse.ok("OK", lista));
     }
 
@@ -44,5 +43,13 @@ public class ReporteController {
         Reporte r = reporteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
         return ResponseEntity.ok(ApiResponse.ok("OK", reporteService.toDetalleResponse(r)));
+    }
+
+
+    @GetMapping("/mapa")
+    public ResponseEntity<ApiResponse<List<ReporteMapaResponse>>> paraMapa() {
+        List<Reporte> reportes = reporteRepository.findAllByOrderByFechaCreacionDesc();
+        List<ReporteMapaResponse> lista = reporteService.toMapaResponseBatch(reportes);
+        return ResponseEntity.ok(ApiResponse.ok("OK", lista));
     }
 }

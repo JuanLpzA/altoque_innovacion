@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
+
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
@@ -17,13 +18,15 @@ public class Usuario {
     @Column(nullable = false, length = 60)
     private String apellido;
 
-    @Column(nullable = false, unique = true, length = 8, columnDefinition = "CHAR(8)")
+    @Column(unique = true, length = 8, columnDefinition = "CHAR(8)")
     private String dni;
 
-    @Column(length = 100)
+
+    @Column(unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, length = 255)
+
+    @Column(length = 255)
     private String contrasena;
 
     @Column(length = 15)

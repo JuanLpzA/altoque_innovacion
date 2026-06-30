@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="sidebar(activa)" class="sidebar">
+    <div class="sidebar-brand">AL<span>Toque</span></div>
+    <div class="sidebar-section">Principal</div>
+    <nav class="sidebar-nav">
+        <a href="/admin/dashboard" th:classappend="${activa == 'dashboard'} ? 'active'">
+            <i class="ti ti-layout-dashboard"></i> Dashboard
+        </a>
+        <a href="/admin/reportes" th:classappend="${activa == 'reportes'} ? 'active'">
+            <i class="ti ti-clipboard-list"></i> Reportes
+        </a>
+        <a href="/admin/mapa" th:classappend="${activa == 'mapa'} ? 'active'">
+            <i class="ti ti-map-pin"></i> Mapa de incidencias
+        </a>
+        <a href="/admin/evidencias" th:classappend="${activa == 'evidencias'} ? 'active'">
+            <i class="ti ti-photo"></i> Evidencias
+        </a>
+        <a href="/admin/moderacion" th:classappend="${activa == 'moderacion'} ? 'active'">
+            <i class="ti ti-shield-check"></i> Centro de moderación
+        </a>
+
+        <div id="seccion-administrador" style="display:none">
+            <div class="sidebar-section">Administrador</div>
+            <a href="/admin/usuarios" id="link-usuarios" th:classappend="${activa == 'usuarios'} ? 'active'">
+                <i class="ti ti-users"></i> Usuarios
+            </a>
+        </div>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="avatar-sm"><i class="ti ti-building-community"></i></div>
+            <div class="user-info">
+                <div class="user-name" id="sb-nombre">—</div>
+                <div class="user-role">Municipalidad</div>
+            </div>
+            <button class="btn-logout" onclick="cerrarSesion()"><i class="ti ti-power"></i></button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

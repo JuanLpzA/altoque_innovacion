@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>Altoque – Notificaciones</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f0f5fb;
+            min-height: 100dvh;
+            padding-bottom: 30px;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+        .header {
+            background: #1a3a8f;
+            padding: 1.1rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .btn-back {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255,255,255,.15);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff;
+            font-size: 1.1rem;
+            cursor: pointer;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: #fff;
+            flex: 1;
+        }
+        .btn-leer-todas {
+            font-size: .72rem;
+            font-weight: 700;
+            color: #fff;
+            background: rgba(255,255,255,.15);
+            border: none;
+            border-radius: 8px;
+            padding: .4rem .7rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .btn-leer-todas:disabled { opacity: .5; cursor: not-allowed; }
+        .content { padding: 1rem; }
+        .notif-card {
+            background: #fff;
+            border-radius: 14px;
+            padding: .9rem 1rem;
+            margin-bottom: .7rem;
+            display: flex;
+            gap: .8rem;
+            align-items: flex-start;
+            box-shadow: 0 2px 10px rgba(0,0,0,.05);
+            text-decoration: none;
+            position: relative;
+            transition: transform .12s;
+        }
+        .notif-card:active { transform: scale(.98); }
+        .notif-card.no-leida { background: #eef3fd; }
+        .notif-card.no-leida::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            background: #1a3a8f;
+            border-radius: 4px 0 0 4px;
+        }
+        .notif-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: #e8f0fe;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .notif-icon i { color: #1a3a8f; font-size: 1.1rem; }
+        .notif-info { flex: 1; min-width: 0; }
+        .notif-mensaje {
+            font-size: .85rem;
+            color: #1f2937;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+        .notif-card.no-leida .notif-mensaje { font-weight: 700; }
+        .notif-reporte {
+            font-size: .73rem;
+            color: #1a3a8f;
+            font-weight: 600;
+            margin-top: .3rem;
+        }
+        .notif-fecha {
+            font-size: .68rem;
+            color: #9ca3af;
+            margin-top: .35rem;
+        }
+        .empty {
+            text-align: center;
+            color: #9ca3af;
+            padding: 3rem 1rem;
+            font-size: .85rem;
+        }
+        .empty i { font-size: 2.4rem; display: block; margin-bottom: .8rem; opacity: .5; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <a href="/inicio" class="btn-back"><i class="ti ti-arrow-left"></i></a>
+    <div class="header-title">Notificaciones</div>
+    <button class="btn-leer-todas" id="btn-leer-todas" onclick="marcarTodasLeidas()">Marcar todas leídas</button>
+</div>
+
+<div class="content" id="lista-notificaciones">
+    <p class="empty">Cargando notificaciones...</p>
+</div>
+
+<script>
+    const token = localStorage.getItem('token');
+    if (!token) { window.location.href = '/login'; }
+
+    async function fetchConReintento(url, opciones = {}, intentos = 2, timeoutMs = 8000) {
+        for (let intento = 1; intento <= intentos; intento++) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { ...opciones, signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return await res.json();
+            } catch (err) {
+                clearTimeout(timeoutId);
+                if (intento === intentos) throw err;
+                await new Promise(r => setTimeout(r, 600));
+            }
+        }
+    }
+
+    function formatFecha(f) {
+        if (!f) return '—';
+        const d = new Date(f);
+        const ahora = new Date();
+        const diffMs = ahora - d;
+        const diffMin = Math.floor(diffMs / 60000);
+        if (diffMin < 1) return 'Justo ahora';
+        if (diffMin < 60) return `Hace ${diffMin} min`;
+        const diffH = Math.floor(diffMin / 60);
+        if (diffH < 24) return `Hace ${diffH} h`;
+        return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    async function marcarLeida(id) {
+        try {
+            await fetch(`/api/notificaciones/${id}/leer`, {
+                method: 'PATCH',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+        } catch (e) { /* no bloqueamos la navegación si falla */ }
+    }
+
+    function irAReporte(id, reporteId) {
+        marcarLeida(id);
+        if (reporteId) {
+            window.location.href = `/reporte-detalle?id=${reporteId}`;
+        }
+    }
+    window.irAReporte = irAReporte;
+
+    function renderNotificaciones(data) {
+        const cont = document.getElementById('lista-notificaciones');
+        if (!data || data.length === 0) {
+            cont.innerHTML = `
+                <div class="empty">
+                    <i class="ti ti-bell-off"></i>
+                    No tienes notificaciones por ahora.
+                </div>`;
+            document.getElementById('btn-leer-todas').disabled = true;
+            return;
+        }
+
+        const hayNoLeidas = data.some(n => !n.leido);
+        document.getElementById('btn-leer-todas').disabled = !hayNoLeidas;
+
+        cont.innerHTML = data.map(n => {
+            const claseNoLeida = n.leido ? '' : 'no-leida';
+            const reporteHtml = n.reporteTitulo
+                ? `<div class="notif-reporte"><i class="ti ti-clipboard-list" style="font-size:.7rem"></i> ${n.reporteTitulo}</div>`
+                : '';
+            return `
+            <a href="#" class="notif-card ${claseNoLeida}" onclick="irAReporte(${n.id}, ${n.reporteId ?? 'null'}); return ${n.reporteId ? 'true' : 'false'};">
+                <div class="notif-icon"><i class="ti ti-bell"></i></div>
+                <div class="notif-info">
+                    <div class="notif-mensaje">${n.mensaje}</div>
+                    ${reporteHtml}
+                    <div class="notif-fecha">${formatFecha(n.fecha)}</div>
+                </div>
+            </a>`;
+        }).join('');
+    }
+
+    async function cargarNotificaciones() {
+        try {
+            const json = await fetchConReintento('/api/notificaciones', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            renderNotificaciones(json.data);
+        } catch (e) {
+            document.getElementById('lista-notificaciones').innerHTML = `
+                <div class="empty">
+                    <i class="ti ti-wifi-off"></i>
+                    No se pudieron cargar las notificaciones.
+                    <br><a href="#" onclick="cargarNotificaciones(); return false;" style="color:#1a3a8f;font-weight:700;">Reintentar</a>
+                </div>`;
+        }
+    }
+
+    async function marcarTodasLeidas() {
+        const btn = document.getElementById('btn-leer-todas');
+        btn.disabled = true;
+        try {
+            await fetch('/api/notificaciones/leer-todas', {
+                method: 'PATCH',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            await cargarNotificaciones();
+        } catch (e) {
+            btn.disabled = false;
+        }
+    }
+
+    cargarNotificaciones();
+</script>
+</body>
+</html>

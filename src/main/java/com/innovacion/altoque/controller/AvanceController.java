@@ -1,13 +1,17 @@
 package com.innovacion.altoque.controller;
 
+import com.innovacion.altoque.dto.request.AvanceRequest;
 import com.innovacion.altoque.dto.response.ApiResponse;
 import com.innovacion.altoque.model.*;
 import com.innovacion.altoque.repository.*;
 import com.innovacion.altoque.service.CloudinaryService;
 import com.innovacion.altoque.service.ReporteService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,19 +32,44 @@ public class AvanceController {
     private final ReporteService reporteService;
 
     @PostMapping("/{idReporte}")
+    @Transactional
     public ResponseEntity<ApiResponse<String>> agregarAvance(
             @PathVariable Integer idReporte,
             @RequestParam(required = false) String comentario,
             @RequestParam Short porcentaje,
-            @RequestParam String nuevoEstado,
+            @RequestParam(defaultValue = "false") boolean sinFoto,
             @RequestParam(required = false) MultipartFile foto,
             @AuthenticationPrincipal Usuario usuario) throws IOException {
 
         Reporte reporte = reporteRepository.findById(idReporte)
                 .orElseThrow(() -> new RuntimeException("Reporte no encontrado"));
 
+        String estadoActual = reporte.getEstado().getNombre().toLowerCase();
+        if (estadoActual.contains("resuelto") || estadoActual.contains("rechazado")) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(ApiResponse.error("No se pueden registrar avances en un reporte " + estadoActual));
+        }
+
+        // Regla: el porcentaje nunca puede bajar
+        short porcentajeActual = reporte.getPorcentajeAvance() == null ? 0 : reporte.getPorcentajeAvance();
+        if (porcentaje < porcentajeActual) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error(
+                            "El porcentaje no puede ser menor al avance actual (" + porcentajeActual + "%)"));
+        }
+
+        // Regla: foto obligatoria salvo que se confirme explícitamente que no hay evidencia
+        boolean hayFoto = foto != null && !foto.isEmpty();
+        if (!hayFoto && !sinFoto) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("Debes adjuntar una foto de evidencia, o confirmar que no cuentas con ella"));
+        }
+
         String urlFoto = null;
-        if (foto != null && !foto.isEmpty()) {
+        if (hayFoto) {
             urlFoto = cloudinaryService.subirFoto(foto, "avances");
         }
 
@@ -52,10 +81,13 @@ public class AvanceController {
         avance.setPorcentaje(porcentaje);
         avanceReporteRepository.save(avance);
 
-        reporte.setPorcentajeAvance(porcentaje);
+        // Regla: el estado se calcula automáticamente, nunca lo elige el admin
+        String nombreEstadoDestino = (porcentaje >= 100) ? "resuelto" : "en proceso";
         EstadoReporte estado = estadoReporteRepository
-                .findByNombreIgnoreCase(nuevoEstado)
-                .orElseThrow(() -> new RuntimeException("Estado no válido"));
+                .findByNombreIgnoreCase(nombreEstadoDestino)
+                .orElseThrow(() -> new RuntimeException("Estado no configurado: " + nombreEstadoDestino));
+
+        reporte.setPorcentajeAvance(porcentaje);
         reporte.setEstado(estado);
         reporte.setFechaActualizacion(LocalDateTime.now());
         reporteRepository.save(reporte);
@@ -67,8 +99,8 @@ public class AvanceController {
         historial.setComentario(comentario);
         historialEstadoRepository.save(historial);
 
-        String mensajeNoti = "Tu reporte '" + reporte.getTitulo() + "' fue actualizado a: " + estado.getNombre()
-                + " (" + porcentaje + "% completado)";
+        String mensajeNoti = "Tu reporte '" + reporte.getTitulo() + "' fue actualizado a: "
+                + estado.getNombre() + " (" + porcentaje + "% completado)";
         reporteService.notificarCiudadanos(reporte, mensajeNoti);
 
         return ResponseEntity.ok(ApiResponse.ok("Avance registrado", null));

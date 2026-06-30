@@ -26,7 +26,7 @@ public class AnalisisIAService {
     private final CategoriaRepository categoriaRepository;
 
     private static final String URL_GEMINI =
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=";
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=";
 
     public AnalisisIAResponse analizarFoto(String urlFotoCloudinary) {
         AnalisisIAResponse fallback = buildFallback();

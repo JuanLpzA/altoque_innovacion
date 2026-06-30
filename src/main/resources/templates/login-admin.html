@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Altoque – Panel Municipal</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Fondo municipalidad */
+    .bg-photo {
+      position: fixed;
+      inset: 0;
+      background-image: url('/fondo_2.png');
+      background-size: cover;
+      background-position: center;
+      filter: brightness(.55);
+      z-index: 0;
+    }
+
+    /* Card principal — igual proporción que la referencia */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: #fff;
+      width: 480px;
+      max-width: 95vw;
+      border-radius: 4px;
+      overflow: hidden;
+      box-shadow: 0 8px 40px rgba(0,0,0,.45);
+    }
+
+    /* Barra superior: rojo | amarillo | teal | azul  (colores Altoque en vez de bandera) */
+    .top-bar {
+      height: 7px;
+      display: flex;
+    }
+    .top-bar span { flex: 1; }
+    .top-bar span:nth-child(1) { background: #c0392b; }
+    .top-bar span:nth-child(2) { background: #f0c30f; }
+    .top-bar span:nth-child(3) { background: #0fa89a; }   /* teal Altoque */
+    .top-bar span:nth-child(4) { background: #1a3a8f; }   /* navy Altoque */
+
+    /* Cabecera */
+    .card-header {
+      padding: 2rem 3rem 1.4rem;
+      text-align: center;
+    }
+
+    .logo-wrapper {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 1rem;
+    }
+
+    .logo-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .muni-name {
+      font-size: .95rem;
+      font-weight: 700;
+      color: #111;
+      letter-spacing: .01em;
+      line-height: 1.4;
+      margin-bottom: .4rem;
+      text-transform: uppercase;
+    }
+
+    /* Badge Altoque — único diferenciador visual */
+    .altoque-badge {
+      display: inline-block;
+      background: #1a3a8f;
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      padding: .28rem 1rem;
+      border-radius: 2px;
+      margin-bottom: .1rem;
+    }
+    .altoque-badge span { color: #0fa89a; }
+
+    .system-sub {
+      font-size: .82rem;
+      color: #555;
+      margin-top: .45rem;
+    }
+
+    /* Cuerpo del formulario */
+    .card-body {
+      padding: .4rem 3rem 2.4rem;
+    }
+
+    /* Mensaje error */
+    .error-msg {
+      display: none;
+      border-left: 4px solid #e53e3e;
+      color: #c53030;
+      background: #fff5f5;
+      padding: .55rem .85rem;
+      font-size: .82rem;
+      border-radius: 2px;
+      margin-bottom: 1rem;
+    }
+
+    /* Campos */
+    .field { margin-bottom: 1.1rem; }
+
+    .field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: .38rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: .83rem;
+      font-weight: 600;
+      color: #222;
+    }
+
+    .input-wrap { position: relative; }
+
+    .input-wrap input {
+      width: 100%;
+      padding: .72rem 2.4rem .72rem .9rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: .9rem;
+      color: #111;
+      background: #fafafa;
+      outline: none;
+      transition: border-color .18s, box-shadow .18s;
+    }
+
+    .input-wrap input:focus {
+      border-color: #1a3a8f;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(26,58,143,.09);
+    }
+
+    .input-icon {
+      position: absolute;
+      right: .8rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #aaa;
+      cursor: pointer;
+      display: flex;
+    }
+
+    /* Captcha */
+    .captcha-row {
+      display: flex;
+      align-items: center;
+      gap: .6rem;
+      margin-bottom: .55rem;
+    }
+
+    .captcha-canvas-wrap {
+      flex: 1;
+      border-bottom: 2px solid #111;
+      padding: .2rem 0;
+      background: transparent;
+    }
+
+    #captchaCanvas { display: block; }
+
+    .btn-refresh {
+      width: 38px;
+      height: 38px;
+      border: 1.5px solid #1a3a8f;
+      background: #fff;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #1a3a8f;
+      transition: background .15s;
+      flex-shrink: 0;
+    }
+    .btn-refresh:hover { background: #eef2ff; }
+
+    /* Botón ingresar */
+    .btn-submit {
+      width: 100%;
+      padding: .85rem;
+      background: #1a4fc4;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: .97rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: .2rem;
+      letter-spacing: .04em;
+      transition: background .15s;
+    }
+    .btn-submit:hover { background: #153db0; }
+  </style>
+</head>
+<body>
+
+<div class="bg-photo"></div>
+
+<div class="card">
+  <div class="top-bar">
+    <span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="card-header">
+    <div class="logo-wrapper">
+      <!-- Thymeleaf resuelve /static/logo_mpch.png correctamente así: -->
+      <img th:src="@{/logo_mpch.png}" src="/logo_mpch.png" alt="Logo MPCH">
+    </div>
+    <div class="muni-name">Municipalidad Provincial<br>de Chiclayo</div>
+    <div class="altoque-badge">AL<span>TOQUE</span> &nbsp;·&nbsp; Panel Municipal</div>
+    <div class="system-sub">Sistema de Reportes de Incidencias v1.0</div>
+  </div>
+
+  <div class="card-body">
+    <div class="error-msg" id="errorMsg"></div>
+
+    <div class="field">
+      <div class="field-header">
+        <label for="email">Usuario</label>
+      </div>
+      <div class="input-wrap">
+        <input type="email" id="email" placeholder="Ingrese su correo institucional" autocomplete="email">
+        <span class="input-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="field">
+      <div class="field-header">
+        <label for="pass">Contraseña</label>
+      </div>
+      <div class="input-wrap">
+        <input type="password" id="pass" placeholder="Ingrese su Contraseña" autocomplete="current-password">
+        <span class="input-icon" onclick="togglePass()" title="Mostrar/ocultar">
+          <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+        </span>
+      </div>
+    </div>
+
+    <!-- Captcha: igual al de la referencia — texto sobre línea, botón refresh al lado -->
+    <div class="field">
+      <div class="captcha-row">
+        <div class="captcha-canvas-wrap">
+          <canvas id="captchaCanvas" width="260" height="44"></canvas>
+        </div>
+        <button type="button" class="btn-refresh" onclick="generarCaptcha()" title="Nuevo código">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"/>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-wrap" style="margin-top:.5rem">
+        <input type="text" id="captchaInput" placeholder="Ingrese el captcha"
+               maxlength="6" autocomplete="off"
+               style="text-transform:uppercase; letter-spacing:.12em;">
+      </div>
+    </div>
+
+    <button class="btn-submit" onclick="iniciarSesion()">&#187; Ingresar</button>
+  </div>
+</div>
+
+<script>
+  // ── Captcha ──────────────────────────────────────────────────────────────────
+  let captchaCode = '';
+
+  function generarCaptcha() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    captchaCode = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+
+    const canvas = document.getElementById('captchaCanvas');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    ctx.clearRect(0, 0, W, H);
+
+    // Fondo limpio (igual que la referencia: blanco puro)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, W, H);
+
+    // Letras en negro bold (como la referencia: ZAYW5Z en negro)
+    const step = W / captchaCode.length;
+    captchaCode.split('').forEach((ch, i) => {
+      ctx.save();
+      const size = 22 + Math.floor(Math.random() * 5);
+      ctx.font = `900 ${size}px 'Arial Black', Arial, sans-serif`;
+      ctx.fillStyle = '#111';
+      const angle = (Math.random() - .5) * .3;
+      const x = step * i + step / 2;
+      const y = H / 2;
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(ch, 0, 0);
+      ctx.restore();
+    });
+
+    document.getElementById('captchaInput').value = '';
+  }
+
+  // ── Mostrar/ocultar contraseña ───────────────────────────────────────────────
+  function togglePass() {
+    const inp = document.getElementById('pass');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+
+  // ── Login ────────────────────────────────────────────────────────────────────
+
+
+  async function iniciarSesion() {
+    const email    = document.getElementById('email').value.trim();
+    const pass     = document.getElementById('pass').value.trim();
+    const captchaV = document.getElementById('captchaInput').value.trim().toUpperCase();
+    const err      = document.getElementById('errorMsg');
+    err.style.display = 'none';
+
+    if (!email || pass.length < 4) {
+      mostrarError('Verifica tu correo y contraseña.');
+      return;
+    }
+    if (!captchaV) {
+      mostrarError('Por favor ingresa el código captcha.');
+      return;
+    }
+    if (captchaV !== captchaCode) {
+      mostrarError('El código captcha es inválido.');
+      generarCaptcha();
+      return;
+    }
+
+    try {
+      const res  = await fetch('/api/admin/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, contrasena: pass })
+      });
+      const json = await res.json();
+      if (json.ok) {
+        const data = json.data;
+        localStorage.setItem('token',    data.token);
+        localStorage.setItem('nombre',   data.nombre);
+        localStorage.setItem('apellido', data.apellido);
+        localStorage.setItem('rol',      data.rol);
+        window.location.href = '/admin/dashboard';
+      } else {
+        mostrarError(json.mensaje || 'Credenciales incorrectas.');
+        generarCaptcha();
+      }
+    } catch {
+      mostrarError('Error de conexión. Intenta nuevamente.');
+    }
+  }
+
+  function mostrarError(msg) {
+    const err = document.getElementById('errorMsg');
+    err.textContent = msg;
+    err.style.display = 'block';
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') iniciarSesion(); });
+  generarCaptcha();
+</script>
+</body>
+</html>

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altoque – Reportes</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+          --sidebar-bg: #1a3a8f;
+          --accent: #0fa89a;
+          --bg: #f0f5fb;
+          --card: #fff;
+          --text: #111827;
+          --muted: #9ca3af;
+          --border: #f3f4f6;
+        }
+        body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: var(--bg);
+          min-height: 100vh;
+          display: flex;
+        }
+        /* ── SIDEBAR ── */
+        .sidebar {
+          width: 220px;
+          background: var(--sidebar-bg);
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+          flex-shrink: 0;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+        }
+        .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
+        .sidebar-brand span { color: var(--accent); }
+        .sidebar-section { padding: .9rem 1.4rem .3rem; font-size: .62rem; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; }
+        .sidebar-nav a { display: flex; align-items: center; gap: .65rem; padding: .62rem 1.4rem; color: rgba(255,255,255,.62); text-decoration: none; font-size: .84rem; font-weight: 500; transition: background .15s, color .15s; }
+        .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
+        .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
+        .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
+        .sidebar-footer { margin-top: auto; padding: 1rem 1.4rem; border-top: 1px solid rgba(255,255,255,.08); }
+        .sidebar-user { display: flex; align-items: center; gap: .6rem; }
+        .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .avatar-sm i { color: #fff; font-size: .95rem; }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
+        .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
+        .btn-logout:hover { color: #fff; }
+        /* ── MAIN ── */
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .topbar {
+          background: var(--card); padding: .9rem 1.8rem;
+          display: flex; align-items: center; justify-content: space-between;
+          border-bottom: 1px solid var(--border);
+          position: sticky; top: 0; z-index: 10;
+        }
+        .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .content { padding: 1.6rem 1.8rem; }
+        /* ── FILTROS ── */
+        .filtros-card {
+          background: var(--card);
+          border-radius: 14px;
+          box-shadow: 0 2px 10px rgba(0,0,0,.05);
+          padding: 1.1rem 1.3rem;
+          margin-bottom: 1.2rem;
+        }
+        .filtros-top-row { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin-bottom: .8rem; }
+        .search-wrap { position: relative; flex: 1; min-width: 220px; }
+        .search-wrap i { position: absolute; left: .75rem; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: .95rem; }
+        .search-input {
+          width: 100%; padding: .55rem .8rem .55rem 2.2rem;
+          border: 1.5px solid #e5e7eb; border-radius: 9px;
+          font-size: .82rem; outline: none;
+        }
+        .search-input:focus { border-color: var(--sidebar-bg); }
+        .btn-toggle-filtros {
+          display: flex; align-items: center; gap: .4rem;
+          padding: .55rem .9rem;
+          border: 1.5px solid #e5e7eb; border-radius: 9px;
+          background: var(--card); cursor: pointer;
+          font-size: .8rem; font-weight: 600; color: #374151;
+          white-space: nowrap;
+        }
+        .btn-toggle-filtros:hover { background: #f8faff; border-color: var(--sidebar-bg); }
+        .btn-toggle-filtros.activo { background: #eff6ff; border-color: var(--sidebar-bg); color: var(--sidebar-bg); }
+        .filtros-grid {
+          display: none;
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          gap: .7rem;
+          padding-top: .9rem;
+          border-top: 1px solid var(--border);
+        }
+        .filtros-grid.open { display: grid; }
+        .filtro-group label {
+          display: block; font-size: .7rem; font-weight: 700;
+          color: var(--muted); text-transform: uppercase; letter-spacing: .04em;
+          margin-bottom: .35rem;
+        }
+        .filtro-select, .filtro-fecha {
+          width: 100%;
+          padding: .5rem .7rem;
+          border: 1.5px solid #e5e7eb;
+          border-radius: 9px;
+          font-size: .82rem;
+          color: var(--text);
+          background: var(--card);
+          outline: none;
+          cursor: pointer;
+          font-family: inherit;
+        }
+        .filtro-select:focus, .filtro-fecha:focus { border-color: var(--sidebar-bg); }
+        .filtros-chips { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .9rem; }
+        .chip {
+          display: flex; align-items: center; gap: .4rem;
+          background: #eff6ff; color: var(--sidebar-bg);
+          font-size: .72rem; font-weight: 600;
+          padding: .3rem .6rem .3rem .7rem;
+          border-radius: 99px;
+        }
+        .chip button { background: none; border: none; cursor: pointer; color: var(--sidebar-bg); display: flex; }
+        .btn-limpiar-filtros {
+          font-size: .72rem; font-weight: 700; color: #b91c1c;
+          background: none; border: none; cursor: pointer;
+          padding: .3rem .4rem;
+        }
+        .resultados-info { font-size: .78rem; color: var(--muted); margin-bottom: .7rem; }
+        /* ── TABLA ── */
+        .card-tabla { background: var(--card); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.05); overflow: hidden; }
+        .tabla-scroll { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 980px; }
+        th {
+          text-align: left; font-size: .68rem; font-weight: 700; color: var(--muted);
+          text-transform: uppercase; letter-spacing: .05em;
+          padding: .75rem 1.1rem; border-bottom: 1px solid var(--border);
+          background: #fafafa; white-space: nowrap;
+        }
+        td { padding: .85rem 1.1rem; font-size: .83rem; color: #374151; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #fafbff; }
+        .badge { font-size: .65rem; font-weight: 700; padding: .22rem .6rem; border-radius: 99px; white-space: nowrap; }
+        .badge-pendiente  { background: #fef2f2; color: #b91c1c; }
+        .badge-proceso    { background: #eff6ff; color: #1d4ed8; }
+        .badge-resuelto   { background: #f0fdf4; color: #15803d; }
+        .badge-rechazado  { background: #f3f4f6; color: #6b7280; }
+        .badge-alto       { background: #fef2f2; color: #b91c1c; }
+        .badge-medio      { background: #fffbeb; color: #b45309; }
+        .badge-bajo       { background: #f0fdf4; color: #15803d; }
+        .ubicacion-cell { display: flex; align-items: center; gap: .35rem; font-size: .78rem; color: #6b7280; max-width: 180px; }
+        .ubicacion-cell i { color: var(--muted); font-size: .9rem; flex-shrink: 0; }
+        .ubicacion-texto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .btn-accion {
+          font-size: .72rem; font-weight: 700;
+          color: var(--sidebar-bg); background: #e8f0fe;
+          border: none; border-radius: 7px;
+          padding: .35rem .65rem; cursor: pointer;
+          text-decoration: none; display: inline-flex; align-items: center; gap: .3rem;
+        }
+        .btn-accion:hover { background: #d1e0fd; }
+        .btn-avance-fila {
+          font-size: .72rem; font-weight: 700;
+          color: #fff; background: var(--sidebar-bg);
+          border: none; border-radius: 7px;
+          padding: .35rem .65rem; cursor: pointer;
+          display: inline-flex; align-items: center; gap: .3rem;
+        }
+        .btn-avance-fila:hover { background: #153070; }
+        .btn-avance-fila:disabled { opacity: .4; cursor: not-allowed; }
+        .btn-rechazar-fila {
+          font-size: .72rem; font-weight: 700;
+          color: #b91c1c; background: #fef2f2;
+          border: none; border-radius: 7px;
+          padding: .35rem .55rem; cursor: pointer;
+          display: inline-flex; align-items: center;
+        }
+        .btn-rechazar-fila:hover { background: #fee2e2; }
+        .btn-rechazar-fila:disabled { opacity: .4; cursor: not-allowed; }
+        .acciones-cell { display: flex; gap: .35rem; align-items: center; flex-wrap: nowrap; }
+        .avance-bar { width: 70px; height: 6px; background: #f3f4f6; border-radius: 99px; overflow: hidden; display: inline-block; vertical-align: middle; }
+        .avance-fill { height: 100%; background: var(--accent); border-radius: 99px; }
+        .empty-row td { text-align: center; color: var(--muted); padding: 3rem; }
+        /* ── MODALES ── */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--card); border-radius: 16px; padding: 1.8rem; width: 460px; max-width: 95vw; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+        .modal-title { font-size: 1.02rem; font-weight: 800; color: var(--text); margin-bottom: .3rem; display: flex; align-items: center; gap: .5rem; }
+        .modal-subtitle { font-size: .78rem; color: var(--muted); margin-bottom: 1.2rem; }
+        .modal-field { margin-bottom: 1rem; }
+        .modal-field label { display: block; font-size: .78rem; font-weight: 600; color: #374151; margin-bottom: .35rem; }
+        .modal-field select, .modal-field input[type="text"], .modal-field input[type="number"], .modal-field textarea {
+          width: 100%; padding: .68rem .9rem; border: 1.5px solid #e5e7eb; border-radius: 9px; font-size: .88rem; outline: none; font-family: inherit;
+        }
+        .modal-field select:focus, .modal-field input:focus, .modal-field textarea:focus { border-color: var(--sidebar-bg); }
+        .modal-error { font-size: .76rem; color: #b91c1c; margin-top: .35rem; display: none; }
+        .modal-error.show { display: block; }
+        .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.2rem; }
+        .btn-cancel  { padding: .6rem 1.2rem; background: #f3f4f6; border: none; border-radius: 9px; font-size: .85rem; font-weight: 600; cursor: pointer; color: #374151; }
+        .btn-confirm { padding: .6rem 1.4rem; background: var(--sidebar-bg); border: none; border-radius: 9px; font-size: .85rem; font-weight: 700; cursor: pointer; color: #fff; }
+        .btn-confirm:hover { background: #153070; }
+        .btn-confirm.danger { background: #b91c1c; }
+        .btn-confirm.danger:hover { background: #991515; }
+        .check-row { display: flex; align-items: flex-start; gap: .55rem; font-size: .8rem; color: #374151; padding: .5rem 0; }
+        .check-row input { margin-top: .2rem; flex-shrink: 0; cursor: pointer; }
+        .check-row label { cursor: pointer; line-height: 1.4; }
+        .file-drop { border: 1.5px dashed #d1d5db; border-radius: 10px; padding: 1rem; text-align: center; cursor: pointer; font-size: .8rem; color: var(--muted); transition: border-color .15s, background .15s; }
+        .file-drop:hover { border-color: var(--sidebar-bg); background: #f8faff; }
+        .file-drop.has-file { border-color: var(--accent); color: var(--text); background: #f0fdfa; }
+        .file-drop i { font-size: 1.4rem; display: block; margin-bottom: .3rem; }
+        .preview-img { width: 100%; max-height: 160px; object-fit: cover; border-radius: 8px; margin-top: .6rem; }
+        .motivos-list { display: flex; flex-direction: column; gap: .2rem; margin-bottom: .6rem; }
+        .pct-actual-tag { font-size: .7rem; color: var(--muted); font-weight: 600; margin-top: .3rem; }
+        .toast {
+          position: fixed; bottom: 1.5rem; right: 1.5rem;
+          background: #111827; color: #fff;
+          padding: .75rem 1.2rem; border-radius: 10px;
+          font-size: .83rem; font-weight: 600;
+          box-shadow: 0 8px 24px rgba(0,0,0,.25);
+          opacity: 0; transform: translateY(12px);
+          transition: opacity .25s, transform .25s;
+          z-index: 200;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.error { background: #b91c1c; }
+    </style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('reportes')}"></div>
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-title">Reportes</div>
+    </div>
+    <div class="content">
+
+        <!-- FILTROS -->
+        <div class="filtros-card">
+            <div class="filtros-top-row">
+                <div class="search-wrap">
+                    <i class="ti ti-search"></i>
+                    <input class="search-input" id="buscar" type="text" placeholder="Buscar por título o zona...">
+                </div>
+                <button class="btn-toggle-filtros" id="btn-toggle-filtros" onclick="toggleFiltros()">
+                    <i class="ti ti-adjustments-horizontal"></i> Filtros avanzados
+                </button>
+                <button class="btn-limpiar-filtros" onclick="limpiarFiltros()">Limpiar filtros</button>
+            </div>
+
+            <div class="filtros-grid" id="filtros-grid">
+                <div class="filtro-group">
+                    <label>Estado</label>
+                    <select class="filtro-select" id="filtro-estado" onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en proceso">En proceso</option>
+                        <option value="resuelto">Resuelto</option>
+                        <option value="rechazado">Rechazado</option>
+                    </select>
+                </div>
+                <div class="filtro-group">
+                    <label>Nivel de riesgo</label>
+                    <select class="filtro-select" id="filtro-riesgo" onchange="aplicarFiltros()">
+                        <option value="">Todos</option>
+                        <option value="ALTO">Alto</option>
+                        <option value="MEDIO">Medio</option>
+                        <option value="BAJO">Bajo</option>
+                    </select>
+                </div>
+                <div class="filtro-group">
+                    <label>Categoría</label>
+                    <select class="filtro-select" id="filtro-categoria" onchange="aplicarFiltros()">
+                        <option value="">Todas</option>
+                        <option value="Limpieza pública">Limpieza pública</option>
+                        <option value="Seguridad ciudadana">Seguridad ciudadana</option>
+                        <option value="Infraestructura vial">Infraestructura vial</option>
+                        <option value="Alumbrado público">Alumbrado público</option>
+                        <option value="Áreas verdes">Áreas verdes</option>
+                        <option value="Tránsito vehicular">Tránsito vehicular</option>
+                        <option value="Contaminación ambiental">Contaminación ambiental</option>
+                    </select>
+                </div>
+                <div class="filtro-group">
+                    <label>Ordenar por</label>
+                    <select class="filtro-select" id="filtro-orden" onchange="aplicarFiltros()">
+                        <option value="reciente">Más reciente</option>
+                        <option value="antiguo">Más antiguo</option>
+                        <option value="avance-desc">Mayor avance</option>
+                        <option value="avance-asc">Menor avance</option>
+                        <option value="fuentes-desc">Más fuentes (minireportes)</option>
+                    </select>
+                </div>
+                <div class="filtro-group">
+                    <label>Fecha desde</label>
+                    <input type="date" class="filtro-fecha" id="filtro-fecha-desde" onchange="aplicarFiltros()">
+                </div>
+                <div class="filtro-group">
+                    <label>Fecha hasta</label>
+                    <input type="date" class="filtro-fecha" id="filtro-fecha-hasta" onchange="aplicarFiltros()">
+                </div>
+            </div>
+
+            <div class="filtros-chips" id="filtros-chips"></div>
+        </div>
+
+        <div class="resultados-info" id="resultados-info">Cargando reportes...</div>
+
+        <div class="card-tabla">
+            <div class="tabla-scroll">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Título</th>
+                        <th>Categoría</th>
+                        <th>Ubicación</th>
+                        <th>Riesgo</th>
+                        <th>Estado</th>
+                        <th>Avance</th>
+                        <th>Fuentes</th>
+                        <th>Fecha</th>
+                        <th>Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tabla-body">
+                    <tr class="empty-row"><td colspan="10">Cargando reportes...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL REGISTRAR AVANCE -->
+<div class="modal-overlay" id="modalAvance">
+    <div class="modal">
+        <div class="modal-title"><i class="ti ti-circle-plus"></i> Registrar avance</div>
+        <div class="modal-subtitle" id="avance-subtitle">El estado del reporte se actualizará automáticamente según el porcentaje.</div>
+
+        <input type="hidden" id="avance-reporte-id">
+
+        <div class="modal-field">
+            <label>Foto de evidencia</label>
+            <div class="file-drop" id="avance-file-drop" onclick="document.getElementById('avance-foto-input').click()">
+                <i class="ti ti-camera-plus"></i>
+                <span id="avance-file-text">Toca para subir una foto del avance</span>
+            </div>
+            <input type="file" id="avance-foto-input" accept="image/*" style="display:none" onchange="onFotoAvanceSeleccionada(event)">
+            <img id="avance-preview" class="preview-img" style="display:none">
+        </div>
+
+        <div class="check-row">
+            <input type="checkbox" id="avance-sin-foto" onchange="toggleSinFoto()">
+            <label for="avance-sin-foto">Confirmo que hubo un avance real en este reporte, pero actualmente no cuento con evidencia fotográfica.</label>
+        </div>
+
+        <div class="modal-field">
+            <label>Comentario del avance</label>
+            <textarea id="avance-comentario" rows="3" placeholder="Describe qué se hizo o qué avance se logró..."></textarea>
+        </div>
+
+        <div class="modal-field">
+            <label>Porcentaje de avance acumulado (%)</label>
+            <input type="number" id="avance-porcentaje" min="0" max="100" placeholder="0 – 100">
+            <div class="pct-actual-tag" id="avance-pct-actual-tag">Avance actual: 0%. Solo puedes igualar o subir este valor.</div>
+            <div class="modal-error" id="avance-error"></div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModal('modalAvance')">Cancelar</button>
+            <button class="btn-confirm" onclick="confirmarAvance()">Guardar avance</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL RECHAZAR REPORTE -->
+<div class="modal-overlay" id="modalRechazo">
+    <div class="modal">
+        <div class="modal-title"><i class="ti ti-ban" style="color:#b91c1c"></i> Rechazar reporte</div>
+        <div class="modal-subtitle">Esta acción es definitiva. Selecciona los motivos y describe la observación antes de confirmar.</div>
+
+        <input type="hidden" id="rechazo-reporte-id">
+
+        <div class="modal-field">
+            <label>Motivos del rechazo</label>
+            <div class="motivos-list">
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="Se verificó en campo y la incidencia ya no existe o fue resuelta antes de la visita">
+                    <label>Se verificó en campo y la incidencia ya no existe o fue resuelta antes de la visita</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="El problema fue solucionado por gestión externa (otra entidad, vecinos, empresa privada, etc.)">
+                    <label>El problema fue solucionado por gestión externa (otra entidad, vecinos, empresa privada, etc.)</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="El reporte es duplicado de otro ya existente">
+                    <label>El reporte es duplicado de otro ya existente</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="La incidencia no corresponde a competencia municipal">
+                    <label>La incidencia no corresponde a competencia municipal</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="Información insuficiente o ubicación incorrecta para verificar">
+                    <label>Información insuficiente o ubicación incorrecta para verificar</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="Reporte falso, malintencionado o sin evidencia válida">
+                    <label>Reporte falso, malintencionado o sin evidencia válida</label>
+                </div>
+                <div class="check-row">
+                    <input type="checkbox" class="motivo-check" value="Otro (especificado en observaciones)">
+                    <label>Otro (especificado en observaciones)</label>
+                </div>
+            </div>
+            <div class="modal-error" id="rechazo-error-motivos">Selecciona al menos un motivo.</div>
+        </div>
+
+        <div class="modal-field">
+            <label>Observación (obligatoria)</label>
+            <textarea id="rechazo-observacion" rows="3" placeholder="Explica con detalle la razón del rechazo..."></textarea>
+            <div class="modal-error" id="rechazo-error-obs">La observación es obligatoria.</div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModal('modalRechazo')">Cancelar</button>
+            <button class="btn-confirm danger" onclick="confirmarRechazo()">Confirmar rechazo</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/admin-guard.js"></script>
+<script>
+    // Guard
+    const TOKEN = window.ADMIN_TOKEN;
+
+    let todosLosReportes = [];
+    let avanceFotoFile    = null;
+    let filaActualAvance  = null; // referencia al reporte que se está actualizando
+
+    // ── Formateo ──────────────────────────────────────────────────
+    function badgeEstado(e) {
+      const n = (e || '').toLowerCase();
+      const cls = n.includes('pendiente') ? 'pendiente'
+                : n.includes('proceso')   ? 'proceso'
+                : n.includes('resuelto')  ? 'resuelto'
+                : 'rechazado';
+      return `<span class="badge badge-${cls}">${e}</span>`;
+    }
+    function badgeRiesgo(r) {
+      const n = (r || '').toUpperCase();
+      return `<span class="badge badge-${n.toLowerCase()}">${n}</span>`;
+    }
+    function formatFecha(f) {
+      if (!f) return '—';
+      return new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+    function mostrarToast(msg, esError) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.toggle('error', !!esError);
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3500);
+    }
+    function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+    function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+
+    // ── Render tabla ──────────────────────────────────────────────
+    function renderTabla(reportes) {
+      const tbody = document.getElementById('tabla-body');
+      document.getElementById('resultados-info').textContent =
+        `${reportes.length} reporte${reportes.length === 1 ? '' : 's'} encontrado${reportes.length === 1 ? '' : 's'}`;
+
+      if (reportes.length === 0) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="10">No hay reportes con ese criterio.</td></tr>';
+        return;
+      }
+      tbody.innerHTML = reportes.map(r => {
+        const estadoCls  = (r.estado || '').toLowerCase();
+        const finalizado = estadoCls.includes('resuelto') || estadoCls.includes('rechazado');
+        const ubicacion  = r.zonaReferencia
+          || (r.latitudCentro && r.longitudCentro ? `${parseFloat(r.latitudCentro).toFixed(4)}, ${parseFloat(r.longitudCentro).toFixed(4)}` : '—');
+        return `
+        <tr>
+          <td style="color:var(--muted);font-size:.75rem">#${r.id}</td>
+          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600">${r.titulo || '—'}</td>
+          <td>${r.categoria || '—'}</td>
+          <td>
+            <div class="ubicacion-cell" title="${ubicacion}">
+              <i class="ti ti-map-pin"></i>
+              <span class="ubicacion-texto">${ubicacion}</span>
+            </div>
+          </td>
+          <td>${badgeRiesgo(r.nivelRiesgo)}</td>
+          <td>${badgeEstado(r.estado)}</td>
+          <td>
+            <div class="avance-bar">
+              <div class="avance-fill" style="width:${r.porcentajeAvance || 0}%"></div>
+            </div>
+            <span style="font-size:.72rem;color:var(--muted);margin-left:.3rem">${r.porcentajeAvance || 0}%</span>
+          </td>
+          <td style="text-align:center">${r.totalMiniReportes ?? '—'}</td>
+          <td style="font-size:.75rem;color:var(--muted)">${formatFecha(r.fechaCreacion)}</td>
+          <td>
+            <div class="acciones-cell">
+              <a href="/admin/reporte-detalle?id=${r.id}" class="btn-accion">Ver</a>
+              <button class="btn-avance-fila" ${finalizado ? 'disabled' : ''} onclick="abrirModalAvance(${r.id}, ${r.porcentajeAvance || 0}, '${(r.titulo || '').replace(/'/g, "\\'")}')">
+                <i class="ti ti-circle-plus" style="font-size:.85rem"></i> Avance
+              </button>
+              <button class="btn-rechazar-fila" ${finalizado ? 'disabled' : ''} onclick="abrirModalRechazo(${r.id})" title="Rechazar reporte">
+                <i class="ti ti-ban" style="font-size:.85rem"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `}).join('');
+    }
+
+    // ── Filtros ───────────────────────────────────────────────────
+    function toggleFiltros() {
+      const grid = document.getElementById('filtros-grid');
+      const btn  = document.getElementById('btn-toggle-filtros');
+      grid.classList.toggle('open');
+      btn.classList.toggle('activo');
+    }
+
+    function renderChips() {
+      const chips = [];
+      const estado   = document.getElementById('filtro-estado').value;
+      const riesgo   = document.getElementById('filtro-riesgo').value;
+      const categoria = document.getElementById('filtro-categoria').value;
+      const desde    = document.getElementById('filtro-fecha-desde').value;
+      const hasta    = document.getElementById('filtro-fecha-hasta').value;
+
+      if (estado)    chips.push({ label: 'Estado: ' + estado, clear: () => { document.getElementById('filtro-estado').value = ''; } });
+      if (riesgo)    chips.push({ label: 'Riesgo: ' + riesgo, clear: () => { document.getElementById('filtro-riesgo').value = ''; } });
+      if (categoria) chips.push({ label: 'Categoría: ' + categoria, clear: () => { document.getElementById('filtro-categoria').value = ''; } });
+      if (desde)     chips.push({ label: 'Desde: ' + desde, clear: () => { document.getElementById('filtro-fecha-desde').value = ''; } });
+      if (hasta)     chips.push({ label: 'Hasta: ' + hasta, clear: () => { document.getElementById('filtro-fecha-hasta').value = ''; } });
+
+      const cont = document.getElementById('filtros-chips');
+      if (chips.length === 0) { cont.innerHTML = ''; return; }
+      cont.innerHTML = chips.map((c, i) => `
+        <span class="chip">${c.label}<button onclick="quitarChip(${i})"><i class="ti ti-x" style="font-size:.7rem"></i></button></span>
+      `).join('');
+      cont._chips = chips;
+    }
+    function quitarChip(i) {
+      const cont = document.getElementById('filtros-chips');
+      if (cont._chips && cont._chips[i]) {
+        cont._chips[i].clear();
+        aplicarFiltros();
+      }
+    }
+
+    function limpiarFiltros() {
+      document.getElementById('buscar').value = '';
+      document.getElementById('filtro-estado').value = '';
+      document.getElementById('filtro-riesgo').value = '';
+      document.getElementById('filtro-categoria').value = '';
+      document.getElementById('filtro-orden').value = 'reciente';
+      document.getElementById('filtro-fecha-desde').value = '';
+      document.getElementById('filtro-fecha-hasta').value = '';
+      aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+      const buscar    = document.getElementById('buscar').value.toLowerCase();
+      const estado    = document.getElementById('filtro-estado').value.toLowerCase();
+      const riesgo    = document.getElementById('filtro-riesgo').value.toUpperCase();
+      const categoria = document.getElementById('filtro-categoria').value;
+      const orden     = document.getElementById('filtro-orden').value;
+      const desde     = document.getElementById('filtro-fecha-desde').value;
+      const hasta     = document.getElementById('filtro-fecha-hasta').value;
+
+      let filtrados = todosLosReportes.filter(r => {
+        const matchBuscar = !buscar ||
+          (r.titulo || '').toLowerCase().includes(buscar) ||
+          (r.zonaReferencia || '').toLowerCase().includes(buscar);
+        const matchEstado    = !estado || (r.estado || '').toLowerCase().includes(estado);
+        const matchRiesgo    = !riesgo || (r.nivelRiesgo || '').toUpperCase() === riesgo;
+        const matchCategoria = !categoria || r.categoria === categoria;
+
+        let matchFecha = true;
+        if (r.fechaCreacion && (desde || hasta)) {
+          const fechaReporte = new Date(r.fechaCreacion);
+          if (desde) matchFecha = matchFecha && fechaReporte >= new Date(desde + 'T00:00:00');
+          if (hasta) matchFecha = matchFecha && fechaReporte <= new Date(hasta + 'T23:59:59');
+        }
+
+        return matchBuscar && matchEstado && matchRiesgo && matchCategoria && matchFecha;
+      });
+
+      switch (orden) {
+        case 'antiguo':
+          filtrados.sort((a, b) => new Date(a.fechaCreacion) - new Date(b.fechaCreacion));
+          break;
+        case 'avance-desc':
+          filtrados.sort((a, b) => (b.porcentajeAvance || 0) - (a.porcentajeAvance || 0));
+          break;
+        case 'avance-asc':
+          filtrados.sort((a, b) => (a.porcentajeAvance || 0) - (b.porcentajeAvance || 0));
+          break;
+        case 'fuentes-desc':
+          filtrados.sort((a, b) => (b.totalMiniReportes || 0) - (a.totalMiniReportes || 0));
+          break;
+        default: // 'reciente'
+          filtrados.sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
+      }
+
+      renderChips();
+      renderTabla(filtrados);
+    }
+    document.getElementById('buscar').addEventListener('input', aplicarFiltros);
+
+    async function cargarReportes() {
+      try {
+        const res  = await fetch('/api/admin/reportes', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
+        const json = await res.json();
+        todosLosReportes = json.data || [];
+        aplicarFiltros();
+      } catch {
+        document.getElementById('tabla-body').innerHTML =
+          '<tr class="empty-row"><td colspan="10">Error al cargar reportes.</td></tr>';
+        document.getElementById('resultados-info').textContent = '';
+      }
+    }
+
+    // ── Modal: registrar avance ──────────────────────────────────
+    function abrirModalAvance(idReporte, porcentajeActual, titulo) {
+      filaActualAvance = { id: idReporte, porcentajeActual };
+      avanceFotoFile = null;
+      document.getElementById('avance-reporte-id').value = idReporte;
+      document.getElementById('avance-subtitle').textContent =
+        titulo ? `Reporte: "${titulo}". El estado se actualizará automáticamente según el porcentaje.`
+               : 'El estado del reporte se actualizará automáticamente según el porcentaje.';
+      document.getElementById('avance-foto-input').value = '';
+      document.getElementById('avance-preview').style.display = 'none';
+      document.getElementById('avance-file-drop').classList.remove('has-file');
+      document.getElementById('avance-file-drop').style.opacity = '1';
+      document.getElementById('avance-file-drop').style.pointerEvents = 'auto';
+      document.getElementById('avance-file-text').textContent = 'Toca para subir una foto del avance';
+      document.getElementById('avance-sin-foto').checked = false;
+      document.getElementById('avance-comentario').value = '';
+      document.getElementById('avance-porcentaje').value = porcentajeActual;
+      document.getElementById('avance-porcentaje').min = porcentajeActual;
+      document.getElementById('avance-pct-actual-tag').textContent =
+        `Avance actual: ${porcentajeActual}%. Solo puedes igualar o subir este valor.`;
+      document.getElementById('avance-error').classList.remove('show');
+      abrirModal('modalAvance');
+    }
+    function onFotoAvanceSeleccionada(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      avanceFotoFile = file;
+      document.getElementById('avance-file-drop').classList.add('has-file');
+      document.getElementById('avance-file-text').textContent = file.name;
+      const preview = document.getElementById('avance-preview');
+      preview.src = URL.createObjectURL(file);
+      preview.style.display = 'block';
+    }
+    function toggleSinFoto() {
+      const sinFoto = document.getElementById('avance-sin-foto').checked;
+      const dropEl  = document.getElementById('avance-file-drop');
+      dropEl.style.opacity = sinFoto ? '0.5' : '1';
+      dropEl.style.pointerEvents = sinFoto ? 'none' : 'auto';
+    }
+    async function confirmarAvance() {
+      const errorEl    = document.getElementById('avance-error');
+      errorEl.classList.remove('show');
+
+      const idReporte  = document.getElementById('avance-reporte-id').value;
+      const sinFoto    = document.getElementById('avance-sin-foto').checked;
+      const comentario = document.getElementById('avance-comentario').value.trim();
+      const porcentaje = parseInt(document.getElementById('avance-porcentaje').value);
+      const pctActual  = filaActualAvance ? filaActualAvance.porcentajeActual : 0;
+
+      if (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100) {
+        errorEl.textContent = 'Ingresa un porcentaje válido entre 0 y 100.';
+        errorEl.classList.add('show');
+        return;
+      }
+      if (porcentaje < pctActual) {
+        errorEl.textContent = `El porcentaje no puede ser menor al avance actual (${pctActual}%).`;
+        errorEl.classList.add('show');
+        return;
+      }
+      if (!avanceFotoFile && !sinFoto) {
+        errorEl.textContent = 'Adjunta una foto de evidencia, o marca el check de confirmación.';
+        errorEl.classList.add('show');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('porcentaje', porcentaje);
+      formData.append('sinFoto', sinFoto);
+      if (comentario) formData.append('comentario', comentario);
+      if (avanceFotoFile) formData.append('foto', avanceFotoFile);
+
+      try {
+        const res = await fetch(`/api/avances/${idReporte}`, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + TOKEN },
+          body: formData
+        });
+        const json = await res.json();
+        if (json.ok) {
+          cerrarModal('modalAvance');
+          mostrarToast('✓ Avance registrado correctamente');
+          await cargarReportes();
+        } else {
+          errorEl.textContent = json.mensaje || 'No se pudo registrar el avance';
+          errorEl.classList.add('show');
+        }
+      } catch {
+        errorEl.textContent = 'Error de conexión';
+        errorEl.classList.add('show');
+      }
+    }
+
+    // ── Modal: rechazar reporte ───────────────────────────────────
+    function abrirModalRechazo(idReporte) {
+      document.getElementById('rechazo-reporte-id').value = idReporte;
+      document.querySelectorAll('.motivo-check').forEach(c => c.checked = false);
+      document.getElementById('rechazo-observacion').value = '';
+      document.getElementById('rechazo-error-motivos').classList.remove('show');
+      document.getElementById('rechazo-error-obs').classList.remove('show');
+      abrirModal('modalRechazo');
+    }
+    async function confirmarRechazo() {
+      const idReporte   = document.getElementById('rechazo-reporte-id').value;
+      const motivos     = Array.from(document.querySelectorAll('.motivo-check:checked')).map(c => c.value);
+      const observacion = document.getElementById('rechazo-observacion').value.trim();
+
+      const errMotivos = document.getElementById('rechazo-error-motivos');
+      const errObs      = document.getElementById('rechazo-error-obs');
+      errMotivos.classList.toggle('show', motivos.length === 0);
+      errObs.classList.toggle('show', observacion.length === 0);
+      if (motivos.length === 0 || observacion.length === 0) return;
+
+      try {
+        const res = await fetch(`/api/admin/reportes/${idReporte}/rechazar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+          body: JSON.stringify({ motivos, observacion })
+        });
+        const json = await res.json();
+        if (json.ok) {
+          cerrarModal('modalRechazo');
+          mostrarToast('Reporte rechazado');
+          await cargarReportes();
+        } else {
+          mostrarToast('Error: ' + (json.mensaje || 'No se pudo rechazar'), true);
+        }
+      } catch {
+        mostrarToast('Error de conexión', true);
+      }
+    }
+
+    // Cerrar modales con Escape o click fuera
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { cerrarModal('modalAvance'); cerrarModal('modalRechazo'); }
+    });
+    ['modalAvance', 'modalRechazo'].forEach(id => {
+      document.getElementById(id).addEventListener('click', e => {
+        if (e.target === e.currentTarget) cerrarModal(id);
+      });
+    });
+
+
+
+    cargarReportes();
+
+
+</script>
+</body>
+</html>

@@ -24,25 +24,25 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Vistas HTML: libres para que Thymeleaf las sirva sin bloqueo
                         .requestMatchers("/", "/login", "/registro", "/inicio",
-                                "/nuevo-reporte", "/mis-reportes", "/reporte-detalle").permitAll()
-                        // SecurityConfig:
-                        .requestMatchers("/api/categorias", "/api/niveles-riesgo").permitAll()
-                        // Recursos estáticos
+                                "/nuevo-reporte", "/mis-reportes", "/reporte-detalle",
+                                "/recuperar-cuenta", "/establecer-contrasena").permitAll()
+                        .requestMatchers("/admin/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
-                        // Endpoints públicos de la API
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/categorias", "/api/niveles-riesgo").permitAll()
                         .requestMatchers("/api/reportes/cercanos").permitAll()
-                        // Solo municipalidad puede gestionar avances y cambiar estados
-                        .requestMatchers("/api/avances/**").hasRole("MUNICIPALIDAD")
-                        // Todo lo demás de la API requiere token válido
+                        .requestMatchers("/api/admin/auth/**").permitAll()
+                        .requestMatchers("/api/admin/password/**").permitAll() // establecer/resetear contraseña vía token
+                        // Gestión de usuarios (crear cuentas, activar/desactivar, resetear) solo para admin
+                        .requestMatchers("/api/admin/usuarios/**").hasRole("MUNICIPALIDAD_ADMIN")
+                        // Resto del panel municipal: admin u operador
+                        .requestMatchers("/api/admin/**").hasAnyRole("MUNICIPALIDAD_ADMIN", "MUNICIPALIDAD_OPERADOR")
+                        .requestMatchers("/api/avances/**").hasAnyRole("MUNICIPALIDAD_ADMIN", "MUNICIPALIDAD_OPERADOR")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()
-
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
     }
 
