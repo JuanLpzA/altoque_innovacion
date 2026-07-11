@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Altoque – Configuración</title>
+  <link rel="stylesheet" href="/css/admin-sidebar.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --sidebar-bg: #1a3a8f;
+      --accent: #0fa89a;
+      --bg: #f0f5fb;
+      --card: #fff;
+      --text: #111827;
+      --muted: #9ca3af;
+      --border: #f3f4f6;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
+    .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .avatar-sm i { color: #fff; font-size: .95rem; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
+    .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
+    .btn-logout:hover { color: #fff; }
+    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+    .topbar { background: var(--card); padding: .9rem 1.8rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+    .content { padding: 1.6rem 1.8rem; max-width: 900px; }
+    /* AVISO */
+    .aviso-info {
+      display: flex; align-items: flex-start; gap: .6rem;
+      background: #eff6ff; color: #1e40af;
+      border-radius: 12px; padding: .85rem 1.05rem;
+      font-size: .82rem; margin-bottom: 1.3rem; line-height: 1.5;
+    }
+    .aviso-info i { font-size: 1.1rem; margin-top: .05rem; flex-shrink: 0; }
+    /* SECCIONES DE CONFIG */
+    .config-section-title {
+      font-size: .72rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted); margin: 1.6rem 0 .7rem;
+    }
+    .config-section-title:first-of-type { margin-top: 0; }
+    .config-card {
+      background: var(--card); border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+      padding: 1.1rem 1.3rem; margin-bottom: .85rem;
+      display: flex; align-items: center; gap: 1.1rem;
+    }
+    .config-icon {
+      width: 42px; height: 42px; border-radius: 11px;
+      background: #eff6ff; color: var(--sidebar-bg);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.15rem; flex-shrink: 0;
+    }
+    .config-info { flex: 1; min-width: 0; }
+    .config-nombre { font-size: .88rem; font-weight: 700; color: var(--text); margin-bottom: .2rem; }
+    .config-desc { font-size: .76rem; color: var(--muted); line-height: 1.4; }
+    .config-control { display: flex; align-items: center; gap: .5rem; flex-shrink: 0; }
+    .config-input {
+      width: 90px; padding: .55rem .7rem; text-align: center;
+      border: 1.5px solid #e5e7eb; border-radius: 9px;
+      font-size: .95rem; font-weight: 700; color: var(--text);
+      outline: none; font-family: inherit;
+    }
+    .config-input:focus { border-color: var(--sidebar-bg); }
+    .config-input.dirty { border-color: #f59e0b; background: #fffbeb; }
+    .config-unidad { font-size: .74rem; color: var(--muted); white-space: nowrap; min-width: 46px; }
+    .btn-guardar-item {
+      padding: .55rem .85rem; border: none; border-radius: 9px;
+      background: var(--sidebar-bg); color: #fff;
+      font-size: .78rem; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; gap: .35rem;
+      opacity: .35; pointer-events: none; transition: opacity .15s;
+    }
+    .btn-guardar-item.activo { opacity: 1; pointer-events: auto; }
+    .btn-guardar-item:hover.activo { background: #153070; }
+    .btn-guardar-item:disabled { opacity: .5; cursor: not-allowed; pointer-events: none; }
+    .config-updated {
+      font-size: .68rem; color: #15803d; display: flex; align-items: center; gap: .25rem;
+      opacity: 0; transition: opacity .2s;
+    }
+    .config-updated.show { opacity: 1; }
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #111827; color: #fff; padding: .75rem 1.2rem; border-radius: 10px; font-size: .83rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; transform: translateY(12px); transition: opacity .25s, transform .25s; z-index: 200; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { background: #b91c1c; }
+    @media (max-width: 640px) {
+      .config-card { flex-wrap: wrap; }
+      .config-control { width: 100%; justify-content: space-between; }
+    }
+  </style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('configuracion')}"></div>
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title">Configuración del sistema</div>
+  </div>
+  <div class="content">
+    <div class="aviso-info">
+      <i class="ti ti-info-circle"></i>
+      <span>Estos valores controlan el comportamiento automático de la app para ciudadanos. Los cambios se aplican de inmediato, sin necesidad de reiniciar el servidor.</span>
+    </div>
+
+    <div class="config-section-title">Límites de reportes por usuario</div>
+
+    <div class="config-card">
+      <div class="config-icon"><i class="ti ti-calendar-stats"></i></div>
+      <div class="config-info">
+        <div class="config-nombre">Máximo de reportes por día</div>
+        <div class="config-desc">Cantidad máxima de mini-reportes que un ciudadano puede enviar en un mismo día.</div>
+      </div>
+      <div class="config-control">
+        <input type="number" min="1" class="config-input" id="input-limite_reportes_dia"
+               oninput="marcarCambio('limite_reportes_dia')">
+        <span class="config-unidad">/ día</span>
+        <span class="config-updated" id="ok-limite_reportes_dia"><i class="ti ti-check"></i></span>
+        <button class="btn-guardar-item" id="btn-limite_reportes_dia"
+                onclick="guardarConfig('limite_reportes_dia')">
+          <i class="ti ti-device-floppy"></i> Guardar
+        </button>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <div class="config-icon"><i class="ti ti-clock-bolt"></i></div>
+      <div class="config-info">
+        <div class="config-nombre">Máximo de reportes por minuto</div>
+        <div class="config-desc">Evita el envío masivo o automatizado de reportes en un corto periodo de tiempo.</div>
+      </div>
+      <div class="config-control">
+        <input type="number" min="1" class="config-input" id="input-limite_reportes_minuto"
+               oninput="marcarCambio('limite_reportes_minuto')">
+        <span class="config-unidad">/ minuto</span>
+        <span class="config-updated" id="ok-limite_reportes_minuto"><i class="ti ti-check"></i></span>
+        <button class="btn-guardar-item" id="btn-limite_reportes_minuto"
+                onclick="guardarConfig('limite_reportes_minuto')">
+          <i class="ti ti-device-floppy"></i> Guardar
+        </button>
+      </div>
+    </div>
+
+    <div class="config-section-title">Agrupación de mini-reportes</div>
+
+    <div class="config-card">
+      <div class="config-icon"><i class="ti ti-map-pin"></i></div>
+      <div class="config-info">
+        <div class="config-nombre">Radio de agrupación</div>
+        <div class="config-desc">Distancia máxima entre dos mini-reportes para considerarlos el mismo incidente.</div>
+      </div>
+      <div class="config-control">
+        <input type="number" min="10" step="10" class="config-input" id="input-radio_agrupacion_metros"
+               oninput="marcarCambio('radio_agrupacion_metros')">
+        <span class="config-unidad">metros</span>
+        <span class="config-updated" id="ok-radio_agrupacion_metros"><i class="ti ti-check"></i></span>
+        <button class="btn-guardar-item" id="btn-radio_agrupacion_metros"
+                onclick="guardarConfig('radio_agrupacion_metros')">
+          <i class="ti ti-device-floppy"></i> Guardar
+        </button>
+      </div>
+    </div>
+
+    <div class="config-card">
+      <div class="config-icon"><i class="ti ti-hourglass"></i></div>
+      <div class="config-info">
+        <div class="config-nombre">Vigencia de un reporte abierto</div>
+        <div class="config-desc">Días durante los cuales un reporte consolidado sigue aceptando nuevas evidencias antes de considerarse cerrado para agrupación.</div>
+      </div>
+      <div class="config-control">
+        <input type="number" min="1" class="config-input" id="input-dias_vigencia_reporte_abierto"
+               oninput="marcarCambio('dias_vigencia_reporte_abierto')">
+        <span class="config-unidad">días</span>
+        <span class="config-updated" id="ok-dias_vigencia_reporte_abierto"><i class="ti ti-check"></i></span>
+        <button class="btn-guardar-item" id="btn-dias_vigencia_reporte_abierto"
+                onclick="guardarConfig('dias_vigencia_reporte_abierto')">
+          <i class="ti ti-device-floppy"></i> Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/admin-guard.js"></script>
+<script>
+  const TOKEN = window.ADMIN_TOKEN;
+  document.getElementById('sb-nombre').textContent =
+    (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+
+  const CLAVES = [
+    'limite_reportes_dia',
+    'limite_reportes_minuto',
+    'radio_agrupacion_metros',
+    'dias_vigencia_reporte_abierto'
+  ];
+
+  let valoresOriginales = {};
+
+  function mostrarToast(msg, esError) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.toggle('error', !!esError);
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function marcarCambio(clave) {
+    const input = document.getElementById('input-' + clave);
+    const btn   = document.getElementById('btn-' + clave);
+    const cambio = input.value !== '' && input.value !== valoresOriginales[clave];
+    input.classList.toggle('dirty', cambio);
+    btn.classList.toggle('activo', cambio);
+    document.getElementById('ok-' + clave).classList.remove('show');
+  }
+
+  async function cargarConfiguracion() {
+    try {
+      const res = await fetch('/api/admin/configuracion', {
+        headers: { 'Authorization': 'Bearer ' + TOKEN }
+      });
+      const json = await res.json();
+      const datos = json.data || {};
+      CLAVES.forEach(clave => {
+        const valor = datos[clave] ?? '';
+        valoresOriginales[clave] = valor;
+        document.getElementById('input-' + clave).value = valor;
+      });
+    } catch {
+      mostrarToast('No se pudo cargar la configuración', true);
+    }
+  }
+
+  async function guardarConfig(clave) {
+    const input = document.getElementById('input-' + clave);
+    const btn   = document.getElementById('btn-' + clave);
+    const valor = input.value.trim();
+
+    if (!valor || isNaN(valor) || Number(valor) <= 0) {
+      mostrarToast('Ingresa un valor numérico válido', true);
+      return;
+    }
+
+    btn.disabled = true;
+    try {
+      const res = await fetch(`/api/admin/configuracion/${clave}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+        body: JSON.stringify({ valor })
+      });
+      const json = await res.json();
+      if (json.ok) {
+        valoresOriginales[clave] = valor;
+        input.classList.remove('dirty');
+        btn.classList.remove('activo');
+        const ok = document.getElementById('ok-' + clave);
+        ok.classList.add('show');
+        setTimeout(() => ok.classList.remove('show'), 2000);
+        mostrarToast('✓ Configuración actualizada');
+      } else {
+        mostrarToast(json.mensaje || 'No se pudo guardar', true);
+      }
+    } catch {
+      mostrarToast('Error de conexión', true);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  cargarConfiguracion();
+</script>
+</body>
+</html>

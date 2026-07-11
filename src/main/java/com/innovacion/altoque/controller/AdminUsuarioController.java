@@ -8,6 +8,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.innovacion.altoque.dto.request.EditarUsuarioRequest;
+import com.innovacion.altoque.dto.request.CambiarRolRequest;
+import com.innovacion.altoque.model.Usuario;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import java.util.List;
 
@@ -54,5 +58,20 @@ public class AdminUsuarioController {
         usuarioAdminService.solicitarReseteoContrasena(id);
         return ResponseEntity.ok(ApiResponse.ok(
                 "Se envió un correo al usuario con el enlace para restablecer su contraseña.", null));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<String>> editarDatos(
+            @PathVariable Integer id, @Valid @RequestBody EditarUsuarioRequest req) {
+        usuarioAdminService.editarDatos(id, req);
+        return ResponseEntity.ok(ApiResponse.ok("Datos actualizados correctamente", null));
+    }
+
+    @PatchMapping("/{id}/rol")
+    public ResponseEntity<ApiResponse<String>> cambiarRol(
+            @PathVariable Integer id, @Valid @RequestBody CambiarRolRequest req,
+            @AuthenticationPrincipal Usuario admin) {
+        usuarioAdminService.cambiarRol(id, req, admin);
+        return ResponseEntity.ok(ApiResponse.ok("Rol actualizado correctamente", null));
     }
 }

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Altoque – Reportes</title>
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,27 +23,6 @@
           min-height: 100vh;
           display: flex;
         }
-        /* ── SIDEBAR ── */
-        .sidebar {
-          width: 220px;
-          background: var(--sidebar-bg);
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          flex-shrink: 0;
-          position: sticky;
-          top: 0;
-          height: 100vh;
-        }
-        .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .sidebar-brand span { color: var(--accent); }
-        .sidebar-section { padding: .9rem 1.4rem .3rem; font-size: .62rem; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; }
-        .sidebar-nav a { display: flex; align-items: center; gap: .65rem; padding: .62rem 1.4rem; color: rgba(255,255,255,.62); text-decoration: none; font-size: .84rem; font-weight: 500; transition: background .15s, color .15s; }
-        .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
-        .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
-        .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
-        .sidebar-footer { margin-top: auto; padding: 1rem 1.4rem; border-top: 1px solid rgba(255,255,255,.08); }
-        .sidebar-user { display: flex; align-items: center; gap: .6rem; }
         .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .avatar-sm i { color: #fff; font-size: .95rem; }
         .user-info { flex: 1; min-width: 0; }
@@ -60,6 +40,13 @@
         }
         .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
         .content { padding: 1.6rem 1.8rem; }
+        /* ── STATS ── */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: .9rem; margin-bottom: 1.2rem; }
+        .stat-card { background: var(--card); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.05); padding: 1.1rem 1.2rem; display: flex; align-items: center; gap: .8rem; transition: box-shadow .15s, transform .15s; }
+        .stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,.09); transform: translateY(-1px); }
+        .stat-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.15rem; }
+        .stat-num { font-size: 1.35rem; font-weight: 900; color: var(--text); line-height: 1.1; }
+        .stat-label { font-size: .72rem; color: var(--muted); font-weight: 600; margin-top: .1rem; }
         /* ── FILTROS ── */
         .filtros-card {
           background: var(--card);
@@ -138,7 +125,7 @@
           padding: .75rem 1.1rem; border-bottom: 1px solid var(--border);
           background: #fafafa; white-space: nowrap;
         }
-        td { padding: .85rem 1.1rem; font-size: .83rem; color: #374151; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        td { padding: .95rem 1.1rem; font-size: .83rem; color: #374151; border-bottom: 1px solid var(--border); vertical-align: middle; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #fafbff; }
         .badge { font-size: .65rem; font-weight: 700; padding: .22rem .6rem; border-radius: 99px; white-space: nowrap; }
@@ -152,6 +139,20 @@
         .ubicacion-cell { display: flex; align-items: center; gap: .35rem; font-size: .78rem; color: #6b7280; max-width: 180px; }
         .ubicacion-cell i { color: var(--muted); font-size: .9rem; flex-shrink: 0; }
         .ubicacion-texto { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* ── Celda de reporte (foto + título + categoría) ── */
+        .reporte-cell { display: flex; align-items: center; gap: .8rem; min-width: 240px; max-width: 320px; }
+        .reporte-foto { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex-shrink: 0; background: #f3f4f6; }
+        .reporte-foto-ph { width: 52px; height: 52px; border-radius: 10px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .reporte-foto-ph i { font-size: 1.3rem; color: #d1d5db; }
+        .reporte-info { min-width: 0; }
+        .reporte-titulo {
+          font-size: .87rem; font-weight: 700; color: var(--text); line-height: 1.35;
+          display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .reporte-cat { font-size: .72rem; color: var(--muted); font-weight: 600; margin-top: .25rem; }
+        tr.riesgo-alto  td:first-child { box-shadow: inset 3px 0 0 #ef4444; }
+        tr.riesgo-medio td:first-child { box-shadow: inset 3px 0 0 #f59e0b; }
+        tr.riesgo-bajo  td:first-child { box-shadow: inset 3px 0 0 #22c55e; }
         .btn-accion {
           font-size: .72rem; font-weight: 700;
           color: var(--sidebar-bg); background: #e8f0fe;
@@ -224,6 +225,20 @@
         }
         .toast.show { opacity: 1; transform: translateY(0); }
         .toast.error { background: #b91c1c; }
+        .pct-num-caption { font-size: .68rem; color: var(--muted); font-weight: 600; flex-shrink: 0; min-width: 122px; }
+        .pct-num-row { display: flex; align-items: center; gap: .7rem; margin-bottom: .6rem; }
+        .pct-num-row input[type="number"] { flex: 1; }
+        .pct-slider-row { display: flex; align-items: center; gap: .7rem; }
+        .pct-slider-row input[type="range"] {
+          flex: 1; height: 6px; border-radius: 99px; background: #e5e7eb; appearance: none; -webkit-appearance: none; outline: none; cursor: pointer;
+        }
+        .pct-slider-row input[type="range"]::-webkit-slider-thumb {
+          appearance: none; -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+        }
+        .pct-slider-row input[type="range"]::-moz-range-thumb {
+          width: 18px; height: 18px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,.3);
+        }
+        .pct-slider-row input[type="range"]:disabled { opacity: .4; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -235,7 +250,51 @@
         <div class="topbar-title">Reportes</div>
     </div>
     <div class="content">
-
+        <!-- STATS -->
+        <div class="stats-grid" id="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#eff6ff;color:#1d4ed8"><i class="ti ti-clipboard-list"></i></div>
+                <div class="stat-info">
+                    <div class="stat-num" id="stat-total">0</div>
+                    <div class="stat-label">Total reportes</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fef2f2;color:#b91c1c"><i class="ti ti-clock"></i></div>
+                <div class="stat-info">
+                    <div class="stat-num" id="stat-pendientes">0</div>
+                    <div class="stat-label">Pendientes</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#eff6ff;color:#1d4ed8"><i class="ti ti-refresh"></i></div>
+                <div class="stat-info">
+                    <div class="stat-num" id="stat-proceso">0</div>
+                    <div class="stat-label">En proceso</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#f0fdf4;color:#15803d"><i class="ti ti-circle-check"></i></div>
+                <div class="stat-info">
+                    <div class="stat-num" id="stat-resueltos">0</div>
+                    <div class="stat-label">Resueltos</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#f3f4f6;color:#6b7280"><i class="ti ti-ban"></i></div>
+                <div class="stat-info">
+                    <div class="stat-num" id="stat-rechazados">0</div>
+                    <div class="stat-label">Rechazados</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background:#fffbeb;color:#b45309"><i class="ti ti-alert-triangle"></i></div>
+                <div class="stat-info">
+                    <div class="stat-num" id="stat-alto-riesgo">0</div>
+                    <div class="stat-label">Riesgo alto</div>
+                </div>
+            </div>
+        </div>
         <!-- FILTROS -->
         <div class="filtros-card">
             <div class="filtros-top-row">
@@ -248,7 +307,6 @@
                 </button>
                 <button class="btn-limpiar-filtros" onclick="limpiarFiltros()">Limpiar filtros</button>
             </div>
-
             <div class="filtros-grid" id="filtros-grid">
                 <div class="filtro-group">
                     <label>Estado</label>
@@ -301,20 +359,16 @@
                     <input type="date" class="filtro-fecha" id="filtro-fecha-hasta" onchange="aplicarFiltros()">
                 </div>
             </div>
-
             <div class="filtros-chips" id="filtros-chips"></div>
         </div>
-
         <div class="resultados-info" id="resultados-info">Cargando reportes...</div>
-
         <div class="card-tabla">
             <div class="tabla-scroll">
                 <table>
                     <thead>
                     <tr>
                         <th>#</th>
-                        <th>Título</th>
-                        <th>Categoría</th>
+                        <th>Reporte</th>
                         <th>Ubicación</th>
                         <th>Riesgo</th>
                         <th>Estado</th>
@@ -325,22 +379,19 @@
                     </tr>
                     </thead>
                     <tbody id="tabla-body">
-                    <tr class="empty-row"><td colspan="10">Cargando reportes...</td></tr>
+                    <tr class="empty-row"><td colspan="9">Cargando reportes...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
-
 <!-- MODAL REGISTRAR AVANCE -->
 <div class="modal-overlay" id="modalAvance">
     <div class="modal">
         <div class="modal-title"><i class="ti ti-circle-plus"></i> Registrar avance</div>
         <div class="modal-subtitle" id="avance-subtitle">El estado del reporte se actualizará automáticamente según el porcentaje.</div>
-
         <input type="hidden" id="avance-reporte-id">
-
         <div class="modal-field">
             <label>Foto de evidencia</label>
             <div class="file-drop" id="avance-file-drop" onclick="document.getElementById('avance-foto-input').click()">
@@ -350,39 +401,39 @@
             <input type="file" id="avance-foto-input" accept="image/*" style="display:none" onchange="onFotoAvanceSeleccionada(event)">
             <img id="avance-preview" class="preview-img" style="display:none">
         </div>
-
         <div class="check-row">
             <input type="checkbox" id="avance-sin-foto" onchange="toggleSinFoto()">
             <label for="avance-sin-foto">Confirmo que hubo un avance real en este reporte, pero actualmente no cuento con evidencia fotográfica.</label>
         </div>
-
         <div class="modal-field">
             <label>Comentario del avance</label>
             <textarea id="avance-comentario" rows="3" placeholder="Describe qué se hizo o qué avance se logró..."></textarea>
         </div>
-
         <div class="modal-field">
             <label>Porcentaje de avance acumulado (%)</label>
-            <input type="number" id="avance-porcentaje" min="0" max="100" placeholder="0 – 100">
-            <div class="pct-actual-tag" id="avance-pct-actual-tag">Avance actual: 0%. Solo puedes igualar o subir este valor.</div>
+            <div class="pct-num-row">
+                <span class="pct-num-caption">Escribe el número</span>
+                <input type="number" id="avance-porcentaje" min="0" max="100" placeholder="0 – 100">
+            </div>
+            <div class="pct-slider-row">
+                <span class="pct-num-caption">O desliza para ajustar</span>
+                <input type="range" id="avance-porcentaje-slider" min="0" max="100" step="1">
+            </div>
+            <div class="pct-actual-tag" id="avance-pct-actual-tag">Avance actual: 0%. El nuevo valor debe ser mayor (mínimo +1%).</div>
             <div class="modal-error" id="avance-error"></div>
         </div>
-
         <div class="modal-actions">
             <button class="btn-cancel" onclick="cerrarModal('modalAvance')">Cancelar</button>
-            <button class="btn-confirm" onclick="confirmarAvance()">Guardar avance</button>
+            <button class="btn-confirm" id="btn-confirmar-avance" onclick="confirmarAvance()">Guardar avance</button>
         </div>
     </div>
 </div>
-
 <!-- MODAL RECHAZAR REPORTE -->
 <div class="modal-overlay" id="modalRechazo">
     <div class="modal">
         <div class="modal-title"><i class="ti ti-ban" style="color:#b91c1c"></i> Rechazar reporte</div>
         <div class="modal-subtitle">Esta acción es definitiva. Selecciona los motivos y describe la observación antes de confirmar.</div>
-
         <input type="hidden" id="rechazo-reporte-id">
-
         <div class="modal-field">
             <label>Motivos del rechazo</label>
             <div class="motivos-list">
@@ -417,31 +468,25 @@
             </div>
             <div class="modal-error" id="rechazo-error-motivos">Selecciona al menos un motivo.</div>
         </div>
-
         <div class="modal-field">
             <label>Observación (obligatoria)</label>
             <textarea id="rechazo-observacion" rows="3" placeholder="Explica con detalle la razón del rechazo..."></textarea>
             <div class="modal-error" id="rechazo-error-obs">La observación es obligatoria.</div>
         </div>
-
         <div class="modal-actions">
             <button class="btn-cancel" onclick="cerrarModal('modalRechazo')">Cancelar</button>
             <button class="btn-confirm danger" onclick="confirmarRechazo()">Confirmar rechazo</button>
         </div>
     </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <script src="/js/admin-guard.js"></script>
 <script>
     // Guard
     const TOKEN = window.ADMIN_TOKEN;
-
     let todosLosReportes = [];
     let avanceFotoFile    = null;
     let filaActualAvance  = null; // referencia al reporte que se está actualizando
-
     // ── Formateo ──────────────────────────────────────────────────
     function badgeEstado(e) {
       const n = (e || '').toLowerCase();
@@ -468,27 +513,51 @@
     }
     function abrirModal(id) { document.getElementById(id).classList.add('open'); }
     function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
-
+    // ── Stats ─────────────────────────────────────────────────────
+    function renderStats() {
+      const total       = todosLosReportes.length;
+      const pendientes  = todosLosReportes.filter(r => (r.estado||'').toLowerCase().includes('pendiente')).length;
+      const proceso     = todosLosReportes.filter(r => (r.estado||'').toLowerCase().includes('proceso')).length;
+      const resueltos   = todosLosReportes.filter(r => (r.estado||'').toLowerCase().includes('resuelto')).length;
+      const rechazados  = todosLosReportes.filter(r => (r.estado||'').toLowerCase().includes('rechazado')).length;
+      const altoRiesgo  = todosLosReportes.filter(r => (r.nivelRiesgo||'').toUpperCase() === 'ALTO').length;
+      document.getElementById('stat-total').textContent       = total;
+      document.getElementById('stat-pendientes').textContent  = pendientes;
+      document.getElementById('stat-proceso').textContent     = proceso;
+      document.getElementById('stat-resueltos').textContent   = resueltos;
+      document.getElementById('stat-rechazados').textContent  = rechazados;
+      document.getElementById('stat-alto-riesgo').textContent = altoRiesgo;
+    }
     // ── Render tabla ──────────────────────────────────────────────
     function renderTabla(reportes) {
       const tbody = document.getElementById('tabla-body');
       document.getElementById('resultados-info').textContent =
         `${reportes.length} reporte${reportes.length === 1 ? '' : 's'} encontrado${reportes.length === 1 ? '' : 's'}`;
-
       if (reportes.length === 0) {
-        tbody.innerHTML = '<tr class="empty-row"><td colspan="10">No hay reportes con ese criterio.</td></tr>';
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="9">No hay reportes con ese criterio.</td></tr>';
         return;
       }
       tbody.innerHTML = reportes.map(r => {
         const estadoCls  = (r.estado || '').toLowerCase();
+        const riesgoCls  = (r.nivelRiesgo || '').toLowerCase();
         const finalizado = estadoCls.includes('resuelto') || estadoCls.includes('rechazado');
         const ubicacion  = r.zonaReferencia
           || (r.latitudCentro && r.longitudCentro ? `${parseFloat(r.latitudCentro).toFixed(4)}, ${parseFloat(r.longitudCentro).toFixed(4)}` : '—');
+        const fotoHTML = r.fotoPrincipal
+          ? `<img class="reporte-foto" src="${r.fotoPrincipal}" alt="foto" onerror="this.outerHTML='<div class=reporte-foto-ph><i class=ti ti-photo></i></div>'">`
+          : `<div class="reporte-foto-ph"><i class="ti ti-photo"></i></div>`;
         return `
-        <tr>
+        <tr class="riesgo-${riesgoCls}">
           <td style="color:var(--muted);font-size:.75rem">#${r.id}</td>
-          <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600">${r.titulo || '—'}</td>
-          <td>${r.categoria || '—'}</td>
+          <td>
+            <div class="reporte-cell">
+              ${fotoHTML}
+              <div class="reporte-info">
+                <div class="reporte-titulo" title="${(r.titulo || '').replace(/"/g, '&quot;')}">${r.titulo || '—'}</div>
+                <div class="reporte-cat">${r.categoria || '—'}</div>
+              </div>
+            </div>
+          </td>
           <td>
             <div class="ubicacion-cell" title="${ubicacion}">
               <i class="ti ti-map-pin"></i>
@@ -519,7 +588,6 @@
         </tr>
       `}).join('');
     }
-
     // ── Filtros ───────────────────────────────────────────────────
     function toggleFiltros() {
       const grid = document.getElementById('filtros-grid');
@@ -527,7 +595,6 @@
       grid.classList.toggle('open');
       btn.classList.toggle('activo');
     }
-
     function renderChips() {
       const chips = [];
       const estado   = document.getElementById('filtro-estado').value;
@@ -535,13 +602,11 @@
       const categoria = document.getElementById('filtro-categoria').value;
       const desde    = document.getElementById('filtro-fecha-desde').value;
       const hasta    = document.getElementById('filtro-fecha-hasta').value;
-
       if (estado)    chips.push({ label: 'Estado: ' + estado, clear: () => { document.getElementById('filtro-estado').value = ''; } });
       if (riesgo)    chips.push({ label: 'Riesgo: ' + riesgo, clear: () => { document.getElementById('filtro-riesgo').value = ''; } });
       if (categoria) chips.push({ label: 'Categoría: ' + categoria, clear: () => { document.getElementById('filtro-categoria').value = ''; } });
       if (desde)     chips.push({ label: 'Desde: ' + desde, clear: () => { document.getElementById('filtro-fecha-desde').value = ''; } });
       if (hasta)     chips.push({ label: 'Hasta: ' + hasta, clear: () => { document.getElementById('filtro-fecha-hasta').value = ''; } });
-
       const cont = document.getElementById('filtros-chips');
       if (chips.length === 0) { cont.innerHTML = ''; return; }
       cont.innerHTML = chips.map((c, i) => `
@@ -556,7 +621,6 @@
         aplicarFiltros();
       }
     }
-
     function limpiarFiltros() {
       document.getElementById('buscar').value = '';
       document.getElementById('filtro-estado').value = '';
@@ -567,7 +631,6 @@
       document.getElementById('filtro-fecha-hasta').value = '';
       aplicarFiltros();
     }
-
     function aplicarFiltros() {
       const buscar    = document.getElementById('buscar').value.toLowerCase();
       const estado    = document.getElementById('filtro-estado').value.toLowerCase();
@@ -576,7 +639,6 @@
       const orden     = document.getElementById('filtro-orden').value;
       const desde     = document.getElementById('filtro-fecha-desde').value;
       const hasta     = document.getElementById('filtro-fecha-hasta').value;
-
       let filtrados = todosLosReportes.filter(r => {
         const matchBuscar = !buscar ||
           (r.titulo || '').toLowerCase().includes(buscar) ||
@@ -584,17 +646,14 @@
         const matchEstado    = !estado || (r.estado || '').toLowerCase().includes(estado);
         const matchRiesgo    = !riesgo || (r.nivelRiesgo || '').toUpperCase() === riesgo;
         const matchCategoria = !categoria || r.categoria === categoria;
-
         let matchFecha = true;
         if (r.fechaCreacion && (desde || hasta)) {
           const fechaReporte = new Date(r.fechaCreacion);
           if (desde) matchFecha = matchFecha && fechaReporte >= new Date(desde + 'T00:00:00');
           if (hasta) matchFecha = matchFecha && fechaReporte <= new Date(hasta + 'T23:59:59');
         }
-
         return matchBuscar && matchEstado && matchRiesgo && matchCategoria && matchFecha;
       });
-
       switch (orden) {
         case 'antiguo':
           filtrados.sort((a, b) => new Date(a.fechaCreacion) - new Date(b.fechaCreacion));
@@ -611,25 +670,23 @@
         default: // 'reciente'
           filtrados.sort((a, b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
       }
-
       renderChips();
       renderTabla(filtrados);
     }
     document.getElementById('buscar').addEventListener('input', aplicarFiltros);
-
     async function cargarReportes() {
       try {
         const res  = await fetch('/api/admin/reportes', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
         const json = await res.json();
         todosLosReportes = json.data || [];
+        renderStats();
         aplicarFiltros();
       } catch {
         document.getElementById('tabla-body').innerHTML =
-          '<tr class="empty-row"><td colspan="10">Error al cargar reportes.</td></tr>';
+          '<tr class="empty-row"><td colspan="9">Error al cargar reportes.</td></tr>';
         document.getElementById('resultados-info').textContent = '';
       }
     }
-
     // ── Modal: registrar avance ──────────────────────────────────
     function abrirModalAvance(idReporte, porcentajeActual, titulo) {
       filaActualAvance = { id: idReporte, porcentajeActual };
@@ -646,13 +703,27 @@
       document.getElementById('avance-file-text').textContent = 'Toca para subir una foto del avance';
       document.getElementById('avance-sin-foto').checked = false;
       document.getElementById('avance-comentario').value = '';
-      document.getElementById('avance-porcentaje').value = porcentajeActual;
-      document.getElementById('avance-porcentaje').min = porcentajeActual;
-      document.getElementById('avance-pct-actual-tag').textContent =
-        `Avance actual: ${porcentajeActual}%. Solo puedes igualar o subir este valor.`;
+      const pctMinimo = Math.min(porcentajeActual + 1, 100);
+      const sliderEl = document.getElementById('avance-porcentaje-slider');
+      const numEl = document.getElementById('avance-porcentaje');
+      sliderEl.min = pctMinimo; sliderEl.max = 100; sliderEl.value = pctMinimo;
+      sliderEl.disabled = porcentajeActual >= 100;
+      numEl.min = pctMinimo; numEl.max = 100; numEl.value = pctMinimo;
+      numEl.disabled = porcentajeActual >= 100;
+      document.getElementById('avance-pct-actual-tag').textContent = porcentajeActual >= 100
+        ? 'Este reporte ya está al 100% de avance.'
+        : `Avance actual: ${porcentajeActual}%. El nuevo valor debe ser mayor (mínimo ${pctMinimo}%).`;
       document.getElementById('avance-error').classList.remove('show');
+      const btn = document.getElementById('btn-confirmar-avance');
+      btn.disabled = false; btn.textContent = 'Guardar avance';
       abrirModal('modalAvance');
     }
+    document.getElementById('avance-porcentaje-slider').addEventListener('input', e => {
+      document.getElementById('avance-porcentaje').value = e.target.value;
+    });
+    document.getElementById('avance-porcentaje').addEventListener('input', e => {
+      document.getElementById('avance-porcentaje-slider').value = e.target.value || 0;
+    });
     function onFotoAvanceSeleccionada(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -672,20 +743,18 @@
     async function confirmarAvance() {
       const errorEl    = document.getElementById('avance-error');
       errorEl.classList.remove('show');
-
       const idReporte  = document.getElementById('avance-reporte-id').value;
       const sinFoto    = document.getElementById('avance-sin-foto').checked;
       const comentario = document.getElementById('avance-comentario').value.trim();
       const porcentaje = parseInt(document.getElementById('avance-porcentaje').value);
       const pctActual  = filaActualAvance ? filaActualAvance.porcentajeActual : 0;
-
       if (isNaN(porcentaje) || porcentaje < 0 || porcentaje > 100) {
         errorEl.textContent = 'Ingresa un porcentaje válido entre 0 y 100.';
         errorEl.classList.add('show');
         return;
       }
-      if (porcentaje < pctActual) {
-        errorEl.textContent = `El porcentaje no puede ser menor al avance actual (${pctActual}%).`;
+      if (porcentaje <= pctActual) {
+        errorEl.textContent = `El porcentaje debe ser mayor al avance actual (${pctActual}%). No puede quedar igual.`;
         errorEl.classList.add('show');
         return;
       }
@@ -694,13 +763,13 @@
         errorEl.classList.add('show');
         return;
       }
-
       const formData = new FormData();
       formData.append('porcentaje', porcentaje);
       formData.append('sinFoto', sinFoto);
       if (comentario) formData.append('comentario', comentario);
       if (avanceFotoFile) formData.append('foto', avanceFotoFile);
-
+      const btn = document.getElementById('btn-confirmar-avance');
+      btn.disabled = true; btn.textContent = 'Guardando...';
       try {
         const res = await fetch(`/api/avances/${idReporte}`, {
           method: 'POST',
@@ -719,9 +788,10 @@
       } catch {
         errorEl.textContent = 'Error de conexión';
         errorEl.classList.add('show');
+      } finally {
+        btn.disabled = false; btn.textContent = 'Guardar avance';
       }
     }
-
     // ── Modal: rechazar reporte ───────────────────────────────────
     function abrirModalRechazo(idReporte) {
       document.getElementById('rechazo-reporte-id').value = idReporte;
@@ -735,13 +805,11 @@
       const idReporte   = document.getElementById('rechazo-reporte-id').value;
       const motivos     = Array.from(document.querySelectorAll('.motivo-check:checked')).map(c => c.value);
       const observacion = document.getElementById('rechazo-observacion').value.trim();
-
       const errMotivos = document.getElementById('rechazo-error-motivos');
       const errObs      = document.getElementById('rechazo-error-obs');
       errMotivos.classList.toggle('show', motivos.length === 0);
       errObs.classList.toggle('show', observacion.length === 0);
       if (motivos.length === 0 || observacion.length === 0) return;
-
       try {
         const res = await fetch(`/api/admin/reportes/${idReporte}/rechazar`, {
           method: 'POST',
@@ -760,7 +828,6 @@
         mostrarToast('Error de conexión', true);
       }
     }
-
     // Cerrar modales con Escape o click fuera
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') { cerrarModal('modalAvance'); cerrarModal('modalRechazo'); }
@@ -770,12 +837,7 @@
         if (e.target === e.currentTarget) cerrarModal(id);
       });
     });
-
-
-
     cargarReportes();
-
-
 </script>
 </body>
 </html>

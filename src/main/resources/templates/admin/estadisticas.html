@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Altoque – Estadísticas</title>
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+          --sidebar-bg: #1a3a8f;
+          --accent: #0fa89a;
+          --bg: #f0f5fb;
+          --card: #fff;
+          --text: #111827;
+          --muted: #9ca3af;
+          --border: #f3f4f6;
+        }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
+        .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .avatar-sm i { color: #fff; font-size: .95rem; }
+        .user-info { flex: 1; min-width: 0; }
+        .user-name { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
+        .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
+        .btn-logout:hover { color: #fff; }
+        .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+        .topbar { background: var(--card); padding: .9rem 1.8rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+        .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
+        .content { padding: 1.6rem 1.8rem; }
+        /* FILTROS */
+        .filtros-card { background: var(--card); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.05); padding: 1.1rem 1.3rem; margin-bottom: 1.2rem; }
+        .filtros-row { display: flex; gap: .7rem; flex-wrap: wrap; align-items: flex-end; }
+        .filtro-group { min-width: 150px; flex: 1; }
+        .filtro-group label { display: block; font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; }
+        .filtro-input, .filtro-select {
+          width: 100%; padding: .55rem .7rem; border: 1.5px solid #e5e7eb; border-radius: 9px;
+          font-size: .82rem; color: var(--text); background: var(--card); outline: none; cursor: pointer; font-family: inherit;
+        }
+        .filtro-input:focus, .filtro-select:focus { border-color: var(--sidebar-bg); }
+        .filtro-btns { display: flex; gap: .5rem; }
+        .btn-aplicar, .btn-limpiar {
+          padding: .55rem 1rem; border: none; border-radius: 9px;
+          font-size: .8rem; font-weight: 700; cursor: pointer; white-space: nowrap;
+        }
+        .btn-aplicar { background: var(--sidebar-bg); color: #fff; }
+        .btn-aplicar:hover { background: #153070; }
+        .btn-limpiar { background: #f3f4f6; color: #374151; }
+        /* KPIs */
+        .kpi-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1.4rem; }
+        .kpi-card { background: var(--card); border-radius: 14px; padding: 1.1rem 1.2rem; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+        .kpi-icon { width: 34px; height: 34px; border-radius: 9px; display: flex; align-items: center; justify-content: center; margin-bottom: .5rem; }
+        .kpi-icon i { font-size: 1.05rem; }
+        .kpi-label { font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+        .kpi-value { font-size: 1.6rem; font-weight: 900; color: var(--text); line-height: 1.2; }
+        .kpi-sub { font-size: .68rem; color: var(--muted); margin-top: .2rem; }
+        .ic-a { background: #eff6ff; } .ic-a i { color: #1d4ed8; }
+        .ic-b { background: #f0fdfa; } .ic-b i { color: #0d9488; }
+        .ic-c { background: #fffbeb; } .ic-c i { color: #b45309; }
+        .ic-d { background: #f0fdf4; } .ic-d i { color: #15803d; }
+        .ic-e { background: #faf5ff; } .ic-e i { color: #7c3aed; }
+        /* GRID DE GRAFICOS */
+        .charts-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .charts-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        .card { background: var(--card); border-radius: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.05); overflow: hidden; }
+        .card-head { padding: 1rem 1.3rem .7rem; border-bottom: 1px solid var(--border); }
+        .card-title { font-size: .9rem; font-weight: 700; color: var(--text); }
+        .card-sub { font-size: .72rem; color: var(--muted); margin-top: .15rem; }
+        .card-body { padding: 1.2rem 1.3rem; position: relative; }
+        .chart-tall { height: 280px; }
+        .chart-mid { height: 240px; }
+        .empty-chart { text-align: center; color: var(--muted); font-size: .82rem; padding: 3rem 1rem; }
+    </style>
+</head>
+<body>
+<!-- SIDEBAR -->
+<div th:replace="~{admin/fragments/sidebar :: sidebar('estadisticas')}"></div>
+<!-- MAIN -->
+<div class="main">
+    <div class="topbar">
+        <div class="topbar-title">Estadísticas</div>
+    </div>
+    <div class="content">
+        <!-- FILTROS -->
+        <div class="filtros-card">
+            <div class="filtros-row">
+                <div class="filtro-group">
+                    <label>Desde</label>
+                    <input type="date" class="filtro-input" id="f-desde">
+                </div>
+                <div class="filtro-group">
+                    <label>Hasta</label>
+                    <input type="date" class="filtro-input" id="f-hasta">
+                </div>
+                <div class="filtro-group">
+                    <label>Categoría</label>
+                    <select class="filtro-select" id="f-categoria"><option value="">Todas</option></select>
+                </div>
+                <div class="filtro-group">
+                    <label>Nivel de riesgo</label>
+                    <select class="filtro-select" id="f-nivel"><option value="">Todos</option></select>
+                </div>
+                <div class="filtro-group">
+                    <label>Estado</label>
+                    <select class="filtro-select" id="f-estado">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en proceso">En proceso</option>
+                        <option value="resuelto">Resuelto</option>
+                        <option value="rechazado">Rechazado</option>
+                    </select>
+                </div>
+                <div class="filtro-btns">
+                    <button class="btn-aplicar" onclick="cargarEstadisticas()">Aplicar</button>
+                    <button class="btn-limpiar" onclick="limpiarFiltros()">Limpiar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPIs -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon ic-a"><i class="ti ti-clipboard-data"></i></div>
+                <div class="kpi-label">Casos oficiales</div>
+                <div class="kpi-value" id="kpi-total">—</div>
+                <div class="kpi-sub">En el rango filtrado</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon ic-b"><i class="ti ti-send"></i></div>
+                <div class="kpi-label">Reportes enviados</div>
+                <div class="kpi-value" id="kpi-envios">—</div>
+                <div class="kpi-sub" id="kpi-envios-sub">por ciudadanos</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon ic-c"><i class="ti ti-transform"></i></div>
+                <div class="kpi-label">Tasa de conversión</div>
+                <div class="kpi-value" id="kpi-conversion">—</div>
+                <div class="kpi-sub">Envíos que formaron un caso</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon ic-d"><i class="ti ti-circle-check"></i></div>
+                <div class="kpi-label">% Resueltos</div>
+                <div class="kpi-value" id="kpi-resueltos">—</div>
+                <div class="kpi-sub">Del total de casos</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-icon ic-e"><i class="ti ti-hourglass"></i></div>
+                <div class="kpi-label">Tiempo de resolución</div>
+                <div class="kpi-value" id="kpi-tiempo">—</div>
+                <div class="kpi-sub">Promedio general</div>
+            </div>
+        </div>
+
+        <!-- TENDENCIA + NIVEL DE RIESGO -->
+        <div class="charts-grid">
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">Tendencia de casos</div>
+                    <div class="card-sub">Cantidad de casos creados por semana</div>
+                </div>
+                <div class="card-body chart-tall"><canvas id="chartTendencia"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">Por nivel de riesgo</div>
+                    <div class="card-sub">Distribución de gravedad</div>
+                </div>
+                <div class="card-body chart-tall"><canvas id="chartNivel"></canvas></div>
+            </div>
+        </div>
+
+        <!-- CATEGORIA + TIEMPO RESOLUCION -->
+        <div class="charts-grid-2">
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">Casos por categoría</div>
+                    <div class="card-sub">Qué tipo de incidencia se reporta más</div>
+                </div>
+                <div class="card-body chart-mid"><canvas id="chartCategoria"></canvas></div>
+            </div>
+            <div class="card">
+                <div class="card-head">
+                    <div class="card-title">Tiempo de resolución por categoría</div>
+                    <div class="card-sub">Horas promedio hasta marcarse "resuelto"</div>
+                </div>
+                <div class="card-body chart-mid"><canvas id="chartTiempoResolucion"></canvas></div>
+            </div>
+        </div>
+
+        <!-- ZONAS -->
+        <div class="card">
+            <div class="card-head">
+                <div class="card-title">Zonas con más incidencias</div>
+                <div class="card-sub">Top 8 zonas de referencia con más casos registrados</div>
+            </div>
+            <div class="card-body chart-mid"><canvas id="chartZonas"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/admin-guard.js"></script>
+<script>
+    const TOKEN = window.ADMIN_TOKEN;
+    document.getElementById('sb-nombre').textContent =
+      (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+
+    const CAT_COLORS = ['#1a3a8f','#0fa89a','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+    const NIVEL_COLORS = { 'ALTO': '#ef4444', 'MEDIO': '#f59e0b', 'BAJO': '#22c55e' };
+
+    let charts = {};
+    function destruirCharts() { Object.values(charts).forEach(c => c && c.destroy()); charts = {}; }
+
+    // ── Cargar selects de filtros ──────────────────────────────
+    async function cargarFiltros() {
+        try {
+            const [catRes, nivelRes] = await Promise.all([
+                fetch('/api/categorias'),
+                fetch('/api/niveles-riesgo')
+            ]);
+            const cats = (await catRes.json()).data || [];
+            const niveles = (await nivelRes.json()).data || [];
+            const selCat = document.getElementById('f-categoria');
+            cats.forEach(c => selCat.innerHTML += `<option value="${c.id}">${c.nombre}</option>`);
+            const selNivel = document.getElementById('f-nivel');
+            niveles.forEach(n => selNivel.innerHTML += `<option value="${n.id}">${n.nombre}</option>`);
+        } catch (e) { console.error('Error cargando filtros:', e); }
+    }
+
+    function limpiarFiltros() {
+        document.getElementById('f-desde').value = '';
+        document.getElementById('f-hasta').value = '';
+        document.getElementById('f-categoria').value = '';
+        document.getElementById('f-nivel').value = '';
+        document.getElementById('f-estado').value = '';
+        cargarEstadisticas();
+    }
+
+    // ── Render de charts ────────────────────────────────────────
+    function renderTendencia(data) {
+        const ctx = document.getElementById('chartTendencia').getContext('2d');
+        if (!data || data.length === 0) {
+            document.getElementById('chartTendencia').parentElement.innerHTML = '<p class="empty-chart">Sin datos suficientes en este rango.</p>';
+            return;
+        }
+        charts.tendencia = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.map(p => p.periodo),
+                datasets: [{
+                    data: data.map(p => p.cantidad),
+                    borderColor: '#1a3a8f',
+                    backgroundColor: 'rgba(26,58,143,.08)',
+                    fill: true, tension: .35, pointRadius: 3, pointBackgroundColor: '#1a3a8f'
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 } } },
+                    y: { grid: { color: '#f3f4f6' }, ticks: { stepSize: 1, font: { size: 11 } }, beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function renderNivel(porNivel) {
+        const labels = Object.keys(porNivel);
+        const ctx = document.getElementById('chartNivel').getContext('2d');
+        if (labels.length === 0) {
+            document.getElementById('chartNivel').parentElement.innerHTML = '<p class="empty-chart">Sin datos en este rango.</p>';
+            return;
+        }
+        charts.nivel = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels,
+                datasets: [{ data: Object.values(porNivel), backgroundColor: labels.map(l => NIVEL_COLORS[l] || '#d1d5db'), borderWidth: 3, borderColor: '#fff' }]
+            },
+            options: { cutout: '65%', plugins: { legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 12 } } } }
+        });
+    }
+
+    function renderCategoria(porCategoria) {
+        const labels = Object.keys(porCategoria);
+        const ctx = document.getElementById('chartCategoria').getContext('2d');
+        if (labels.length === 0) {
+            document.getElementById('chartCategoria').parentElement.innerHTML = '<p class="empty-chart">Sin datos en este rango.</p>';
+            return;
+        }
+        charts.categoria = new Chart(ctx, {
+            type: 'bar',
+            data: { labels, datasets: [{ data: Object.values(porCategoria), backgroundColor: CAT_COLORS, borderRadius: 6, borderSkipped: false }] },
+            options: {
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { color: '#f3f4f6' }, ticks: { stepSize: 1, font: { size: 11 } } }, y: { grid: { display: false }, ticks: { font: { size: 10 } } } }
+            }
+        });
+    }
+
+    function renderTiempoResolucion(tiempoPorCategoria) {
+        const labels = Object.keys(tiempoPorCategoria);
+        const ctx = document.getElementById('chartTiempoResolucion').getContext('2d');
+        if (labels.length === 0) {
+            document.getElementById('chartTiempoResolucion').parentElement.innerHTML = '<p class="empty-chart">Aún no hay casos resueltos en este rango.</p>';
+            return;
+        }
+        charts.tiempo = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [{
+                    data: Object.values(tiempoPorCategoria),
+                    backgroundColor: '#0fa89a', borderRadius: 6, borderSkipped: false
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => ` ${formatHoras(ctx.raw)}` } }
+                },
+                scales: { x: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 11 } } }, y: { grid: { display: false }, ticks: { font: { size: 10 } } } }
+            }
+        });
+    }
+
+    function renderZonas(topZonas) {
+        const ctx = document.getElementById('chartZonas').getContext('2d');
+        if (!topZonas || topZonas.length === 0) {
+            document.getElementById('chartZonas').parentElement.innerHTML = '<p class="empty-chart">Sin zonas registradas en este rango.</p>';
+            return;
+        }
+        charts.zonas = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: topZonas.map(z => z.zona),
+                datasets: [{ data: topZonas.map(z => z.cantidad), backgroundColor: '#1a3a8f', borderRadius: 6, borderSkipped: false }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false }, ticks: { font: { size: 10 } } }, y: { grid: { color: '#f3f4f6' }, ticks: { stepSize: 1, font: { size: 11 } } } }
+            }
+        });
+    }
+
+    function formatHoras(horas) {
+        if (horas < 24) return `${horas} h`;
+        return `${(horas / 24).toFixed(1)} días`;
+    }
+
+    // ── Carga principal ──────────────────────────────────────────
+    async function cargarEstadisticas() {
+        destruirCharts();
+        // Reseteamos contenedores por si quedaron con mensaje de "sin datos" de una carga anterior
+        document.querySelectorAll('.chart-tall, .chart-mid').forEach(c => {
+            if (!c.querySelector('canvas')) {
+                const id = c.dataset.canvasId;
+            }
+        });
+
+        const params = new URLSearchParams();
+        const desde = document.getElementById('f-desde').value;
+        const hasta = document.getElementById('f-hasta').value;
+        const categoriaId = document.getElementById('f-categoria').value;
+        const nivelId = document.getElementById('f-nivel').value;
+        const estado = document.getElementById('f-estado').value;
+        if (desde) params.set('desde', desde);
+        if (hasta) params.set('hasta', hasta);
+        if (categoriaId) params.set('categoriaId', categoriaId);
+        if (nivelId) params.set('nivelRiesgoId', nivelId);
+        // El backend filtra por estadoId (numérico); si tu selector usa nombre,
+        // este mapeo simple cubre los 4 estados fijos del sistema.
+        const ESTADOS_ID = { 'pendiente': 1, 'en proceso': 2, 'resuelto': 3, 'rechazado': 4 };
+        if (estado && ESTADOS_ID[estado]) params.set('estadoId', ESTADOS_ID[estado]);
+
+        try {
+            const res = await fetch(`/api/admin/estadisticas?${params.toString()}`, {
+                headers: { 'Authorization': 'Bearer ' + TOKEN }
+            });
+            const json = await res.json();
+            const d = json.data || {};
+
+            document.getElementById('kpi-total').textContent = d.totalReportes ?? 0;
+            document.getElementById('kpi-envios').textContent = d.totalMiniReportes ?? 0;
+            document.getElementById('kpi-envios-sub').textContent =
+                `${d.totalMiniReportesAgrupados ?? 0} ya forman parte de un caso`;
+            document.getElementById('kpi-conversion').textContent = (d.tasaConversion ?? 0) + '%';
+            document.getElementById('kpi-resueltos').textContent = (d.porcentajeResueltos ?? 0) + '%';
+            document.getElementById('kpi-tiempo').textContent =
+                d.promedioTiempoResolucionHoras != null ? formatHoras(d.promedioTiempoResolucionHoras) : '—';
+
+            renderTendencia(d.tendencia || []);
+            renderNivel(d.porNivelRiesgo || {});
+            renderCategoria(d.porCategoria || {});
+            renderTiempoResolucion(d.tiempoResolucionPorCategoria || {});
+            renderZonas(d.topZonas || []);
+        } catch (e) {
+            console.error('Error cargando estadísticas:', e);
+        }
+    }
+
+    cargarFiltros().then(cargarEstadisticas);
+</script>
+</body>
+</html>

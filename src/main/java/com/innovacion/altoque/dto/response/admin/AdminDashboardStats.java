@@ -13,6 +13,7 @@ public class AdminDashboardStats {
     private Map<String, Long> porEstado;
     private Map<String, Long> porCategoria;
     private List<ReporteMapaItem> reportesParaMapa;
+    private String periodo;
 
     @Data
     public static class ReporteMapaItem {

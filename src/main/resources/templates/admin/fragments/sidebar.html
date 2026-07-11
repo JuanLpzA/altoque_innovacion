@@ -1,34 +1,49 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-
 <div th:fragment="sidebar(activa)" class="sidebar">
-    <div class="sidebar-brand">AL<span>Toque</span></div>
+
+    <div class="sidebar-brand">
+        <img src="/logo_mpch.png" alt="Municipalidad Provincial de Chiclayo" class="brand-logo">
+        <div class="brand-text">
+            <div class="brand-name">ALT<span>oque</span></div>
+            <div class="brand-affil">Municipalidad de Chiclayo</div>
+        </div>
+    </div>
+    <div class="sidebar-flagbar"><span></span><span></span><span></span></div>
+
     <div class="sidebar-section">Principal</div>
     <nav class="sidebar-nav">
         <a href="/admin/dashboard" th:classappend="${activa == 'dashboard'} ? 'active'">
-            <i class="ti ti-layout-dashboard"></i> Dashboard
+            <span class="nav-icon"><i class="ti ti-layout-dashboard"></i></span> Dashboard
         </a>
         <a href="/admin/reportes" th:classappend="${activa == 'reportes'} ? 'active'">
-            <i class="ti ti-clipboard-list"></i> Reportes
+            <span class="nav-icon"><i class="ti ti-clipboard-list"></i></span> Reportes
         </a>
         <a href="/admin/mapa" th:classappend="${activa == 'mapa'} ? 'active'">
-            <i class="ti ti-map-pin"></i> Mapa de incidencias
+            <span class="nav-icon"><i class="ti ti-map-pin"></i></span> Mapa de incidencias
         </a>
         <a href="/admin/evidencias" th:classappend="${activa == 'evidencias'} ? 'active'">
-            <i class="ti ti-photo"></i> Evidencias
+            <span class="nav-icon"><i class="ti ti-photo"></i></span> Evidencias
         </a>
         <a href="/admin/moderacion" th:classappend="${activa == 'moderacion'} ? 'active'">
-            <i class="ti ti-shield-check"></i> Centro de moderación
+            <span class="nav-icon"><i class="ti ti-shield-check"></i></span> Centro de moderación
         </a>
 
         <div id="seccion-administrador" style="display:none">
             <div class="sidebar-section">Administrador</div>
             <a href="/admin/usuarios" id="link-usuarios" th:classappend="${activa == 'usuarios'} ? 'active'">
-                <i class="ti ti-users"></i> Usuarios
+                <span class="nav-icon"><i class="ti ti-users"></i></span> Usuarios
+            </a>
+            <a href="/admin/estadisticas" id="link-estadisticas" th:classappend="${activa == 'estadisticas'} ? 'active'">
+                <span class="nav-icon"><i class="ti ti-chart-bar"></i></span> Estadísticas
+            </a>
+            <a href="/admin/configuracion" id="link-configuracion" th:classappend="${activa == 'configuracion'} ? 'active'">
+                <span class="nav-icon"><i class="ti ti-settings"></i></span> Configuración
             </a>
         </div>
     </nav>
+
     <div class="sidebar-footer">
         <div class="sidebar-user">
             <div class="avatar-sm"><i class="ti ti-building-community"></i></div>
@@ -36,10 +51,9 @@
                 <div class="user-name" id="sb-nombre">—</div>
                 <div class="user-role">Municipalidad</div>
             </div>
-            <button class="btn-logout" onclick="cerrarSesion()"><i class="ti ti-power"></i></button>
+            <button class="btn-logout" onclick="cerrarSesion()" title="Cerrar sesión"><i class="ti ti-power"></i></button>
         </div>
     </div>
 </div>
-
 </body>
 </html>

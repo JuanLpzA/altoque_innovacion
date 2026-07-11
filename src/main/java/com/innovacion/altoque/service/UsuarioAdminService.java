@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.innovacion.altoque.dto.request.EditarUsuarioRequest;
+import com.innovacion.altoque.dto.request.CambiarRolRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -154,5 +156,34 @@ public class UsuarioAdminService {
 
         tr.setUsado(true);
         tokenRecuperacionRepository.save(tr);
+    }
+
+
+    @Transactional
+    public void editarDatos(Integer idUsuario, EditarUsuarioRequest req) {
+        Usuario u = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        u.setNombre(req.getNombre());
+        u.setApellido(req.getApellido());
+        usuarioRepository.save(u);
+    }
+
+    @Transactional
+    public void cambiarRol(Integer idUsuario, CambiarRolRequest req, Usuario admin) {
+        Usuario u = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (!ROLES_MUNICIPALES.contains(u.getRol().getNombre().toLowerCase())) {
+            throw new RuntimeException("Solo se puede cambiar el rol de cuentas municipales");
+        }
+
+        if (u.getId().equals(admin.getId()) && !req.getRol().equalsIgnoreCase("municipalidad_admin")) {
+            throw new RuntimeException("No puedes cambiar tu propio rol de administrador");
+        }
+
+        Rol nuevoRol = rolRepository.findByNombreIgnoreCase(req.getRol())
+                .orElseThrow(() -> new RuntimeException("Rol no válido: " + req.getRol()));
+        u.setRol(nuevoRol);
+        usuarioRepository.save(u);
     }
 }

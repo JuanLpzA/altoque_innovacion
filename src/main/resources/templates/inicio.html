@@ -9,340 +9,192 @@
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f0f5fb;
+            background:
+                linear-gradient(to bottom, #1a3a8f 0, #1a3a8f 240px, #f0f5fb 240px, #f0f5fb 100%);
             min-height: 100dvh;
             padding-bottom: 80px;
             max-width: 480px;
             margin: 0 auto;
         }
         /* ── HEADER ── */
-        .header {
-            background: #1a3a8f;
-            padding: 1.1rem 1.2rem 3.2rem;
-            position: relative;
-        }
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-        }
+        .header { padding: 1.1rem 1.2rem 3.2rem; position: relative; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: .75rem; }
         .avatar-circle {
-            width: 42px; height: 42px;
-            border-radius: 50%;
+            width: 42px; height: 42px; border-radius: 50%;
             background: rgba(255,255,255,.2);
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .avatar-circle i { color: #fff; font-size: 1.35rem; }
-        .header-name {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: -.01em;
-            line-height: 1.1;
-        }
-        .header-sub {
-            font-size: .72rem;
-            color: rgba(255,255,255,.7);
-            margin-top: 1px;
-        }
-        .header-actions {
-            display: flex;
-            gap: .5rem;
-        }
+        .header-name { font-size: 1.25rem; font-weight: 800; color: #fff; letter-spacing: -.01em; line-height: 1.1; }
+        .header-sub { font-size: .72rem; color: rgba(255,255,255,.7); margin-top: 1px; }
+        .header-actions { display: flex; gap: .5rem; }
         .icon-btn {
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,.35);
-            background: transparent;
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,.35); background: transparent;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: #fff;
-            font-size: 1.05rem;
+            cursor: pointer; color: #fff; font-size: 1.05rem;
         }
         .icon-btn:active { background: rgba(255,255,255,.15); }
+        /* ── AVISO UBICACIÓN (discreto, no bloqueante) ── */
+        .ubicacion-aviso {
+            display: none;
+            align-items: center; gap: .5rem;
+            background: rgba(255,255,255,.15);
+            border-radius: 10px;
+            padding: .5rem .7rem;
+            margin-top: .7rem;
+            font-size: .72rem;
+            color: #fff;
+        }
+        .ubicacion-aviso.visible { display: flex; }
+        .ubicacion-aviso i { font-size: .95rem; flex-shrink: 0; }
+        .ubicacion-aviso span { flex: 1; line-height: 1.3; }
+        .ubicacion-aviso button {
+            border: none; background: rgba(255,255,255,.25); color: #fff;
+            font-size: .68rem; font-weight: 700; padding: .3rem .55rem;
+            border-radius: 7px; cursor: pointer; flex-shrink: 0;
+        }
         /* ── STATS CARD ── */
         .stats-card {
-            background: #fff;
-            border-radius: 18px;
-            margin: 0 1rem;
-            margin-top: -2.2rem;
-            padding: 1.1rem 1.3rem 1rem;
-            box-shadow: 0 6px 24px rgba(26,58,143,.13);
-            position: relative;
-            z-index: 2;
+            background: #fff; border-radius: 18px; margin: 0 1rem; margin-top: -2.2rem;
+            padding: 1.1rem 1.3rem 1rem; box-shadow: 0 6px 24px rgba(26,58,143,.13);
+            position: relative; z-index: 2;
         }
-        .stats-header {
-            display: flex;
-            align-items: flex-start;
-            gap: .75rem;
-            margin-bottom: .6rem;
-        }
+        .stats-header { display: flex; align-items: flex-start; justify-content: space-between; gap: .75rem; margin-bottom: .6rem; }
+        .stats-header-left { display: flex; align-items: flex-start; gap: .75rem; }
         .stats-icon-box {
-            width: 38px; height: 38px;
-            border-radius: 10px;
-            background: #e8f0fe;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            width: 38px; height: 38px; border-radius: 10px; background: #e8f0fe;
+            display: flex; align-items: center; justify-content: center; flex-shrink: 0;
         }
         .stats-icon-box i { color: #1a3a8f; font-size: 1.2rem; }
-        .stats-label {
-            font-size: .78rem;
-            font-weight: 600;
-            color: #374151;
-            line-height: 1.3;
+        .stats-label { font-size: .78rem; font-weight: 600; color: #374151; line-height: 1.3; }
+        .stats-info-btn {
+            border: none; background: #f3f4f6; color: #9ca3af;
+            width: 24px; height: 24px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: .8rem; cursor: pointer; flex-shrink: 0;
         }
-        .stats-count {
-            font-size: 2.2rem;
-            font-weight: 900;
-            color: #1a3a8f;
-            line-height: 1;
-            letter-spacing: -.02em;
-        }
+        .stats-count { font-size: 2.2rem; font-weight: 900; color: #1a3a8f; line-height: 1; letter-spacing: -.02em; }
         .stats-count span { color: #9ca3af; font-weight: 400; font-size: 1.6rem; }
         .stats-sub { font-size: .68rem; color: #9ca3af; margin-top: .3rem; }
-        .progress-bar {
-            background: #e5e7eb;
-            border-radius: 99px;
-            height: 6px;
-            margin-top: .75rem;
-            overflow: hidden;
-        }
-        .progress-fill {
-            background: #1a3a8f;
-            height: 100%;
-            border-radius: 99px;
-        }
+        .progress-bar { background: #e5e7eb; border-radius: 99px; height: 6px; margin-top: .75rem; overflow: hidden; }
+        .progress-fill { background: #1a3a8f; height: 100%; border-radius: 99px; transition: width .4s ease; }
+        /* skeleton */
+        .skeleton { background: linear-gradient(90deg, #eef1f6 25%, #e2e7f0 37%, #eef1f6 63%); background-size: 400% 100%; animation: skeleton-loading 1.4s ease infinite; border-radius: 8px; }
+        @keyframes skeleton-loading { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+        .stats-count.skeleton { width: 90px; height: 2.2rem; }
         /* ── GRID ACCIONES ── */
-        .acciones {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-template-rows: auto auto;
-            gap: .75rem;
-            padding: 1rem;
-        }
+        .acciones { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: .75rem; padding: 1rem; }
         .accion-btn {
-            background: #fff;
-            border: none;
-            border-radius: 16px;
-            padding: 1.1rem 1rem;
-            text-align: center;
-            cursor: pointer;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: .5rem;
+            background: #fff; border: none; border-radius: 16px; padding: 1.1rem 1rem;
+            text-align: center; cursor: pointer; text-decoration: none;
+            display: flex; flex-direction: column; align-items: center; gap: .5rem;
             box-shadow: 0 2px 10px rgba(0,0,0,.06);
         }
         .accion-btn .a-icon { font-size: 1.7rem; color: #1a3a8f; }
-        .accion-btn .a-label {
-            font-size: .75rem;
-            font-weight: 700;
-            color: #1e293b;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-        }
+        .accion-btn .a-label { font-size: .75rem; font-weight: 700; color: #1e293b; text-transform: uppercase; letter-spacing: .04em; }
         .btn-nuevo {
-            background: #0fa89a;
-            border-radius: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: .65rem;
-            cursor: pointer;
-            text-decoration: none;
-            border: none;
-            padding: 1.2rem .8rem;
-            grid-column: 2;
-            grid-row: 1 / 3;
-            box-shadow: 0 4px 16px rgba(15,168,154,.3);
+            background: #0fa89a; border-radius: 16px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: .65rem; cursor: pointer;
+            text-decoration: none; border: none; padding: 1.2rem .8rem;
+            grid-column: 2; grid-row: 1 / 3; box-shadow: 0 4px 16px rgba(15,168,154,.3);
         }
-        .btn-nuevo .n-label {
-            font-size: .82rem;
-            font-weight: 800;
-            color: #fff;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: .05em;
-            line-height: 1.2;
-        }
-        .plus-circle {
-            width: 52px; height: 52px;
-            border-radius: 50%;
-            background: rgba(255,255,255,.25);
-            display: flex; align-items: center; justify-content: center;
-        }
+        .btn-nuevo .n-label { font-size: .82rem; font-weight: 800; color: #fff; text-align: center; text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+        .plus-circle { width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,.25); display: flex; align-items: center; justify-content: center; }
         .plus-circle i { color: #fff; font-size: 1.8rem; }
         /* ── SECCIÓN REPORTES ── */
-        .seccion {
-            padding: .25rem 1rem .5rem;
-        }
-        .seccion-titulo {
-            font-size: 1rem;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: .7rem;
-        }
+        .seccion { padding: .25rem 1rem .5rem; display: flex; align-items: center; justify-content: space-between; }
+        .seccion-titulo { font-size: 1rem; font-weight: 700; color: #111827; }
+        .seccion-sub { font-size: .72rem; color: #9ca3af; }
         /* ── BUSCADOR ── */
-        .search-wrap {
-            margin: 0 1rem .85rem;
-            position: relative;
-        }
-        .search-wrap i {
-            position: absolute;
-            left: 11px; top: 50%;
-            transform: translateY(-50%);
-            color: #9ca3af;
-            font-size: 16px;
-        }
+        .search-wrap { margin: 0 1rem .85rem; position: relative; }
+        .search-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 16px; }
         .search-wrap input {
-            width: 100%;
-            border: 1.5px solid #e5e7eb;
-            border-radius: 12px;
-            padding: .6rem .85rem .6rem 2.2rem;
-            font-size: .85rem;
-            background: #fff;
-            outline: none;
-            color: #374151;
+            width: 100%; border: 1.5px solid #e5e7eb; border-radius: 12px;
+            padding: .6rem .85rem .6rem 2.2rem; font-size: .85rem; background: #fff; outline: none; color: #374151;
         }
         .search-wrap input:focus { border-color: #1a3a8f; }
         /* ── TARJETAS REPORTE ── */
-        .reporte-card {
-            background: #fff;
-            margin: 0 1rem .85rem;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 2px 14px rgba(0,0,0,.07);
-        }
-        .reporte-img-wrap {
-            position: relative;
-            width: 100%;
-            height: 130px;
-        }
+        .reporte-card { background: #fff; margin: 0 1rem .85rem; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,.07); text-decoration: none; display: block; }
+        .reporte-img-wrap { position: relative; width: 100%; height: 170px; }
         .reporte-img-placeholder {
-            width: 100%; height: 100%;
-            background: linear-gradient(135deg, #c8d8ec, #a8bdd8);
-            display: flex; align-items: center; justify-content: center;
-            color: #7a97b8; font-size: 2.2rem;
+            width: 100%; height: 100%; background: linear-gradient(135deg, #c8d8ec, #a8bdd8);
+            display: flex; align-items: center; justify-content: center; color: #7a97b8; font-size: 2.2rem;
         }
-        .reporte-img {
-            width: 100%; height: 100%;
-            object-fit: cover; display: block;
-        }
+        .reporte-img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; }
         .badge-img {
-            position: absolute;
-            top: 10px; right: 10px;
-            font-size: .68rem;
-            font-weight: 700;
-            padding: .25rem .65rem;
-            border-radius: 99px;
-            backdrop-filter: blur(4px);
+            position: absolute; top: 10px; right: 10px; font-size: .68rem; font-weight: 700;
+            padding: .25rem .65rem; border-radius: 99px; backdrop-filter: blur(4px);
         }
         .badge-PENDIENTE   { background: rgba(239,68,68,.85);  color: #fff; }
         .badge-EN_PROCESO  { background: rgba(59,130,246,.85); color: #fff; }
         .badge-RESUELTO    { background: rgba(34,197,94,.85);  color: #fff; }
         .badge-default     { background: rgba(107,114,128,.8); color: #fff; }
-        .badge-riesgo {
-            font-size: .62rem;
-            font-weight: 700;
-            padding: .18rem .5rem;
-            border-radius: 99px;
+        .badge-distancia {
+            position: absolute; top: 10px; left: 10px;
+            background: rgba(17,24,39,.6); color: #fff; backdrop-filter: blur(4px);
+            font-size: .68rem; font-weight: 700; padding: .25rem .6rem; border-radius: 99px;
+            display: flex; align-items: center; gap: .25rem;
         }
+        .badge-riesgo { font-size: .62rem; font-weight: 700; padding: .18rem .5rem; border-radius: 99px; }
         .badge-ALTO  { background: #fef2f2; color: #b91c1c; }
         .badge-MEDIO { background: #fffbeb; color: #b45309; }
         .badge-BAJO  { background: #f0fdf4; color: #15803d; }
         .reporte-body { padding: .85rem .9rem .9rem; }
-        .reporte-titulo {
-            font-size: .95rem;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: .45rem;
-        }
-        .reporte-dir {
-            display: flex;
-            align-items: center;
-            gap: .3rem;
-            font-size: .75rem;
-            color: #6b7280;
-            margin-bottom: .5rem;
-        }
+        .reporte-titulo { font-size: .95rem; font-weight: 700; color: #111827; margin-bottom: .45rem; }
+        .reporte-dir { display: flex; align-items: center; gap: .3rem; font-size: .75rem; color: #6b7280; margin-bottom: .5rem; }
         .reporte-dir i { color: #ef4444; font-size: 14px; }
-        .reporte-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: .4rem;
-        }
-        .ver-detalle {
-            font-size: .73rem;
-            font-weight: 700;
-            color: #1a3a8f;
-            text-decoration: none;
-            opacity: .85;
-        }
-        .progress-mini {
-            font-size: .67rem;
-            color: #9ca3af;
-        }
-        .empty {
-            text-align: center;
-            color: #9ca3af;
-            padding: 2.5rem 1rem;
-            font-size: .85rem;
-        }
+        .reporte-footer { display: flex; justify-content: space-between; align-items: center; margin-top: .4rem; gap: .4rem; }
+        .reporte-personas { display: flex; align-items: center; gap: .3rem; font-size: .72rem; color: #6b7280; font-weight: 600; }
+        .reporte-personas i { font-size: .95rem; color: #1a3a8f; }
+        .ver-detalle { font-size: .73rem; font-weight: 700; color: #1a3a8f; text-decoration: none; opacity: .85; white-space: nowrap; }
+        .empty { text-align: center; color: #9ca3af; padding: 2.5rem 1rem; font-size: .85rem; line-height: 1.5; }
+        .empty a { color: #1a3a8f; font-weight: 700; }
+        /* skeleton cards */
+        .skeleton-card { background: #fff; margin: 0 1rem .85rem; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 14px rgba(0,0,0,.07); }
+        .skeleton-card .sk-img { width: 100%; height: 170px; }
+        .skeleton-card .sk-body { padding: .9rem; }
+        .skeleton-card .sk-line { height: 14px; margin-bottom: .5rem; width: 70%; }
+        .skeleton-card .sk-line.short { width: 40%; }
         /* ── NAV INFERIOR ── */
         nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            max-width: 480px;
-            margin: 0 auto;
-            background: #fff;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: .45rem 0 .75rem;
-            z-index: 10;
+            position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto;
+            background: #fff; border-top: 1px solid #e5e7eb;
+            display: flex; justify-content: space-around; align-items: center;
+            padding: .45rem 0 .75rem; z-index: 10;
         }
-        nav a {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: .1rem;
-            font-size: .62rem;
-            font-weight: 600;
-            color: #9ca3af;
-            text-decoration: none;
-        }
+        nav a { display: flex; flex-direction: column; align-items: center; gap: .1rem; font-size: .62rem; font-weight: 600; color: #9ca3af; text-decoration: none; }
         nav a.activo { color: #1a3a8f; }
         nav a i { font-size: 1.35rem; }
         .nav-center {
-            background: #1a3a8f;
-            width: 54px; height: 54px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin-top: -22px;
-            border: 3px solid #fff;
-            box-shadow: 0 4px 16px rgba(26,58,143,.35);
-            text-decoration: none;
+            background: #1a3a8f; width: 54px; height: 54px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin-top: -22px;
+            border: 3px solid #fff; box-shadow: 0 4px 16px rgba(26,58,143,.35); text-decoration: none;
         }
         .nav-center i { color: #fff; font-size: 1.5rem; }
-        body {
-            background:
-                linear-gradient(
-                    to bottom,
-                    #1a3a8f 0,
-                    #1a3a8f 240px,
-                    #f0f5fb 240px,
-                    #f0f5fb 100%
-                );
+        /* ── MODAL INFO STATS ── */
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45);
+            z-index: 100; align-items: flex-end; justify-content: center;
+        }
+        .modal-overlay.visible { display: flex; }
+        .modal-sheet {
+            background: #fff; border-radius: 22px 22px 0 0; padding: 1.5rem 1.4rem 2rem;
+            width: 100%; max-width: 480px; box-shadow: 0 -8px 40px rgba(0,0,0,.15);
+            animation: slideUp .25s ease;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal-icon {
+            width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto .9rem; font-size: 1.5rem; background: #eff6ff; color: #1a3a8f;
+        }
+        .modal-titulo { font-size: 1rem; font-weight: 800; color: #111827; text-align: center; margin-bottom: .6rem; }
+        .modal-mensaje { font-size: .85rem; color: #6b7280; text-align: left; line-height: 1.6; margin-bottom: 1.2rem; }
+        .modal-mensaje b { color: #111827; }
+        .modal-btn {
+            width: 100%; padding: .85rem; border: none; border-radius: 12px;
+            font-size: .95rem; font-weight: 700; cursor: pointer; background: #1a3a8f; color: #fff;
         }
     </style>
 </head>
@@ -351,9 +203,7 @@
 <div class="header">
     <div class="header-top">
         <div class="header-left">
-            <div class="avatar-circle">
-                <i class="ti ti-user"></i>
-            </div>
+            <div class="avatar-circle"><i class="ti ti-user"></i></div>
             <div>
                 <div class="header-name" id="hdr-nombre">Cargando...</div>
                 <div class="header-sub" id="hdr-sub">—</div>
@@ -363,14 +213,10 @@
             <a href="/notificaciones" class="icon-btn" aria-label="Notificaciones" style="position:relative; text-decoration:none;">
                 <i class="ti ti-bell"></i>
                 <span id="notif-badge" style="
-                    display:none;
-                    position:absolute; top:-2px; right:-2px;
-                    background:#ef4444; color:#fff;
-                    font-size:.62rem; font-weight:800;
-                    min-width:17px; height:17px; padding:0 3px;
-                    border-radius:99px;
-                    display:flex; align-items:center; justify-content:center;
-                    border:2px solid #1a3a8f;
+                    display:none; position:absolute; top:-2px; right:-2px;
+                    background:#ef4444; color:#fff; font-size:.62rem; font-weight:800;
+                    min-width:17px; height:17px; padding:0 3px; border-radius:99px;
+                    align-items:center; justify-content:center; border:2px solid #1a3a8f;
                 "></span>
             </a>
             <button class="icon-btn" aria-label="Cerrar sesión" onclick="ejecutarCerrarSesion()">
@@ -378,21 +224,29 @@
             </button>
         </div>
     </div>
+    <div class="ubicacion-aviso" id="ubicacionAviso">
+        <i class="ti ti-map-pin-off"></i>
+        <span>Activa tu ubicación para ver los reportes más cercanos a ti</span>
+        <button onclick="solicitarUbicacion()">Activar</button>
+    </div>
 </div>
+
 <!-- ── STATS CARD ── -->
 <div class="stats-card">
     <div class="stats-header">
-        <div class="stats-icon-box">
-            <i class="ti ti-clipboard-list"></i>
+        <div class="stats-header-left">
+            <div class="stats-icon-box"><i class="ti ti-clipboard-list"></i></div>
+            <div class="stats-label">Reportes que enviaste</div>
         </div>
-        <div class="stats-label">Cantidad de reportes atendidos</div>
+        <button class="stats-info-btn" onclick="abrirInfoStats()" aria-label="¿Qué significa esto?">
+            <i class="ti ti-info-circle"></i>
+        </button>
     </div>
-    <div class="stats-count" id="stats-count">—<span>/—</span></div>
-    <div class="stats-sub">Cantidad en estado de procesos resueltos</div>
-    <div class="progress-bar">
-        <div class="progress-fill" id="stats-barra" style="width:0%"></div>
-    </div>
+    <div class="stats-count skeleton" id="stats-count"></div>
+    <div class="stats-sub" id="stats-sub">Cargando tu progreso...</div>
+    <div class="progress-bar"><div class="progress-fill" id="stats-barra" style="width:0%"></div></div>
 </div>
+
 <!-- ── ACCIONES ── -->
 <div class="acciones">
     <a href="/mis-reportes" class="accion-btn">
@@ -401,51 +255,61 @@
     </a>
     <a href="/nuevo-reporte" class="btn-nuevo">
         <span class="n-label">Crear Nuevo<br>Reporte</span>
-        <div class="plus-circle">
-            <i class="ti ti-plus"></i>
-        </div>
+        <div class="plus-circle"><i class="ti ti-plus"></i></div>
     </a>
     <a href="/mapa-reportes" class="accion-btn">
         <i class="ti ti-search a-icon"></i>
         <span class="a-label">Búsqueda</span>
     </a>
 </div>
-<!-- ── REPORTES CIUDADANOS ── -->
+
+<!-- ── REPORTES CERCANOS ── -->
 <div class="seccion">
-    <div class="seccion-titulo">Reportes Ciudadanos</div>
+    <div class="seccion-titulo">Reportes cerca de ti</div>
+    <div class="seccion-sub" id="seccion-sub"></div>
 </div>
 <div class="search-wrap">
     <i class="ti ti-search"></i>
     <input type="text" id="buscar-input" placeholder="Buscar reportes...">
 </div>
-<div id="lista-reportes">
-    <p class="empty">Buscando tu ubicación...</p>
-</div>
+<div id="lista-reportes"></div>
+
 <!-- ── NAV INFERIOR ── -->
 <nav>
-    <a href="/inicio" class="activo">
-        <i class="ti ti-home"></i>
-        <span>Inicio</span>
-    </a>
-    <a href="/nuevo-reporte">
-        <div class="nav-center">
-            <i class="ti ti-plus"></i>
-        </div>
-    </a>
-    <a href="/perfil">
-        <i class="ti ti-user"></i>
-        <span>Perfil</span>
-    </a>
+    <a href="/inicio" class="activo"><i class="ti ti-home"></i><span>Inicio</span></a>
+    <a href="/nuevo-reporte"><div class="nav-center"><i class="ti ti-plus"></i></div></a>
+    <a href="/perfil"><i class="ti ti-user"></i><span>Perfil</span></a>
 </nav>
+
+<!-- ── MODAL INFO STATS ── -->
+<div class="modal-overlay" id="modalInfoStats">
+    <div class="modal-sheet">
+        <div class="modal-icon"><i class="ti ti-info-circle"></i></div>
+        <div class="modal-titulo">¿Cómo funciona?</div>
+        <div class="modal-mensaje">
+            Cada vez que reportas un problema, tu reporte se une a los que envían otros vecinos sobre el mismo caso.
+            Cuando hay suficientes reportes coincidiendo en el mismo lugar, se forma <b>un caso oficial</b> que la municipalidad revisa y atiende.
+            <br><br>
+            Aquí puedes ver cuántos de tus reportes ya forman parte de un caso <b>resuelto</b> por la municipalidad.
+        </div>
+        <button class="modal-btn" onclick="cerrarInfoStats()">Entendido</button>
+    </div>
+</div>
+
 <script>
     const token = localStorage.getItem('token');
     if (!token) { window.location.href = '/login'; }
+    document.getElementById('hdr-nombre').textContent = (localStorage.getItem('nombre') || '').toUpperCase();
+    document.getElementById('hdr-sub').textContent = localStorage.getItem('apellido') || '';
 
-    document.getElementById('hdr-nombre').textContent =
-        (localStorage.getItem('nombre') || '').toUpperCase();
-    document.getElementById('hdr-sub').textContent =
-        localStorage.getItem('apellido') || '';
+    function abrirInfoStats() { document.getElementById('modalInfoStats').classList.add('visible'); }
+    function cerrarInfoStats() { document.getElementById('modalInfoStats').classList.remove('visible'); }
 
+    // ── Helpers de formato ─────────────────────────────────────
+    function formatDistancia(m) {
+        if (m == null) return '';
+        return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
+    }
     function estadoBadgeClass(nombre) {
         if (!nombre) return 'badge-default';
         const n = nombre.toUpperCase();
@@ -454,63 +318,75 @@
         if (n.includes('RESUELTO')) return 'badge-RESUELTO';
         return 'badge-default';
     }
-
     function nivelBadge(nivel) {
-        if (!nivel) return '';
-        return `<span class="badge-riesgo badge-${nivel}">${nivel}</span>`;
+        return nivel ? `<span class="badge-riesgo badge-${nivel}">${nivel}</span>` : '';
     }
 
+    // ── SKELETONS ──────────────────────────────────────────────
+    function renderSkeletonReportes() {
+        const cont = document.getElementById('lista-reportes');
+        cont.innerHTML = Array.from({ length: 3 }).map(() => `
+            <div class="skeleton-card">
+                <div class="sk-img skeleton"></div>
+                <div class="sk-body">
+                    <div class="sk-line skeleton"></div>
+                    <div class="sk-line short skeleton"></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // ── RENDER STATS ───────────────────────────────────────────
+    function renderStats(data) {
+        const total = data.totalEnviados || 0;
+        const resueltos = data.resueltos || 0;
+        const pct = total > 0 ? Math.round((resueltos / total) * 100) : 0;
+        const count = document.getElementById('stats-count');
+        count.classList.remove('skeleton');
+        count.innerHTML = `${String(resueltos).padStart(2, '0')}<span>/${String(total).padStart(2, '0')}</span>`;
+        document.getElementById('stats-sub').textContent =
+            total === 0
+                ? 'Aún no has enviado reportes. ¡Crea el primero!'
+                : `${resueltos} de tus reportes ya fueron resueltos por la municipalidad`;
+        document.getElementById('stats-barra').style.width = pct + '%';
+    }
+
+    // ── RENDER LISTA ───────────────────────────────────────────
     function renderReportes(data) {
         const cont = document.getElementById('lista-reportes');
+        document.getElementById('seccion-sub').textContent = data && data.length ? `Top ${data.length} más cercanos` : '';
         if (!data || data.length === 0) {
-            cont.innerHTML = '<p class="empty">No hay reportes cercanos por ahora.</p>';
-            document.getElementById('stats-count').innerHTML = '00<span>/00</span>';
-            document.getElementById('stats-barra').style.width = '0%';
+            cont.innerHTML = '<p class="empty">No hay reportes registrados cerca de tu ubicación todavía.</p>';
             return;
         }
         cont.innerHTML = data.map(r => {
             const estadoNombre = r.estado || '';
             const badgeCls = estadoBadgeClass(estadoNombre);
             const imgHtml = r.fotoPrincipal
-                ? `<img class="reporte-img" src="${r.fotoPrincipal}" alt="${r.titulo}">`
+                ? `<img class="reporte-img" src="${r.fotoPrincipal}" alt="${r.titulo}" loading="lazy">`
                 : `<div class="reporte-img-placeholder"><i class="ti ti-photo"></i></div>`;
             const direccion = r.zonaReferencia || 'Sin dirección';
             return `
-            <div class="reporte-card">
+            <a href="/reporte-detalle?id=${r.id}" class="reporte-card">
                 <div class="reporte-img-wrap">
                     ${imgHtml}
+                    <span class="badge-distancia"><i class="ti ti-walk"></i> ${formatDistancia(r.distanciaMetros)}</span>
                     ${estadoNombre ? `<span class="badge-img ${badgeCls}">${estadoNombre}</span>` : ''}
                 </div>
                 <div class="reporte-body">
                     <div class="reporte-titulo">${r.titulo}</div>
-                    <div class="reporte-dir">
-                        <i class="ti ti-map-pin"></i>
-                        <span>${direccion}</span>
-                    </div>
+                    <div class="reporte-dir"><i class="ti ti-map-pin"></i><span>${direccion}</span></div>
                     <div class="reporte-footer">
-                        <span class="progress-mini">
-                            ${r.categoria ? r.categoria + ' · ' : ''}
-                            ${r.nivelRiesgo ? nivelBadge(r.nivelRiesgo) : ''}
-                        </span>
-                        <a href="/reporte-detalle?id=${r.id}" class="ver-detalle">Ver detalle ›</a>
+                        <span class="reporte-personas"><i class="ti ti-users"></i> ${r.totalPersonas || 1} persona${r.totalPersonas === 1 ? '' : 's'}</span>
+                        ${nivelBadge(r.nivelRiesgo)}
+                        <span class="ver-detalle">Ver ›</span>
                     </div>
                 </div>
-            </div>`;
+            </a>`;
         }).join('');
-
-        // Stats: se calculan siempre después de renderizar
-        const total = data.length;
-        const atendidos = data.filter(r => {
-            const n = (r.estado || '').toUpperCase();
-            return n.includes('PROCESO') || n.includes('PROGRESO') || n.includes('RESUELTO');
-        }).length;
-        const pct = total > 0 ? Math.round((atendidos / total) * 100) : 0;
-        document.getElementById('stats-count').innerHTML =
-            `${String(atendidos).padStart(2,'0')}<span>/${String(total).padStart(2,'0')}</span>`;
-        document.getElementById('stats-barra').style.width = pct + '%';
     }
 
-    // ── Fetch con timeout + reintento automático ──────────────────
+    // ── Fetch con timeout + reintento ──────────────────────────
     async function fetchConReintento(url, opciones = {}, intentos = 2, timeoutMs = 8000) {
         for (let intento = 1; intento <= intentos; intento++) {
             const controller = new AbortController();
@@ -523,92 +399,153 @@
             } catch (err) {
                 clearTimeout(timeoutId);
                 if (intento === intentos) throw err;
-                // pequeña espera antes de reintentar (backoff simple)
                 await new Promise(r => setTimeout(r, 600));
             }
         }
     }
 
-    function cargarReportesCercanos(lat, lng) {
-        const cont = document.getElementById('lista-reportes');
-        cont.innerHTML = '<p class="empty">Cargando reportes cercanos...</p>';
+    // ── CACHE (stale-while-revalidate) ─────────────────────────
+    const CACHE_KEY_STATS = 'cache_stats_inicio';
+    const CACHE_KEY_LISTA = 'cache_lista_inicio';
 
-        fetchConReintento(
-            `/api/reportes/cercanos?lat=${lat}&lng=${lng}`,
-            { headers: { 'Authorization': 'Bearer ' + token } }
-        )
-        .then(json => { renderReportes(json.data); })
-        .catch(() => {
-            cont.innerHTML = `
-                <p class="empty">No se pudieron cargar los reportes.
-                <br><a href="#" onclick="cargarConUbicacion(); return false;" style="color:#1a3a8f;font-weight:700;">Reintentar</a></p>`;
-        });
+    function leerCache(clave) {
+        try {
+            const raw = sessionStorage.getItem(clave);
+            return raw ? JSON.parse(raw) : null;
+        } catch { return null; }
+    }
+    function guardarCache(clave, data) {
+        try { sessionStorage.setItem(clave, JSON.stringify(data)); } catch { /* no crítico */ }
     }
 
-    // ── GEOLOCALIZACIÓN ──────────────────────────────────────────
-    const COORD_DEFECTO = { lat: -6.7714, lng: -79.8409 };
+    async function actualizarStats() {
+        const cache = leerCache(CACHE_KEY_STATS);
+        if (cache) renderStats(cache); // instantáneo si hay cache
+
+        try {
+            const json = await fetchConReintento('/api/mini-reportes/mis-estadisticas', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            renderStats(json.data);
+            guardarCache(CACHE_KEY_STATS, json.data);
+        } catch {
+            if (!cache) {
+                document.getElementById('stats-count').classList.remove('skeleton');
+                document.getElementById('stats-count').innerHTML = '00<span>/00</span>';
+                document.getElementById('stats-sub').textContent = 'No se pudo cargar tu progreso.';
+            }
+        }
+    }
+
+    async function actualizarListaReportes(lat, lng) {
+        const cache = leerCache(CACHE_KEY_LISTA);
+        if (cache) {
+            renderReportes(cache); // instantáneo si hay cache
+        } else {
+            renderSkeletonReportes();
+        }
+
+        try {
+            const json = await fetchConReintento(
+                `/api/reportes/top-cercanos?lat=${lat}&lng=${lng}&limite=5`
+            );
+            renderReportes(json.data);
+            guardarCache(CACHE_KEY_LISTA, json.data);
+        } catch {
+            if (!cache) {
+                document.getElementById('lista-reportes').innerHTML = `
+                    <p class="empty">No se pudieron cargar los reportes cercanos.
+                    <br><a href="#" onclick="cargarConUbicacion(); return false;">Reintentar</a></p>`;
+            }
+        }
+    }
+
+    // ── UBICACIÓN (no bloqueante) ───────────────────────────────
+    const COORD_DEFECTO = { lat: -6.7714, lng: -79.8409 }; // solo para pintar algo mientras se resuelve la real
+    let ultimaCoordCargada = null;
 
     function guardarUltimaUbicacion(lat, lng) {
-        try {
-            localStorage.setItem('ultima_ubicacion', JSON.stringify({ lat, lng, ts: Date.now() }));
-        } catch (e) { /* no crítico */ }
+        try { localStorage.setItem('ultima_ubicacion', JSON.stringify({ lat, lng, ts: Date.now() })); } catch {}
     }
-
     function obtenerUltimaUbicacionGuardada() {
         try {
             const raw = localStorage.getItem('ultima_ubicacion');
             if (!raw) return null;
             const datos = JSON.parse(raw);
-            if (Date.now() - datos.ts > 24 * 60 * 60 * 1000) return null; // máx 24h
+            if (Date.now() - datos.ts > 24 * 60 * 60 * 1000) return null;
             return datos;
-        } catch (e) {
-            return null;
-        }
+        } catch { return null; }
     }
-
-    let ultimaCoordCargada = null;
-
     function cargarSiCambioSignificativo(lat, lng) {
         if (ultimaCoordCargada) {
             const dLat = Math.abs(ultimaCoordCargada.lat - lat);
             const dLng = Math.abs(ultimaCoordCargada.lng - lng);
-            if (dLat < 0.001 && dLng < 0.001) return; // diferencia menor a ~100m, no recargar
+            if (dLat < 0.001 && dLng < 0.001) return;
         }
         ultimaCoordCargada = { lat, lng };
         guardarUltimaUbicacion(lat, lng);
-        cargarReportesCercanos(lat, lng);
+        actualizarListaReportes(lat, lng);
+    }
+
+    async function solicitarUbicacion() {
+        document.getElementById('ubicacionAviso').classList.remove('visible');
+        if (!navigator.geolocation) return;
+
+        if (navigator.permissions) {
+            try {
+                const estado = await navigator.permissions.query({ name: 'geolocation' });
+                if (estado.state === 'denied') {
+                    document.getElementById('ubicacionAviso').classList.add('visible');
+                    return;
+                }
+            } catch { /* seguimos igual */ }
+        }
+        navigator.geolocation.getCurrentPosition(
+            pos => cargarSiCambioSignificativo(pos.coords.latitude, pos.coords.longitude),
+            () => document.getElementById('ubicacionAviso').classList.add('visible'),
+            { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
+        );
     }
 
     function cargarConUbicacion() {
-        // ── Paso 0 (INSTANTÁNEO, 0ms de espera) ──
-        // Mostramos algo de inmediato con la última ubicación real conocida,
-        // o la coordenada por defecto si es la primera vez que se usa la app.
-        // Esto elimina por completo la espera percibida al entrar a la página.
+        // Paso 0: pintar algo YA, con la última ubicación real conocida o una por defecto.
         const guardada = obtenerUltimaUbicacionGuardada();
         const coordInicial = guardada || COORD_DEFECTO;
         cargarSiCambioSignificativo(coordInicial.lat, coordInicial.lng);
 
-        if (!navigator.geolocation) return;
-
-        // ── Paso 1 (en paralelo, no bloquea nada) ──
-        // Intento rápido con posición en caché del dispositivo, por si es
-        // distinta a la que ya mostramos (ej. usuario cambió de lugar).
+        if (!navigator.geolocation) {
+            document.getElementById('ubicacionAviso').classList.add('visible');
+            return;
+        }
+        // Paso 1: posición rápida en caché del dispositivo (en paralelo, no bloquea).
         navigator.geolocation.getCurrentPosition(
             pos => cargarSiCambioSignificativo(pos.coords.latitude, pos.coords.longitude),
-            () => { /* nada que hacer, ya mostramos algo en el paso 0 */ },
+            () => {},
             { timeout: 2000, maximumAge: Infinity, enableHighAccuracy: false }
         );
-
-        // ── Paso 2 (en paralelo, no bloquea nada) ──
-        // Ubicación fresca y precisa con más margen de tiempo. Si llega y es
-        // distinta a lo ya mostrado, se corrige automáticamente.
+        // Paso 2: posición precisa y fresca (en paralelo, corrige si hace falta).
         navigator.geolocation.getCurrentPosition(
             pos => cargarSiCambioSignificativo(pos.coords.latitude, pos.coords.longitude),
-            () => { /* nada que hacer */ },
+            err => { if (err.code === err.PERMISSION_DENIED) document.getElementById('ubicacionAviso').classList.add('visible'); },
             { timeout: 10000, maximumAge: 0, enableHighAccuracy: true }
         );
     }
-    cargarConUbicacion();
+
+    // ── Carga inicial + refresco al volver a la pantalla ────────
+    function cargarTodo() {
+        actualizarStats();
+        cargarConUbicacion();
+        cargarBadgeNotificaciones();
+    }
+    cargarTodo();
+
+    // Cubre "volver atrás" en móviles (bfcache) y cambios de pestaña/app en segundo plano.
+    window.addEventListener('pageshow', (e) => {
+        if (e.persisted) cargarTodo();
+    });
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') cargarTodo();
+    });
 
     // ── Buscador local ──────────────────────────────────────────
     document.getElementById('buscar-input').addEventListener('input', function () {
@@ -623,16 +560,11 @@
     async function ejecutarCerrarSesion() {
         try {
             const t = localStorage.getItem('token');
-            if (t) {
-                await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + t }
-                });
-            }
-        } catch (e) {
-            console.error("Error al revocar el token:", e);
-        } finally {
+            if (t) await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + t } });
+        } catch (e) { console.error("Error al revocar el token:", e); }
+        finally {
             localStorage.clear();
+            sessionStorage.clear();
             window.location.href = '/login';
         }
     }
@@ -651,11 +583,8 @@
             } else {
                 badge.style.display = 'none';
             }
-        } catch (e) {
-            // si falla, simplemente no mostramos badge; no es crítico
-        }
+        } catch {}
     }
-    cargarBadgeNotificaciones();
 </script>
 </body>
 </html>

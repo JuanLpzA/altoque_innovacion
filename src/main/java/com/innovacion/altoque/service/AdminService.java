@@ -26,31 +26,52 @@ public class AdminService {
     private final NotificacionRepository notificacionRepository;
 
     public AdminDashboardStats obtenerStats() {
-        LocalDateTime haceUnMes = LocalDateTime.now().minusMonths(1);
+        return obtenerStats("mes"); // compatibilidad hacia atrás
+    }
+
+    public AdminDashboardStats obtenerStats(String periodo) {
+        LocalDateTime ahora = LocalDateTime.now();
+        String periodoNormalizado = (periodo == null) ? "mes" : periodo.toLowerCase();
+        LocalDateTime desde;
+        switch (periodoNormalizado) {
+            case "hoy":
+                desde = ahora.toLocalDate().atStartOfDay();
+                break;
+            case "semana":
+                desde = ahora.minusDays(7);
+                break;
+            case "todo":
+                desde = LocalDateTime.of(2000, 1, 1, 0, 0);
+                break;
+            case "mes":
+            default:
+                desde = ahora.minusMonths(1);
+                periodoNormalizado = "mes";
+                break;
+        }
+
         List<Reporte> todos = reporteRepository.findAllByOrderByFechaCreacionDesc();
-        List<Reporte> delMes = todos.stream()
-                .filter(r -> r.getFechaCreacion().isAfter(haceUnMes))
+        List<Reporte> delPeriodo = todos.stream()
+                .filter(r -> r.getFechaCreacion().isAfter(desde))
                 .collect(Collectors.toList());
 
         long pendientes = 0, enProceso = 0, resueltos = 0;
-        for (Reporte r : delMes) {
+        for (Reporte r : delPeriodo) {
             String e = r.getEstado().getNombre().toLowerCase();
             if (e.contains("pendiente")) pendientes++;
             else if (e.contains("proceso")) enProceso++;
             else if (e.contains("resuelto")) resueltos++;
         }
 
-        Map<String, Long> porEstado = new LinkedHashMap<>();
-        for (Object[] row : reporteRepository.countByEstado()) {
-            porEstado.put((String) row[0], (Long) row[1]);
-        }
+        Map<String, Long> porEstado = delPeriodo.stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.getEstado().getNombre(), LinkedHashMap::new, Collectors.counting()));
 
-        Map<String, Long> porCategoria = new LinkedHashMap<>();
-        for (Object[] row : reporteRepository.countByCategoria()) {
-            porCategoria.put((String) row[0], (Long) row[1]);
-        }
+        Map<String, Long> porCategoria = delPeriodo.stream()
+                .collect(Collectors.groupingBy(
+                        r -> r.getCategoria().getNombre(), LinkedHashMap::new, Collectors.counting()));
 
-        List<AdminDashboardStats.ReporteMapaItem> mapa = todos.stream().map(r -> {
+        List<AdminDashboardStats.ReporteMapaItem> mapa = delPeriodo.stream().map(r -> {
             AdminDashboardStats.ReporteMapaItem item = new AdminDashboardStats.ReporteMapaItem();
             item.setId(r.getId());
             item.setTitulo(r.getTitulo());
@@ -62,15 +83,17 @@ public class AdminService {
         }).collect(Collectors.toList());
 
         AdminDashboardStats stats = new AdminDashboardStats();
-        stats.setTotalUltimoMes(delMes.size());
+        stats.setTotalUltimoMes(delPeriodo.size());
         stats.setPendientes(pendientes);
         stats.setEnProceso(enProceso);
         stats.setResueltos(resueltos);
         stats.setPorEstado(porEstado);
         stats.setPorCategoria(porCategoria);
         stats.setReportesParaMapa(mapa);
+        stats.setPeriodo(periodoNormalizado);
         return stats;
     }
+
 
     public List<AdminReporteListItem> listarReportes() {
         return reporteRepository.findAllByOrderByFechaCreacionDesc()

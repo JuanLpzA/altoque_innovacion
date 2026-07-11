@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Altoque – Dashboard</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         :root {
           --sidebar-bg: #1a3a8f;
           --accent: #0fa89a;
@@ -17,110 +17,19 @@
           --text: #111827;
           --muted: #9ca3af;
           --border: #f3f4f6;
+          --rojo: #b91c1c;
+          --ambar: #b45309;
+          --verde: #15803d;
         }
-
         body {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           background: var(--bg);
           min-height: 100vh;
           display: flex;
         }
-
-        /* ── SIDEBAR ── */
-        .sidebar {
-          width: 220px;
-          background: var(--sidebar-bg);
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
-          flex-shrink: 0;
-          position: sticky;
-          top: 0;
-          height: 100vh;
-        }
-
-        .sidebar-brand {
-          padding: 1.4rem 1.4rem .9rem;
-          font-size: 1.3rem;
-          font-weight: 900;
-          color: #fff;
-          letter-spacing: -.02em;
-          border-bottom: 1px solid rgba(255,255,255,.08);
-        }
-
-        .sidebar-brand span { color: var(--accent); }
-
-        .sidebar-section {
-          padding: .9rem 1.4rem .3rem;
-          font-size: .62rem;
-          font-weight: 700;
-          color: rgba(255,255,255,.3);
-          text-transform: uppercase;
-          letter-spacing: .1em;
-        }
-
-        .sidebar-nav a {
-          display: flex;
-          align-items: center;
-          gap: .65rem;
-          padding: .62rem 1.4rem;
-          color: rgba(255,255,255,.62);
-          text-decoration: none;
-          font-size: .84rem;
-          font-weight: 500;
-          border-radius: 0;
-          transition: background .15s, color .15s;
-        }
-
-        .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
-
-        .sidebar-nav a.active {
-          background: rgba(255,255,255,.13);
-          color: #fff;
-          border-right: 3px solid var(--accent);
-        }
-
-        .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
-
-        .sidebar-footer {
-          margin-top: auto;
-          padding: 1rem 1.4rem;
-          border-top: 1px solid rgba(255,255,255,.08);
-        }
-
-        .sidebar-user {
-          display: flex;
-          align-items: center;
-          gap: .6rem;
-        }
-
-        .avatar-sm {
-          width: 32px; height: 32px;
-          border-radius: 50%;
-          background: rgba(255,255,255,.13);
-          display: flex; align-items: center; justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .avatar-sm i { color: #fff; font-size: .95rem; }
-
-        .user-info { flex: 1; min-width: 0; }
-        .user-name { color: #fff; font-weight: 600; font-size: .78rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
-
-        .btn-logout {
-          background: none; border: none;
-          color: rgba(255,255,255,.4);
-          cursor: pointer; font-size: 1rem;
-          padding: .2rem;
-          transition: color .15s;
-        }
-
-        .btn-logout:hover { color: #fff; }
-
+        /* Estilos del sidebar → ahora en /css/admin-sidebar.css (compartido entre todas las páginas /admin) */
         /* ── MAIN ── */
         .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-
         .topbar {
           background: var(--card);
           padding: .9rem 1.8rem;
@@ -132,67 +41,93 @@
           top: 0;
           z-index: 10;
         }
-
         .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
-
         .topbar-right {
           font-size: .78rem;
           color: var(--muted);
         }
-
         .content { padding: 1.6rem 1.8rem; overflow-y: auto; }
 
-        /* ── STATS ── */
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 1rem;
-          margin-bottom: 1.4rem;
-        }
-
-        .stat-card {
+        /* ── PANEL DE CONTROL (período + resumen unificados) ── */
+        .control-card {
           background: var(--card);
           border-radius: 14px;
-          padding: 1.2rem 1.3rem;
           box-shadow: 0 2px 10px rgba(0,0,0,.05);
+          margin-bottom: 1.4rem;
+          overflow: hidden;
+          border: 1px solid var(--border);
+        }
+        .control-header {
+          padding: 1rem 1.4rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: .8rem;
+          border-bottom: 1px solid var(--border);
+        }
+        .periodo-info { display: flex; align-items: center; gap: .6rem; font-size: .82rem; color: #374151; }
+        .periodo-info i { color: var(--sidebar-bg); font-size: 1.1rem; }
+        .periodo-info strong { color: var(--text); }
+        .periodo-selector { display: flex; gap: .3rem; background: #f3f4f6; padding: .25rem; border-radius: 10px; }
+        .periodo-btn {
+          border: none; background: none; cursor: pointer;
+          font-size: .78rem; font-weight: 600; color: #6b7280;
+          padding: .45rem .9rem; border-radius: 8px;
+          transition: background .15s, color .15s;
+          white-space: nowrap;
+        }
+        .periodo-btn:hover { color: var(--text); }
+        .periodo-btn.active { background: #fff; color: var(--sidebar-bg); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+
+        /* ── FILA DE ESTADÍSTICAS (color sólido, sin efecto "card genérico") ── */
+        .stats-row {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 1px;
+          background: var(--border);
+        }
+        .stat-block {
+          padding: 1.15rem 1.35rem;
           display: flex;
           flex-direction: column;
-          gap: .35rem;
+          gap: .3rem;
+          color: #fff;
         }
-
-        .stat-icon {
-          width: 36px; height: 36px;
-          border-radius: 9px;
+        .stat-block.stat-total    { background: var(--sidebar-bg); }
+        .stat-block.stat-pend     { background: var(--rojo); }
+        .stat-block.stat-proceso  { background: var(--ambar); }
+        .stat-block.stat-resuelto { background: var(--verde); }
+        .stat-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .stat-icono {
+          width: 30px; height: 30px;
+          border-radius: 8px;
+          background: rgba(255,255,255,.16);
           display: flex; align-items: center; justify-content: center;
-          margin-bottom: .2rem;
         }
-
-        .stat-icon i { font-size: 1.1rem; }
-
-        .stat-label { font-size: .72rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
-        .stat-num   { font-size: 2.1rem; font-weight: 900; color: var(--text); line-height: 1; }
-        .stat-sub   { font-size: .71rem; color: var(--muted); }
-
-        .ic-total     { background: #eff6ff; } .ic-total i     { color: #1d4ed8; }
-        .ic-pend      { background: #fef2f2; } .ic-pend i      { color: #b91c1c; }
-        .ic-proceso   { background: #fffbeb; } .ic-proceso i   { color: #b45309; }
-        .ic-resuelto  { background: #f0fdf4; } .ic-resuelto i  { color: #15803d; }
-
-        /* ── GRID MEDIO (donut + mapa) ── */
-        .mid-grid {
-          display: grid;
-          grid-template-columns: 340px 1fr;
-          gap: 1rem;
-          margin-bottom: 1.4rem;
+        .stat-icono i { font-size: 1rem; color: #fff; }
+        .stat-label {
+          font-size: .68rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: .06em;
+          color: rgba(255,255,255,.8);
         }
+        .stat-num { font-size: 2rem; font-weight: 900; line-height: 1; }
+        .stat-sub { font-size: .71rem; color: rgba(255,255,255,.7); }
 
+        /* ── CARDS GENERALES ── */
         .card {
           background: var(--card);
           border-radius: 14px;
           box-shadow: 0 2px 10px rgba(0,0,0,.05);
           overflow: hidden;
+          border: 1px solid var(--border);
         }
-
         .card-head {
           padding: 1rem 1.3rem .7rem;
           border-bottom: 1px solid var(--border);
@@ -200,9 +135,7 @@
           align-items: center;
           justify-content: space-between;
         }
-
         .card-title { font-size: .9rem; font-weight: 700; color: var(--text); }
-
         .btn-sm {
           font-size: .72rem;
           font-weight: 700;
@@ -214,17 +147,21 @@
           cursor: pointer;
           text-decoration: none;
         }
-
         .btn-sm:hover { background: #d1e0fd; }
-
         .card-body { padding: 1.2rem 1.3rem; }
 
+        /* ── GRID MEDIO (donut + mapa) ── */
+        .mid-grid {
+          display: grid;
+          grid-template-columns: 340px 1fr;
+          gap: 1rem;
+          margin-bottom: 1.4rem;
+        }
         .donut-wrap {
           position: relative;
           width: 160px; height: 160px;
           margin: 0 auto 1rem;
         }
-
         .donut-center {
           position: absolute;
           inset: 0;
@@ -234,12 +171,9 @@
           justify-content: center;
           pointer-events: none;
         }
-
         .donut-total { font-size: 1.5rem; font-weight: 900; color: var(--text); }
         .donut-label { font-size: .68rem; color: var(--muted); font-weight: 600; }
-
         .legend { display: flex; flex-direction: column; gap: .45rem; }
-
         .legend-item {
           display: flex;
           align-items: center;
@@ -247,11 +181,8 @@
           font-size: .78rem;
           color: #374151;
         }
-
         .legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-
         .legend-count { margin-left: auto; font-weight: 700; color: var(--text); }
-
         #mapa { width: 100%; height: 300px; }
 
         /* ── GRID INFERIOR (barras + últimas incidencias) ── */
@@ -260,9 +191,7 @@
           grid-template-columns: 1fr 1fr;
           gap: 1rem;
         }
-
         .ultimas-list { display: flex; flex-direction: column; gap: .7rem; padding: 1rem 1.3rem; max-height: 320px; overflow-y: auto; }
-
         .incidencia-item {
           display: flex;
           gap: .9rem;
@@ -270,9 +199,7 @@
           padding-bottom: .7rem;
           border-bottom: 1px solid var(--border);
         }
-
         .incidencia-item:last-child { border-bottom: none; padding-bottom: 0; }
-
         .inc-foto {
           width: 52px; height: 52px;
           border-radius: 10px;
@@ -280,7 +207,6 @@
           flex-shrink: 0;
           background: #f3f4f6;
         }
-
         .inc-foto-placeholder {
           width: 52px; height: 52px;
           border-radius: 10px;
@@ -288,18 +214,14 @@
           display: flex; align-items: center; justify-content: center;
           flex-shrink: 0;
         }
-
         .inc-foto-placeholder i { font-size: 1.3rem; color: #d1d5db; }
-
         .inc-info { flex: 1; min-width: 0; }
         .inc-cat  { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
         .inc-titulo { font-size: .83rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .inc-zona { font-size: .72rem; color: var(--muted); margin-top: .1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
         .inc-right { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; flex-shrink: 0; }
         .inc-fecha { font-size: .68rem; color: var(--muted); }
         .inc-hora  { font-size: .65rem; color: #c4c9d4; }
-
         /* badges */
         .badge {
           font-size: .64rem;
@@ -308,62 +230,82 @@
           border-radius: 99px;
           white-space: nowrap;
         }
-
         .badge-pendiente  { background: #fef2f2; color: #b91c1c; }
         .badge-proceso    { background: #eff6ff; color: #1d4ed8; }
         .badge-resuelto   { background: #f0fdf4; color: #15803d; }
         .badge-rechazado  { background: #f3f4f6; color: #6b7280; }
-
         .loading-row {
           text-align: center;
           color: var(--muted);
           font-size: .83rem;
           padding: 2rem;
         }
+
+        @media (max-width: 900px) {
+          .stats-row { grid-template-columns: repeat(2, 1fr); }
+          .mid-grid, .bot-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
-
 <!-- SIDEBAR -->
 <div th:replace="~{admin/fragments/sidebar :: sidebar('dashboard')}"></div>
-
 <!-- MAIN -->
 <div class="main">
     <div class="topbar">
         <div class="topbar-title">Dashboard</div>
         <div class="topbar-right" id="topbar-fecha">—</div>
     </div>
-
     <div class="content">
-
-        <!-- STATS -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-icon ic-total"><i class="ti ti-clipboard-data"></i></div>
-                <div class="stat-label">Total último mes</div>
-                <div class="stat-num" id="st-total">—</div>
-                <div class="stat-sub">Incidencias registradas</div>
+        <!-- PANEL DE CONTROL: período + resumen general -->
+        <div class="control-card">
+            <div class="control-header">
+                <div class="periodo-info">
+                    <i class="ti ti-calendar-stats"></i>
+                    <span>Mostrando datos de: <strong id="periodo-rango-label">Cargando...</strong></span>
+                </div>
+                <div class="periodo-selector" id="periodo-selector">
+                    <button class="periodo-btn" data-periodo="hoy">Hoy</button>
+                    <button class="periodo-btn" data-periodo="semana">Últimos 7 días</button>
+                    <button class="periodo-btn active" data-periodo="mes">Último mes</button>
+                    <button class="periodo-btn" data-periodo="todo">Todo el histórico</button>
+                </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon ic-pend"><i class="ti ti-clock"></i></div>
-                <div class="stat-label">Pendientes</div>
-                <div class="stat-num" id="st-pendiente">—</div>
-                <div class="stat-sub">Sin atender</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon ic-proceso"><i class="ti ti-refresh"></i></div>
-                <div class="stat-label">En proceso</div>
-                <div class="stat-num" id="st-proceso">—</div>
-                <div class="stat-sub">En atención</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-icon ic-resuelto"><i class="ti ti-circle-check"></i></div>
-                <div class="stat-label">Resueltos</div>
-                <div class="stat-num" id="st-resuelto">—</div>
-                <div class="stat-sub">Cerrados</div>
+            <div class="stats-row">
+                <div class="stat-block stat-total">
+                    <div class="stat-top">
+                        <span class="stat-label">Total</span>
+                        <div class="stat-icono"><i class="ti ti-clipboard-data"></i></div>
+                    </div>
+                    <div class="stat-num" id="st-total">—</div>
+                    <div class="stat-sub" id="st-total-sub">Incidencias registradas</div>
+                </div>
+                <div class="stat-block stat-pend">
+                    <div class="stat-top">
+                        <span class="stat-label">Pendientes</span>
+                        <div class="stat-icono"><i class="ti ti-clock"></i></div>
+                    </div>
+                    <div class="stat-num" id="st-pendiente">—</div>
+                    <div class="stat-sub" id="st-pend-sub">Sin atender</div>
+                </div>
+                <div class="stat-block stat-proceso">
+                    <div class="stat-top">
+                        <span class="stat-label">En proceso</span>
+                        <div class="stat-icono"><i class="ti ti-refresh"></i></div>
+                    </div>
+                    <div class="stat-num" id="st-proceso">—</div>
+                    <div class="stat-sub" id="st-proceso-sub">En atención</div>
+                </div>
+                <div class="stat-block stat-resuelto">
+                    <div class="stat-top">
+                        <span class="stat-label">Resueltos</span>
+                        <div class="stat-icono"><i class="ti ti-circle-check"></i></div>
+                    </div>
+                    <div class="stat-num" id="st-resuelto">—</div>
+                    <div class="stat-sub" id="st-resuelto-sub">Cerrados</div>
+                </div>
             </div>
         </div>
-
         <!-- DONUT + MAPA -->
         <div class="mid-grid">
             <div class="card">
@@ -382,7 +324,6 @@
                     <div class="legend" id="donut-legend"></div>
                 </div>
             </div>
-
             <div class="card">
                 <div class="card-head">
                     <span class="card-title">Mapa de incidencias</span>
@@ -390,7 +331,6 @@
                 <div id="mapa"></div>
             </div>
         </div>
-
         <!-- BARRAS + ÚLTIMAS INCIDENCIAS -->
         <div class="bot-grid">
             <div class="card">
@@ -401,7 +341,6 @@
                     <canvas id="barChart"></canvas>
                 </div>
             </div>
-
             <div class="card">
                 <div class="card-head">
                     <span class="card-title">Últimas incidencias</span>
@@ -412,22 +351,14 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
-
-<script src="/js/admin-guard.js?1"></script>
-
+<script src="/js/admin-guard.js?2"></script>
 <script>
     // ── Guard ──────────────────────────────────────────────────────
-
-
     const TOKEN = window.ADMIN_TOKEN;
-
-
     document.getElementById('topbar-fecha').textContent =
       new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
     // ── Colores ────────────────────────────────────────────────────
     const ESTADO_COLORS = {
       'pendiente':  '#ef4444',
@@ -435,11 +366,58 @@
       'resuelto':   '#22c55e',
       'rechazado':  '#9ca3af'
     };
-
     const CAT_COLORS = [
       '#1a3a8f','#0fa89a','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4'
     ];
-
+    // ── Período seleccionado ──────────────────────────────────────
+    let periodoActual = 'mes';
+    const PERIODO_LABELS = {
+      hoy:    'Hoy',
+      semana: 'Últimos 7 días',
+      mes:    'Último mes',
+      todo:   'Todo el histórico'
+    };
+    function calcularRangoFechas(periodo) {
+      const hoy = new Date();
+      let desde;
+      switch (periodo) {
+        case 'hoy':
+          desde = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+          break;
+        case 'semana':
+          desde = new Date(hoy);
+          desde.setDate(hoy.getDate() - 7);
+          break;
+        case 'todo':
+          desde = null;
+          break;
+        case 'mes':
+        default:
+          desde = new Date(hoy);
+          desde.setMonth(hoy.getMonth() - 1);
+      }
+      const fmt = d => d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+      if (!desde) return `Desde el inicio hasta ${fmt(hoy)}`;
+      return `${fmt(desde)} – ${fmt(hoy)}`;
+    }
+    function actualizarEtiquetaPeriodo() {
+      const label = PERIODO_LABELS[periodoActual] || 'Último mes';
+      const rango = calcularRangoFechas(periodoActual);
+      document.getElementById('periodo-rango-label').textContent = `${label} (${rango})`;
+      document.getElementById('st-total-sub').textContent    = `Incidencias registradas · ${label}`;
+      document.getElementById('st-pend-sub').textContent     = `Sin atender · ${label}`;
+      document.getElementById('st-proceso-sub').textContent  = `En atención · ${label}`;
+      document.getElementById('st-resuelto-sub').textContent = `Cerrados · ${label}`;
+    }
+    document.querySelectorAll('.periodo-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (btn.dataset.periodo === periodoActual) return;
+        periodoActual = btn.dataset.periodo;
+        document.querySelectorAll('.periodo-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        cargarDashboard();
+      });
+    });
     // ── Utilidades ─────────────────────────────────────────────────
     function badgeHTML(estado) {
       const n = (estado || '').toLowerCase();
@@ -449,7 +427,6 @@
                 : 'rechazado';
       return `<span class="badge badge-${cls}">${estado}</span>`;
     }
-
     function formatFecha(f) {
       if (!f) return '—';
       const d = new Date(f);
@@ -458,73 +435,75 @@
         hora:  d.toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' })
       };
     }
-
     // ── Mapa (sin API key — usa OpenStreetMap vía iframe) ──────────
     let mapaIniciado = false;
-
+    let mapaInstance = null;
+    let mapaMarkers  = [];
     function initMapa(reportes) {
-      if (mapaIniciado) return;
-      mapaIniciado = true;
-
-      // Leaflet via CDN (libre, sin key)
-      const link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-      document.head.appendChild(link);
-
-      const script = document.createElement('script');
-      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-      script.onload = () => {
+      if (!mapaIniciado) {
+        mapaIniciado = true;
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.onload = () => crearOActualizarMapa(reportes);
+        document.head.appendChild(script);
+      } else {
+        crearOActualizarMapa(reportes);
+      }
+    }
+    function crearOActualizarMapa(reportes) {
+      if (!mapaInstance) {
         const centro = reportes.length > 0
           ? [parseFloat(reportes[0].latitud), parseFloat(reportes[0].longitud)]
           : [-6.77137, -79.84088]; // Lambayeque por defecto
-
-        const map = L.map('mapa').setView(centro, 13);
+        mapaInstance = L.map('mapa').setView(centro, 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        reportes.forEach(r => {
-          const lat = parseFloat(r.latitud);
-          const lng = parseFloat(r.longitud);
-          if (isNaN(lat) || isNaN(lng)) return;
-
-          const estado = (r.estado || '').toLowerCase();
-          const color  = estado.includes('resuelto')  ? '#22c55e'
-                       : estado.includes('proceso')    ? '#f59e0b'
-                       : estado.includes('rechazado')  ? '#9ca3af'
-                       : '#ef4444';
-
-          const circle = L.circleMarker([lat, lng], {
-            radius: 9,
-            fillColor: color,
-            color: '#fff',
-            weight: 2,
-            fillOpacity: 0.85
-          }).addTo(map);
-
-          circle.bindPopup(`
-            <strong>${r.titulo}</strong><br>
-            <small>${r.categoria}</small><br>
-            <small>${r.estado}</small>
-          `);
-        });
-      };
-      document.head.appendChild(script);
+        }).addTo(mapaInstance);
+      }
+      mapaMarkers.forEach(m => mapaInstance.removeLayer(m));
+      mapaMarkers = [];
+      reportes.forEach(r => {
+        const lat = parseFloat(r.latitud);
+        const lng = parseFloat(r.longitud);
+        if (isNaN(lat) || isNaN(lng)) return;
+        const estado = (r.estado || '').toLowerCase();
+        const color  = estado.includes('resuelto')  ? '#22c55e'
+                     : estado.includes('proceso')    ? '#f59e0b'
+                     : estado.includes('rechazado')  ? '#9ca3af'
+                     : '#ef4444';
+        const circle = L.circleMarker([lat, lng], {
+          radius: 9,
+          fillColor: color,
+          color: '#fff',
+          weight: 2,
+          fillOpacity: 0.85
+        }).addTo(mapaInstance);
+        circle.bindPopup(`
+          <strong>${r.titulo}</strong><br>
+          <small>${r.categoria}</small><br>
+          <small>${r.estado}</small>
+        `);
+        mapaMarkers.push(circle);
+      });
     }
-
     // ── Charts ─────────────────────────────────────────────────────
     let donutChart = null;
     let barChart   = null;
-
     function renderDonut(porEstado, total) {
       document.getElementById('donut-total').textContent = total;
       const labels = Object.keys(porEstado);
       const values = Object.values(porEstado);
       const colors = labels.map(l => ESTADO_COLORS[l.toLowerCase()] || '#d1d5db');
-
       const ctx = document.getElementById('donutChart').getContext('2d');
       if (donutChart) donutChart.destroy();
+      if (labels.length === 0) {
+        document.getElementById('donut-legend').innerHTML = '<div class="loading-row" style="padding:1rem 0">Sin datos en este período.</div>';
+        return;
+      }
       donutChart = new Chart(ctx, {
         type: 'doughnut',
         data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 3, borderColor: '#fff' }] },
@@ -536,7 +515,6 @@
           animation: { animateRotate: true, duration: 600 }
         }
       });
-
       const legend = document.getElementById('donut-legend');
       legend.innerHTML = labels.map((l, i) => `
         <div class="legend-item">
@@ -546,11 +524,9 @@
         </div>
       `).join('');
     }
-
     function renderBarras(porCategoria) {
       const labels = Object.keys(porCategoria);
       const values = Object.values(porCategoria);
-
       const ctx = document.getElementById('barChart').getContext('2d');
       if (barChart) barChart.destroy();
       barChart = new Chart(ctx, {
@@ -575,22 +551,18 @@
         }
       });
     }
-
     function renderUltimas(reportes) {
       const list = document.getElementById('ultimas-list');
       const items = reportes.slice(0, 8);
-
       if (items.length === 0) {
         list.innerHTML = '<div class="loading-row">Sin incidencias aún.</div>';
         return;
       }
-
       list.innerHTML = items.map(r => {
         const { fecha, hora } = formatFecha(r.fechaCreacion);
         const fotoHTML = r.fotoPrincipal
           ? `<img class="inc-foto" src="${r.fotoPrincipal}" alt="foto" onerror="this.style.display='none'">`
           : `<div class="inc-foto-placeholder"><i class="ti ti-photo"></i></div>`;
-
         return `
           <div class="incidencia-item">
             ${fotoHTML}
@@ -608,47 +580,37 @@
         `;
       }).join('');
     }
-
     // ── Carga principal ────────────────────────────────────────────
     async function cargarDashboard() {
+      actualizarEtiquetaPeriodo();
       try {
         const [statsRes, reportesRes] = await Promise.all([
-          fetch('/api/admin/dashboard/stats', { headers: { 'Authorization': 'Bearer ' + TOKEN } }),
+          fetch('/api/admin/dashboard/stats?periodo=' + periodoActual, { headers: { 'Authorization': 'Bearer ' + TOKEN } }),
           fetch('/api/admin/reportes',        { headers: { 'Authorization': 'Bearer ' + TOKEN } })
         ]);
-
         const statsJson    = await statsRes.json();
         const reportesJson = await reportesRes.json();
-
         const stats   = statsJson.data   || {};
         const reportes = reportesJson.data || [];
-
         // Stats cards
         document.getElementById('st-total').textContent    = stats.totalUltimoMes ?? 0;
         document.getElementById('st-pendiente').textContent = stats.pendientes      ?? 0;
         document.getElementById('st-proceso').textContent   = stats.enProceso       ?? 0;
         document.getElementById('st-resuelto').textContent  = stats.resueltos       ?? 0;
-
-        // Gráficos
+        // Gráficos (ya filtrados por período desde el backend)
         const porEstado = stats.porEstado || {};
         const total     = Object.values(porEstado).reduce((a, b) => a + b, 0);
         renderDonut(porEstado, total);
         renderBarras(stats.porCategoria || {});
-
-        // Mapa
+        // Mapa (también respeta el período seleccionado)
         initMapa(stats.reportesParaMapa || []);
-
-        // Últimas incidencias
+        // Últimas incidencias (siempre las más recientes, sin filtrar por período)
         renderUltimas(reportes);
-
       } catch (e) {
         console.error('Error cargando dashboard:', e);
       }
     }
-
-
     cargarDashboard();
-
 </script>
 </body>
 </html>
