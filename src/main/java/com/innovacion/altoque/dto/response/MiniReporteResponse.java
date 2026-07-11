@@ -16,6 +16,6 @@ public class MiniReporteResponse {
     private BigDecimal longitud;
     private String direccionAprox;
     private LocalDateTime fechaCreacion;
-    private Integer idReporte;       // null si aún no está agrupado
+    private Integer idReporte;
     private String estadoReporte;
 }

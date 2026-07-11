@@ -15,7 +15,8 @@ public class AdminDashboardController {
     private final AdminService adminService;
 
     @GetMapping("/stats")
-    public ResponseEntity<ApiResponse<AdminDashboardStats>> stats() {
-        return ResponseEntity.ok(ApiResponse.ok("OK", adminService.obtenerStats()));
+    public ResponseEntity<ApiResponse<AdminDashboardStats>> stats(
+            @RequestParam(name = "periodo", required = false, defaultValue = "mes") String periodo) {
+        return ResponseEntity.ok(ApiResponse.ok("OK", adminService.obtenerStats(periodo)));
     }
 }

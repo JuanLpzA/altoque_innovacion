@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Altoque – Usuarios</title>
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,16 +18,6 @@
           --border: #f3f4f6;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
-        .sidebar { width: 220px; background: var(--sidebar-bg); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
-        .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .sidebar-brand span { color: var(--accent); }
-        .sidebar-section { padding: .9rem 1.4rem .3rem; font-size: .62rem; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; }
-        .sidebar-nav a { display: flex; align-items: center; gap: .65rem; padding: .62rem 1.4rem; color: rgba(255,255,255,.62); text-decoration: none; font-size: .84rem; font-weight: 500; transition: background .15s, color .15s; }
-        .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
-        .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
-        .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
-        .sidebar-footer { margin-top: auto; padding: 1rem 1.4rem; border-top: 1px solid rgba(255,255,255,.08); }
-        .sidebar-user { display: flex; align-items: center; gap: .6rem; }
         .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .avatar-sm i { color: #fff; font-size: .95rem; }
         .user-info { flex: 1; min-width: 0; }
@@ -102,6 +93,18 @@
         .btn-icon.toggle-on:hover { background: #fee2e2; }
         .btn-icon.toggle-off { background: #f0fdf4; color: #15803d; }
         .btn-icon.toggle-off:hover { background: #dcfce7; }
+        .btn-icon.editar { background: #f5f3ff; color: #7c3aed; }
+        .btn-icon.editar:hover { background: #ede9fe; }
+        .btn-icon.rol { background: #ecfeff; color: #0891b2; }
+        .btn-icon.rol:hover { background: #cffafe; }
+        .rol-opcion {
+          border: 1.5px solid #e5e7eb; border-radius: 10px; padding: .8rem .9rem;
+          margin-bottom: .6rem; cursor: pointer; transition: border-color .15s, background .15s;
+        }
+        .rol-opcion:hover { border-color: #c7d2fe; }
+        .rol-opcion.seleccionado { border-color: var(--sidebar-bg); background: #eff6ff; }
+        .rol-opcion-titulo { font-size: .85rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: .4rem; margin-bottom: .3rem; }
+        .rol-opcion-desc { font-size: .76rem; color: #6b7280; line-height: 1.4; }
         .btn-icon:disabled { opacity: .4; cursor: not-allowed; }
         .empty-row td { text-align: center; color: var(--muted); padding: 3rem; }
         /* MODALES */
@@ -260,7 +263,6 @@
     </div>
 </div>
 
-<!-- MODAL: NUEVA CUENTA MUNICIPAL -->
 <div class="modal-overlay" id="modalNuevaCuenta">
     <div class="modal">
         <div class="modal-title"><i class="ti ti-user-plus"></i> Nueva cuenta municipal</div>
@@ -298,7 +300,6 @@
     </div>
 </div>
 
-<!-- MODAL: DETALLE DE USUARIO -->
 <div class="modal-overlay" id="modalDetalle">
     <div class="modal">
         <div class="detalle-header">
@@ -315,7 +316,6 @@
     </div>
 </div>
 
-<!-- MODAL: CONFIRMAR ACCIÓN (activar/desactivar/resetear) -->
 <div class="modal-overlay" id="modalConfirmar">
     <div class="modal">
         <div class="modal-title" id="confirmar-titulo">Confirmar acción</div>
@@ -327,6 +327,49 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="modalEditar">
+    <div class="modal">
+        <div class="modal-title"><i class="ti ti-edit"></i> Editar datos</div>
+        <div class="modal-subtitle">Actualiza el nombre y apellido de esta cuenta.</div>
+        <div class="modal-field">
+            <label>Nombre</label>
+            <input type="text" id="ed-nombre" placeholder="Nombre">
+        </div>
+        <div class="modal-field">
+            <label>Apellido</label>
+            <input type="text" id="ed-apellido" placeholder="Apellido">
+        </div>
+        <div class="modal-error" id="ed-error"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModal('modalEditar')">Cancelar</button>
+            <button class="btn-confirm" onclick="confirmarEditar()">Guardar cambios</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalCambiarRol">
+    <div class="modal">
+        <div class="modal-title"><i class="ti ti-user-cog"></i> Cambiar rol</div>
+        <div class="modal-subtitle" id="rol-nombre-usuario">Selecciona el nuevo rol para esta cuenta.</div>
+
+        <div class="rol-opcion" id="rol-opcion-operador" onclick="seleccionarRol('municipalidad_operador')">
+            <div class="rol-opcion-titulo"><i class="ti ti-headset" style="color:#0d9488"></i> Operador</div>
+            <div class="rol-opcion-desc">Gestiona reportes: cambia estados, sube avances y evidencias, revisa el mapa de incidencias. No puede administrar usuarios ni la configuración del sistema.</div>
+        </div>
+
+        <div class="rol-opcion" id="rol-opcion-admin" onclick="seleccionarRol('municipalidad_admin')">
+            <div class="rol-opcion-titulo"><i class="ti ti-shield-lock" style="color:#1d4ed8"></i> Administrador</div>
+            <div class="rol-opcion-desc">Todo lo que puede hacer un operador, además de crear cuentas municipales, cambiar roles, y configurar los parámetros del sistema (límites de reportes, agrupación, etc.).</div>
+        </div>
+
+        <div class="modal-error" id="rol-error"></div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="cerrarModal('modalCambiarRol')">Cancelar</button>
+            <button class="btn-confirm" id="btn-confirmar-rol" onclick="confirmarCambiarRol()">Guardar rol</button>
+        </div>
+    </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="/js/admin-guard.js"></script>
@@ -334,6 +377,15 @@
 
     const TOKEN = window.ADMIN_TOKEN;
     const ROL_YO  = (localStorage.getItem('rol') || '').toLowerCase();
+    function obtenerIdDesdeToken(token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+        return parseInt(payload.sub, 10);
+      } catch {
+        return null;
+      }
+    }
+    const ID_YO = obtenerIdDesdeToken(TOKEN);
     document.getElementById('sb-nombre').textContent =
       (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
 
@@ -422,6 +474,13 @@
           <td>
             <div class="acciones-cell">
               <button class="btn-icon ver" title="Ver detalle" onclick="abrirDetalle(${u.id})"><i class="ti ti-eye"></i></button>
+              <button class="btn-icon editar" title="Editar nombre" onclick="abrirModalEditar(${u.id})">
+                <i class="ti ti-edit"></i>
+              </button>
+              ${u.id === ID_YO
+                ? `<button class="btn-icon rol" title="No puedes cambiar tu propio rol" disabled><i class="ti ti-user-cog"></i></button>`
+                : `<button class="btn-icon rol" title="Cambiar rol" onclick="abrirModalCambiarRol(${u.id})"><i class="ti ti-user-cog"></i></button>`
+              }
               <button class="btn-icon reset" title="Resetear contraseña" ${u.pendienteActivacion ? 'disabled' : ''}
                 onclick="pedirConfirmacion('reset', ${u.id}, '${(u.nombre + ' ' + u.apellido).replace(/'/g, "\\'")}')">
                 <i class="ti ti-key"></i>
@@ -694,13 +753,106 @@
 
     // Cerrar modales con Escape o click fuera
     document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') { ['modalNuevaCuenta','modalDetalle','modalConfirmar'].forEach(cerrarModal); }
+      if (e.key === 'Escape') { ['modalNuevaCuenta','modalDetalle','modalConfirmar','modalEditar','modalCambiarRol'].forEach(cerrarModal); }
     });
-    ['modalNuevaCuenta','modalDetalle','modalConfirmar'].forEach(id => {
+    ['modalNuevaCuenta','modalDetalle','modalConfirmar','modalEditar','modalCambiarRol'].forEach(id => {
       document.getElementById(id).addEventListener('click', e => {
         if (e.target === e.currentTarget) cerrarModal(id);
       });
     });
+
+
+    // ── Modal: editar nombre/apellido ────────────────────────────
+    let idUsuarioEditando = null;
+    function abrirModalEditar(id) {
+      const u = municipales.find(x => x.id === id);
+      if (!u) return;
+      idUsuarioEditando = id;
+      document.getElementById('ed-nombre').value = u.nombre;
+      document.getElementById('ed-apellido').value = u.apellido;
+      document.getElementById('ed-error').classList.remove('show');
+      abrirModal('modalEditar');
+    }
+    async function confirmarEditar() {
+      const errorEl = document.getElementById('ed-error');
+      errorEl.classList.remove('show');
+      const nombre = document.getElementById('ed-nombre').value.trim();
+      const apellido = document.getElementById('ed-apellido').value.trim();
+      if (!nombre || !apellido) {
+        errorEl.textContent = 'Nombre y apellido son obligatorios.';
+        errorEl.classList.add('show');
+        return;
+      }
+      try {
+        const res = await fetch(`/api/admin/usuarios/${idUsuarioEditando}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+          body: JSON.stringify({ nombre, apellido })
+        });
+        const json = await res.json();
+        if (json.ok) {
+          cerrarModal('modalEditar');
+          mostrarToast('✓ Datos actualizados');
+          await cargarTodo();
+        } else {
+          errorEl.textContent = json.mensaje || 'No se pudo actualizar.';
+          errorEl.classList.add('show');
+        }
+      } catch {
+        errorEl.textContent = 'Error de conexión.';
+        errorEl.classList.add('show');
+      }
+    }
+
+    // ── Modal: cambiar rol ────────────────────────────────────────
+    let idUsuarioCambiandoRol = null;
+    let rolSeleccionado = null;
+    function abrirModalCambiarRol(id) {
+      const u = municipales.find(x => x.id === id);
+      if (!u) return;
+      idUsuarioCambiandoRol = id;
+      rolSeleccionado = u.rol.toLowerCase();
+      document.getElementById('rol-nombre-usuario').textContent =
+        `Selecciona el nuevo rol para ${u.nombre} ${u.apellido}.`;
+      document.getElementById('rol-error').classList.remove('show');
+      marcarRolSeleccionado();
+      abrirModal('modalCambiarRol');
+    }
+    function seleccionarRol(rol) {
+      rolSeleccionado = rol;
+      marcarRolSeleccionado();
+    }
+    function marcarRolSeleccionado() {
+      document.getElementById('rol-opcion-operador').classList.toggle('seleccionado', rolSeleccionado === 'municipalidad_operador');
+      document.getElementById('rol-opcion-admin').classList.toggle('seleccionado', rolSeleccionado === 'municipalidad_admin');
+    }
+    async function confirmarCambiarRol() {
+      const errorEl = document.getElementById('rol-error');
+      errorEl.classList.remove('show');
+      const btn = document.getElementById('btn-confirmar-rol');
+      btn.disabled = true;
+      try {
+        const res = await fetch(`/api/admin/usuarios/${idUsuarioCambiandoRol}/rol`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN },
+          body: JSON.stringify({ rol: rolSeleccionado })
+        });
+        const json = await res.json();
+        if (json.ok) {
+          cerrarModal('modalCambiarRol');
+          mostrarToast('✓ Rol actualizado');
+          await cargarTodo();
+        } else {
+          errorEl.textContent = json.mensaje || 'No se pudo cambiar el rol.';
+          errorEl.classList.add('show');
+        }
+      } catch {
+        errorEl.textContent = 'Error de conexión.';
+        errorEl.classList.add('show');
+      } finally {
+        btn.disabled = false;
+      }
+    }
 
 
     cargarTodo();

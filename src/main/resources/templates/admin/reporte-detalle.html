@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Altoque – Detalle de Reporte</title>
+    <link rel="stylesheet" href="/css/admin-sidebar.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -19,16 +20,6 @@
           --border: #f3f4f6;
         }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
-        .sidebar { width: 220px; background: var(--sidebar-bg); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
-        .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
-        .sidebar-brand span { color: var(--accent); }
-        .sidebar-section { padding: .9rem 1.4rem .3rem; font-size: .62rem; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; }
-        .sidebar-nav a { display: flex; align-items: center; gap: .65rem; padding: .62rem 1.4rem; color: rgba(255,255,255,.62); text-decoration: none; font-size: .84rem; font-weight: 500; transition: background .15s, color .15s; }
-        .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
-        .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
-        .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
-        .sidebar-footer { margin-top: auto; padding: 1rem 1.4rem; border-top: 1px solid rgba(255,255,255,.08); }
-        .sidebar-user { display: flex; align-items: center; gap: .6rem; }
         .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .avatar-sm i { color: #fff; font-size: .95rem; }
         .user-info { flex: 1; min-width: 0; }
@@ -176,6 +167,28 @@
         .detalle-mini-row i { color: var(--muted); font-size: 1rem; margin-top: .1rem; flex-shrink: 0; width: 18px; }
         .detalle-mini-label { font-weight: 600; color: #374151; min-width: 90px; flex-shrink: 0; }
         .detalle-mini-value { color: #6b7280; flex: 1; }
+
+
+        .foto-visor {
+          width: 100%; max-height: 480px; min-height: 140px;
+          background: #0f172a; display: flex; align-items: center; justify-content: center;
+          overflow: hidden; border-radius: 12px;
+        }
+        .foto-visor img {
+          max-width: 100%; max-height: 480px; width: auto; height: auto;
+          object-fit: contain; display: block; cursor: zoom-in;
+        }
+
+
+        .hero-header-nofoto { background: linear-gradient(120deg, var(--sidebar-bg), #234a9e); padding: 1.4rem 1.4rem 1.1rem; }
+        .hero-titulo-plain { font-size: 1.25rem; font-weight: 800; color: #fff; line-height: 1.3; }
+        .evidencia-strip { display: flex; gap: .5rem; padding: .9rem 1.4rem 0; overflow-x: auto; }
+        .evidencia-strip-item { width: 68px; height: 68px; border-radius: 10px; object-fit: cover; flex-shrink: 0; cursor: zoom-in; border: 2px solid transparent; transition: border-color .15s; }
+        .evidencia-strip-item:hover { border-color: var(--accent); }
+        .evidencia-strip-empty { font-size: .78rem; color: var(--muted); padding: .3rem 0 .9rem; }
+
+        .avance-foto-wrap { width:100%; max-height:200px; min-height:100px; background:#f3f4f6; border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:zoom-in; }
+        .avance-foto-wrap img { max-width:100%; max-height:200px; width:auto; height:auto; object-fit:contain; }
     </style>
 </head>
 <body>
@@ -189,14 +202,10 @@
     </div>
     <div class="content">
         <div class="hero-card">
-            <div class="hero-foto-wrap">
-                <div id="hero-foto-contenido">
-                    <div class="hero-foto-placeholder"><i class="ti ti-photo"></i></div>
-                </div>
-                <div class="hero-overlay">
-                    <div class="hero-titulo" id="hero-titulo">Cargando...</div>
-                </div>
+            <div class="hero-header-nofoto">
+                <div class="hero-titulo-plain" id="hero-titulo">Cargando...</div>
             </div>
+            <div class="evidencia-strip" id="evidencia-strip"></div>
             <div class="hero-body">
                 <div class="hero-info">
                     <div class="badges" id="hero-badges"></div>
@@ -219,6 +228,7 @@
                     <div class="avance-label">Porcentaje de avance</div>
                 </div>
             </div>
+
         </div>
         <div class="acciones-card">
             <div class="acciones-title">
@@ -374,6 +384,18 @@
         </div>
     </div>
 </div>
+
+
+<div class="modal-overlay" id="modalFoto" style="z-index:2200">
+    <div style="position:relative; max-width:92vw; max-height:92vh;">
+        <button onclick="cerrarModal('modalFoto')" style="position:absolute; top:-14px; right:-14px; background:#fff; border:none; border-radius:50%; width:36px; height:36px; cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.3); display:flex; align-items:center; justify-content:center;">
+            <i class="ti ti-x"></i>
+        </button>
+        <img id="foto-ampliada-img" src="" style="max-width:92vw; max-height:92vh; object-fit:contain; border-radius:10px; display:block;">
+    </div>
+</div>
+
+
 <div class="toast" id="toast"></div>
 
 <script src="/js/admin-guard.js"></script>
@@ -407,6 +429,22 @@
       t.classList.add('show');
       setTimeout(() => t.classList.remove('show'), 3500);
     }
+
+    function abrirFoto(url) {
+      if (!url) return;
+      document.getElementById('foto-ampliada-img').src = url;
+      abrirModal('modalFoto');
+    }
+    function renderEvidenciaStrip(minis) {
+      const cont = document.getElementById('evidencia-strip');
+      const fotos = minis.map(m => m.urlFoto).filter(Boolean).slice(0, 8);
+      if (fotos.length === 0) {
+        cont.innerHTML = '<div class="evidencia-strip-empty">Sin fotos de evidencia registradas aún.</div>';
+        return;
+      }
+      cont.innerHTML = fotos.map(url => `<img class="evidencia-strip-item" src="${url}" onclick="abrirFoto('${url}')">`).join('');
+    }
+
     function abrirModal(id) { document.getElementById(id).classList.add('open'); }
     function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
     function renderHero(r) {
@@ -415,11 +453,7 @@
       document.getElementById('hero-zona').textContent     = r.zonaReferencia || 'Sin zona registrada';
       document.getElementById('hero-fecha').textContent    = formatFecha(r.fechaCreacion);
       document.getElementById('hero-desc').textContent     = r.descripcionConsolidada || '—';
-      if (r.fotoPrincipal) {
-        document.getElementById('hero-foto-contenido').innerHTML =
-          `<img class="hero-foto" src="${r.fotoPrincipal}" alt="foto"
-             onerror="this.outerHTML='<div class=hero-foto-placeholder><i class=ti ti-photo style=font-size:3.5rem;color:#d1d5db></i></div>'">`;
-      }
+
       const estadoCls = badgeClase(r.estado);
       const riesgoCls = (r.nivelRiesgo || '').toLowerCase();
       document.getElementById('hero-badges').innerHTML = `
@@ -446,6 +480,7 @@
         `Avance actual: ${pct}%. Solo puedes igualar o subir este valor.`;
     }
     function renderMinis(minis) {
+      renderEvidenciaStrip(minis);
       miniReportesData = minis;
       document.getElementById('mini-count').textContent = minis.length;
       const list = document.getElementById('mini-list');
@@ -484,8 +519,8 @@
         if (!m) { mostrarToast('No se pudo cargar el detalle', true); return; }
         const fotoWrap = document.getElementById('detalle-mini-foto-wrap');
         fotoWrap.innerHTML = m.urlFoto
-          ? `<img class="detalle-mini-foto" src="${m.urlFoto}" alt="evidencia ciudadano">`
-          : `<div class="detalle-mini-foto" style="display:flex;align-items:center;justify-content:center;"><i class="ti ti-photo" style="font-size:2.5rem;color:#d1d5db"></i></div>`;
+         ? `<div class="foto-visor" style="margin-bottom:1rem" onclick="abrirFoto('${m.urlFoto}')"><img src="${m.urlFoto}" alt="evidencia ciudadano"></div>`
+         : `<div class="foto-visor" style="margin-bottom:1rem"><span style="color:#9ca3af;font-size:.82rem;display:flex;flex-direction:column;align-items:center;gap:.4rem"><i class="ti ti-photo-off" style="font-size:2rem"></i>Sin foto adjunta</span></div>`;
         const riesgoCls = (m.nivelRiesgo || '').toLowerCase();
         document.getElementById('detalle-mini-body').innerHTML = `
           <div class="badges" style="margin-bottom:.8rem">
@@ -523,7 +558,7 @@
             <span class="avance-pct-badge">${a.porcentaje ?? 0}%</span>
           </div>
           ${a.urlFoto
-            ? `<img class="avance-foto" src="${a.urlFoto}" alt="evidencia">`
+            ? `<div class="avance-foto-wrap" onclick="abrirFoto('${a.urlFoto}')"><img src="${a.urlFoto}" alt="evidencia"></div>`
             : `<span class="avance-sin-foto-tag"><i class="ti ti-alert-triangle"></i> Sin evidencia fotográfica</span>`}
           ${a.comentario ? `<div class="avance-comentario">${a.comentario}</div>` : ''}
           ${i < avances.length - 1 ? '<hr class="avance-divider">' : ''}
@@ -724,7 +759,7 @@
     // como el click empezaron y terminaron sobre el overlay (no sobre el
     // contenido del modal). Esto evita que seleccionar texto dentro del modal
     // y soltar el mouse fuera (o viceversa) cierre el modal sin querer.
-    ['modalDetalleMini', 'modalAvance', 'modalRechazo'].forEach(id => {
+    ['modalDetalleMini', 'modalAvance', 'modalRechazo', 'modalFoto'].forEach(id => {
       const overlay = document.getElementById(id);
       let mousedownEnOverlay = false;
       overlay.addEventListener('mousedown', e => {

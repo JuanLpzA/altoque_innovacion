@@ -83,4 +83,23 @@ public interface ReporteRepository extends JpaRepository<Reporte, Integer> {
         ORDER BY rm.reporte.fechaCreacion DESC
     """)
     List<Reporte> findDistinctByUsuarioId(@Param("usuarioId") Integer usuarioId);
+
+
+
+    @Query("""
+        SELECT r FROM Reporte r
+        WHERE (:desde IS NULL OR r.fechaCreacion >= :desde)
+        AND (:hasta IS NULL OR r.fechaCreacion <= :hasta)
+        AND (:categoriaId IS NULL OR r.categoria.id = :categoriaId)
+        AND (:nivelRiesgoId IS NULL OR r.nivelRiesgo.id = :nivelRiesgoId)
+        AND (:estadoId IS NULL OR r.estado.id = :estadoId)
+        ORDER BY r.fechaCreacion ASC
+    """)
+    List<Reporte> findConFiltros(
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta,
+            @Param("categoriaId") Integer categoriaId,
+            @Param("nivelRiesgoId") Integer nivelRiesgoId,
+            @Param("estadoId") Integer estadoId
+    );
 }

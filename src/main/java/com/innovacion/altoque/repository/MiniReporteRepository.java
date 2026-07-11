@@ -55,4 +55,20 @@ public interface MiniReporteRepository extends JpaRepository<MiniReporte, Intege
     List<MiniReporte> findNoAgrupadosRecientes(Pageable pageable);
 
     long countByUsuarioId(Integer usuarioId);
+
+
+
+    @Query("""
+        SELECT m FROM MiniReporte m
+        WHERE (:desde IS NULL OR m.fechaCreacion >= :desde)
+        AND (:hasta IS NULL OR m.fechaCreacion <= :hasta)
+        AND (:categoriaId IS NULL OR m.categoria.id = :categoriaId)
+        AND (:nivelRiesgoId IS NULL OR m.nivelRiesgo.id = :nivelRiesgoId)
+    """)
+    List<MiniReporte> findConFiltros(
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta,
+            @Param("categoriaId") Integer categoriaId,
+            @Param("nivelRiesgoId") Integer nivelRiesgoId
+    );
 }

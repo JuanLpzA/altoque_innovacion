@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/usuarios/**").hasRole("MUNICIPALIDAD_ADMIN")
                         // Resto del panel municipal: admin u operador
                         .requestMatchers("/api/admin/configuracion/**").hasRole("MUNICIPALIDAD_ADMIN")
+                        .requestMatchers("/api/admin/estadisticas/**").hasRole("MUNICIPALIDAD_ADMIN")
                         .requestMatchers("/api/admin/**").hasAnyRole("MUNICIPALIDAD_ADMIN", "MUNICIPALIDAD_OPERADOR")
                         .requestMatchers("/api/avances/**").hasAnyRole("MUNICIPALIDAD_ADMIN", "MUNICIPALIDAD_OPERADOR")
                         .requestMatchers("/api/**").authenticated()

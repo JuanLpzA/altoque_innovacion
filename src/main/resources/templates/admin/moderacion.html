@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Altoque – Centro de Moderación</title>
+  <link rel="stylesheet" href="/css/admin-sidebar.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -17,16 +18,6 @@
       --border: #f3f4f6;
     }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
-    .sidebar { width: 220px; background: var(--sidebar-bg); min-height: 100vh; display: flex; flex-direction: column; flex-shrink: 0; position: sticky; top: 0; height: 100vh; }
-    .sidebar-brand { padding: 1.4rem 1.4rem .9rem; font-size: 1.3rem; font-weight: 900; color: #fff; letter-spacing: -.02em; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .sidebar-brand span { color: var(--accent); }
-    .sidebar-section { padding: .9rem 1.4rem .3rem; font-size: .62rem; font-weight: 700; color: rgba(255,255,255,.3); text-transform: uppercase; letter-spacing: .1em; }
-    .sidebar-nav a { display: flex; align-items: center; gap: .65rem; padding: .62rem 1.4rem; color: rgba(255,255,255,.62); text-decoration: none; font-size: .84rem; font-weight: 500; transition: background .15s, color .15s; }
-    .sidebar-nav a:hover { background: rgba(255,255,255,.07); color: #fff; }
-    .sidebar-nav a.active { background: rgba(255,255,255,.13); color: #fff; border-right: 3px solid var(--accent); }
-    .sidebar-nav a i { font-size: 1.05rem; opacity: .85; }
-    .sidebar-footer { margin-top: auto; padding: 1rem 1.4rem; border-top: 1px solid rgba(255,255,255,.08); }
-    .sidebar-user { display: flex; align-items: center; gap: .6rem; }
     .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .avatar-sm i { color: #fff; font-size: .95rem; }
     .user-info { flex: 1; min-width: 0; }
@@ -87,7 +78,16 @@
     /* ── MODAL CONFIRMAR ── */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); display: none; align-items: center; justify-content: center; z-index: 100; padding: 1rem; }
     .modal-overlay.open { display: flex; }
-    .modal { background: var(--card); border-radius: 16px; padding: 1.8rem; width: 420px; max-width: 95vw; box-shadow: 0 20px 60px rgba(0,0,0,.2); }
+    .modal {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 1.8rem;
+      width: 420px;
+      max-width: 95vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,.2);
+    }
     .modal-title { font-size: 1rem; font-weight: 800; color: var(--text); margin-bottom: .5rem; display: flex; align-items: center; gap: .5rem; }
     .modal-title i { color: #b91c1c; }
     .modal-desc { font-size: .82rem; color: #6b7280; line-height: 1.55; margin-bottom: .9rem; }
@@ -104,6 +104,16 @@
     .btn-danger:disabled { background: #fca5a5; cursor: not-allowed; opacity: .75; }
     .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: #111827; color: #fff; padding: .75rem 1.2rem; border-radius: 10px; font-size: .83rem; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.25); opacity: 0; transform: translateY(12px); transition: opacity .25s, transform .25s; z-index: 200; }
     .toast.show { opacity: 1; transform: translateY(0); }
+
+    .foto-visor {
+      width: 100%; max-height: 480px; min-height: 140px;
+      background: #0f172a; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; border-radius: 12px;
+    }
+    .foto-visor img {
+      max-width: 100%; max-height: 480px; width: auto; height: auto;
+      object-fit: contain; display: block; cursor: zoom-in;
+    }
   </style>
 </head>
 <body>
@@ -117,8 +127,7 @@
   <div class="content">
     <div class="info-banner">
       <i class="ti ti-info-circle"></i>
-      Aquí aparecen las solicitudes ciudadanas (mini reportes) que aún no han formado un reporte oficial.
-      Puedes cancelar aquellas con evidencia de baja confianza o irrelevantes.
+      Aquí puedes revisar los reportes que los vecinos enviaron y que todavía no se juntaron con otros para formar un caso oficial. Toca cualquiera para ver los detalles completos, y si notas que alguno no tiene sentido o no corresponde a la realidad, puedes cancelarlo.
     </div>
 
     <div class="filtros">
@@ -177,219 +186,260 @@
       </label>
     </div>
     <div class="modal-actions">
-      <button class="btn-cancel" onclick="cerrarModal()">Volver</button>
+      <button class="btn-cancel" onclick="cerrarModal('modalOverlay')">Volver</button>
       <button class="btn-danger" id="btn-confirmar-cancelacion" onclick="confirmarCancelacion()" disabled>
         Sí, cancelar solicitud
       </button>
     </div>
   </div>
 </div>
+
+
+<div class="modal-overlay" id="modalDetalleSolicitud">
+  <div class="modal" style="width:520px">
+    <div class="modal-title"><i class="ti ti-file-text"></i> Detalle de la solicitud</div>
+    <div class="modal-subtitle">Revisa la evidencia completa antes de decidir</div>
+    <div class="foto-visor" id="detalle-foto-visor" style="margin-bottom:1rem"></div>
+    <div id="detalle-solicitud-body"></div>
+    <div class="modal-actions" style="justify-content:space-between">
+      <button class="btn-cancel" onclick="cerrarModal('modalDetalleSolicitud')">Cerrar</button>
+      <button class="btn-danger" id="btn-cancelar-desde-detalle" onclick="cancelarDesdeDetalle()">
+        <i class="ti ti-ban"></i> Cancelar esta solicitud
+      </button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 
 <script src="/js/admin-guard.js"></script>
 <script>
-  // Guard
-  const TOKEN = window.ADMIN_TOKEN;
+    const TOKEN = window.ADMIN_TOKEN;
+    let todos = [];
+    let idDetalleActual = null;
 
-  let todos = [];
-
-  function badgeRiesgo(r) {
-    const n = (r || '').toUpperCase();
-    return `<span class="badge badge-${n.toLowerCase()}">${n}</span>`;
-  }
-  function formatFecha(f) {
-    if (!f) return '—';
-    return new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-  function pesoRiesgo(r) {
-    const n = (r || '').toUpperCase();
-    return n === 'ALTO' ? 3 : n === 'MEDIO' ? 2 : 1;
-  }
-
-  function poblarCategorias() {
-    const sel = document.getElementById('filtro-categoria');
-    const cats = [...new Set(todos.map(m => m.categoria).filter(Boolean))].sort();
-    cats.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c; opt.textContent = c;
-      sel.appendChild(opt);
-    });
-  }
-
-  function renderGrid(items) {
-    const grid = document.getElementById('mini-grid');
-    document.getElementById('filtros-resumen').textContent =
-      `Mostrando ${items.length} de ${todos.length} solicitudes`;
-
-    if (items.length === 0) {
-      grid.innerHTML = `
-        <div style="grid-column:1/-1" class="empty-state">
-          <i class="ti ti-mood-happy"></i>
-          <p>No hay solicitudes que coincidan con los filtros seleccionados.</p>
-        </div>`;
-      return;
+    function badgeRiesgo(r) {
+      const n = (r || '').toUpperCase();
+      return `<span class="badge badge-${n.toLowerCase()}">${n}</span>`;
     }
-    grid.innerHTML = items.map(m => {
-      const agrupBadge = m.agrupado
-        ? `<span class="badge badge-agrupado">Agrupado</span>`
-        : badgeRiesgo(m.nivelRiesgo);
-      const fotoHTML = m.urlFoto
-        ? `<img class="mini-card-foto" src="${m.urlFoto}" alt="foto" onerror="this.parentElement.innerHTML='<div class=mini-card-foto-placeholder><i class=ti ti-photo></i></div>'">`
-        : `<div class="mini-card-foto-placeholder"><i class="ti ti-photo"></i></div>`;
-      return `
-        <div class="mini-card" id="card-${m.id}">
-          ${fotoHTML}
-          <div class="mini-card-body">
-            <div class="mini-card-top">
-              <div class="mini-card-titulo">${m.titulo || '—'}</div>
-              ${agrupBadge}
+    function formatFecha(f) {
+      if (!f) return '—';
+      return new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    }
+    function pesoRiesgo(r) {
+      const n = (r || '').toUpperCase();
+      return n === 'ALTO' ? 3 : n === 'MEDIO' ? 2 : 1;
+    }
+    function abrirModal(id) { document.getElementById(id).classList.add('open'); }
+    function cerrarModal(id) { document.getElementById(id).classList.remove('open'); }
+    function mostrarToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function poblarCategorias() {
+      const sel = document.getElementById('filtro-categoria');
+      const cats = [...new Set(todos.map(m => m.categoria).filter(Boolean))].sort();
+      cats.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c; opt.textContent = c;
+        sel.appendChild(opt);
+      });
+    }
+
+    function renderGrid(items) {
+      const grid = document.getElementById('mini-grid');
+      document.getElementById('filtros-resumen').textContent =
+        `Mostrando ${items.length} de ${todos.length} solicitudes`;
+      if (items.length === 0) {
+        grid.innerHTML = `
+          <div style="grid-column:1/-1" class="empty-state">
+            <i class="ti ti-mood-happy"></i>
+            <p>No hay solicitudes que coincidan con los filtros seleccionados.</p>
+          </div>`;
+        return;
+      }
+      grid.innerHTML = items.map(m => {
+        const agrupBadge = m.agrupado
+          ? `<span class="badge badge-agrupado">Agrupado</span>`
+          : badgeRiesgo(m.nivelRiesgo);
+        const fotoHTML = m.urlFoto
+          ? `<img class="mini-card-foto" src="${m.urlFoto}" alt="foto" onerror="this.parentElement.innerHTML='<div class=mini-card-foto-placeholder><i class=ti ti-photo></i></div>'">`
+          : `<div class="mini-card-foto-placeholder"><i class="ti ti-photo"></i></div>`;
+        return `
+          <div class="mini-card" id="card-${m.id}" onclick="abrirDetalle(${m.id})" style="cursor:pointer">
+            ${fotoHTML}
+            <div class="mini-card-body">
+              <div class="mini-card-top">
+                <div class="mini-card-titulo">${m.titulo || '—'}</div>
+                ${agrupBadge}
+              </div>
+              <div class="mini-card-cat">${m.categoria || '—'}</div>
+              <div class="mini-card-desc">${m.descripcion || '—'}</div>
+              <div class="mini-card-meta">
+                <i class="ti ti-map-pin"></i>
+                <span>${m.direccionAprox || 'Sin dirección'}</span>
+              </div>
+              <div class="mini-card-meta">
+                <i class="ti ti-calendar"></i>
+                <span>${formatFecha(m.fechaCreacion)}</span>
+              </div>
             </div>
-            <div class="mini-card-cat">${m.categoria || '—'}</div>
-            <div class="mini-card-desc">${m.descripcion || '—'}</div>
-            <div class="mini-card-meta">
-              <i class="ti ti-map-pin"></i>
-              <span>${m.direccionAprox || 'Sin dirección'}</span>
-            </div>
-            <div class="mini-card-meta">
-              <i class="ti ti-calendar"></i>
-              <span>${formatFecha(m.fechaCreacion)}</span>
+            <div class="mini-card-footer">
+              <div class="mini-user">
+                <i class="ti ti-user"></i>
+                ${m.nombreUsuario || '—'}
+              </div>
+              ${!m.agrupado ? `
+                <button class="btn-cancelar" onclick="event.stopPropagation(); abrirConfirmacion(${m.id})">
+                  <i class="ti ti-ban"></i> Cancelar
+                </button>
+              ` : ''}
             </div>
           </div>
-          <div class="mini-card-footer">
-            <div class="mini-user">
-              <i class="ti ti-user"></i>
-              ${m.nombreUsuario || '—'}
-            </div>
-            ${!m.agrupado ? `
-              <button class="btn-cancelar" onclick='abrirModal(${m.id})'>
-                <i class="ti ti-ban"></i> Cancelar
-              </button>
-            ` : ''}
-          </div>
+        `;
+      }).join('');
+    }
+
+    function aplicarFiltros() {
+      const buscar  = document.getElementById('buscar').value.toLowerCase();
+      const riesgo  = document.getElementById('filtro-riesgo').value.toUpperCase();
+      const cat     = document.getElementById('filtro-categoria').value;
+      const orden   = document.getElementById('filtro-orden').value;
+      let filtrados = todos.filter(m => {
+        const matchBuscar = !buscar ||
+          (m.titulo || '').toLowerCase().includes(buscar) ||
+          (m.categoria || '').toLowerCase().includes(buscar) ||
+          (m.nombreUsuario || '').toLowerCase().includes(buscar);
+        const matchRiesgo = !riesgo || (m.nivelRiesgo || '').toUpperCase() === riesgo;
+        const matchCat = !cat || m.categoria === cat;
+        return matchBuscar && matchRiesgo && matchCat;
+      });
+      filtrados.sort((a, b) => {
+        if (orden === 'reciente') return new Date(b.fechaCreacion) - new Date(a.fechaCreacion);
+        if (orden === 'antiguo')  return new Date(a.fechaCreacion) - new Date(b.fechaCreacion);
+        if (orden === 'riesgo')   return pesoRiesgo(b.nivelRiesgo) - pesoRiesgo(a.nivelRiesgo);
+        return 0;
+      });
+      renderGrid(filtrados);
+    }
+    function resetFiltros() {
+      document.getElementById('buscar').value = '';
+      document.getElementById('filtro-categoria').value = '';
+      document.getElementById('filtro-riesgo').value = '';
+      document.getElementById('filtro-orden').value = 'reciente';
+      aplicarFiltros();
+    }
+    document.getElementById('buscar').addEventListener('input', aplicarFiltros);
+    document.getElementById('filtro-categoria').addEventListener('change', aplicarFiltros);
+    document.getElementById('filtro-riesgo').addEventListener('change', aplicarFiltros);
+    document.getElementById('filtro-orden').addEventListener('change', aplicarFiltros);
+
+    async function cargarMiniReportes() {
+      try {
+        const res  = await fetch('/api/admin/moderacion/mini-reportes', {
+          headers: { 'Authorization': 'Bearer ' + TOKEN }
+        });
+        const json = await res.json();
+        todos = json.data || [];
+        poblarCategorias();
+        renderGrid(todos);
+        document.getElementById('filtros-resumen').textContent = `Mostrando ${todos.length} de ${todos.length} solicitudes`;
+      } catch {
+        document.getElementById('mini-grid').innerHTML = `
+          <div style="grid-column:1/-1" class="empty-state">
+            <i class="ti ti-wifi-off"></i>
+            <p>Error al cargar las solicitudes.</p>
+          </div>`;
+      }
+    }
+
+    // ── Modal: detalle completo ──────────────────────────────────
+    function abrirDetalle(id) {
+      const m = todos.find(x => x.id == id);
+      if (!m) return;
+      idDetalleActual = id;
+      const fotoVisor = document.getElementById('detalle-foto-visor');
+      fotoVisor.innerHTML = m.urlFoto
+        ? `<img src="${m.urlFoto}" alt="evidencia">`
+        : `<div style="color:#9ca3af;display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:2rem"><i class="ti ti-photo-off" style="font-size:2rem"></i><span style="font-size:.8rem">Sin foto adjunta</span></div>`;
+      document.getElementById('detalle-solicitud-body').innerHTML = `
+        <div style="display:flex;gap:.4rem;margin-bottom:.9rem;flex-wrap:wrap">
+          ${badgeRiesgo(m.nivelRiesgo)}
+          <span class="badge" style="background:#f0f5fb;color:#1a3a8f">${m.categoria || '—'}</span>
+          ${m.agrupado ? '<span class="badge badge-agrupado">Ya agrupado</span>' : ''}
+        </div>
+        <div class="modal-preview" style="margin-bottom:1rem">
+          <div class="modal-preview-tit">${m.titulo || '—'}</div>
+          <div class="modal-preview-meta" style="margin-top:.4rem;line-height:1.6">${m.descripcion || 'Sin descripción'}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:.55rem;font-size:.83rem;color:#374151">
+          <div style="display:flex;gap:.5rem"><i class="ti ti-user" style="color:#9ca3af"></i> ${m.nombreUsuario || '—'}</div>
+          <div style="display:flex;gap:.5rem"><i class="ti ti-calendar" style="color:#9ca3af"></i> ${formatFecha(m.fechaCreacion)}</div>
+          <div style="display:flex;gap:.5rem"><i class="ti ti-map-pin" style="color:#9ca3af"></i> ${m.direccionAprox || 'Sin dirección'}</div>
+          <div style="display:flex;gap:.5rem"><i class="ti ti-map" style="color:#9ca3af"></i> ${m.latitud ?? '—'}, ${m.longitud ?? '—'}</div>
         </div>
       `;
-    }).join('');
-  }
-
-  function aplicarFiltros() {
-    const buscar  = document.getElementById('buscar').value.toLowerCase();
-    const riesgo  = document.getElementById('filtro-riesgo').value.toUpperCase();
-    const cat     = document.getElementById('filtro-categoria').value;
-    const orden   = document.getElementById('filtro-orden').value;
-
-    let filtrados = todos.filter(m => {
-      const matchBuscar = !buscar ||
-        (m.titulo || '').toLowerCase().includes(buscar) ||
-        (m.categoria || '').toLowerCase().includes(buscar) ||
-        (m.nombreUsuario || '').toLowerCase().includes(buscar);
-      const matchRiesgo = !riesgo || (m.nivelRiesgo || '').toUpperCase() === riesgo;
-      const matchCat = !cat || m.categoria === cat;
-      return matchBuscar && matchRiesgo && matchCat;
-    });
-
-    filtrados.sort((a, b) => {
-      if (orden === 'reciente') return new Date(b.fechaCreacion) - new Date(a.fechaCreacion);
-      if (orden === 'antiguo')  return new Date(a.fechaCreacion) - new Date(b.fechaCreacion);
-      if (orden === 'riesgo')   return pesoRiesgo(b.nivelRiesgo) - pesoRiesgo(a.nivelRiesgo);
-      return 0;
-    });
-
-    renderGrid(filtrados);
-  }
-
-  function resetFiltros() {
-    document.getElementById('buscar').value = '';
-    document.getElementById('filtro-categoria').value = '';
-    document.getElementById('filtro-riesgo').value = '';
-    document.getElementById('filtro-orden').value = 'reciente';
-    aplicarFiltros();
-  }
-
-  document.getElementById('buscar').addEventListener('input', aplicarFiltros);
-  document.getElementById('filtro-categoria').addEventListener('change', aplicarFiltros);
-  document.getElementById('filtro-riesgo').addEventListener('change', aplicarFiltros);
-  document.getElementById('filtro-orden').addEventListener('change', aplicarFiltros);
-
-  async function cargarMiniReportes() {
-    try {
-      const res  = await fetch('/api/admin/moderacion/mini-reportes', {
-        headers: { 'Authorization': 'Bearer ' + TOKEN }
-      });
-      const json = await res.json();
-      todos = json.data || [];
-      poblarCategorias();
-      renderGrid(todos);
-      document.getElementById('filtros-resumen').textContent = `Mostrando ${todos.length} de ${todos.length} solicitudes`;
-    } catch {
-      document.getElementById('mini-grid').innerHTML = `
-        <div style="grid-column:1/-1" class="empty-state">
-          <i class="ti ti-wifi-off"></i>
-          <p>Error al cargar las solicitudes.</p>
-        </div>`;
+      document.getElementById('btn-cancelar-desde-detalle').style.display = m.agrupado ? 'none' : 'flex';
+      abrirModal('modalDetalleSolicitud');
     }
-  }
+    function cancelarDesdeDetalle() {
+      cerrarModal('modalDetalleSolicitud');
+      abrirConfirmacion(idDetalleActual);
+    }
 
-  // ── Modal ──────────────────────────────────────────────────────
-  function abrirModal(id) {
-    const m = todos.find(x => x.id == id);
-    if (!m) return;
-    document.getElementById('modal-id').value = id;
-    document.getElementById('modal-preview-tit').textContent = m.titulo || '—';
-    document.getElementById('modal-preview-meta').textContent =
-      `${m.categoria || '—'} · ${(m.nivelRiesgo || '').toUpperCase()} · ${m.nombreUsuario || '—'}`;
-    document.getElementById('chk-revisado').checked = false;
-    document.getElementById('chk-irreversible').checked = false;
-    actualizarBotonModal();
-    document.getElementById('modalOverlay').classList.add('open');
-  }
-  function cerrarModal() {
-    document.getElementById('modalOverlay').classList.remove('open');
-  }
-  function actualizarBotonModal() {
-    const ok = document.getElementById('chk-revisado').checked &&
-               document.getElementById('chk-irreversible').checked;
-    document.getElementById('btn-confirmar-cancelacion').disabled = !ok;
-  }
-  async function confirmarCancelacion() {
-    const id = document.getElementById('modal-id').value;
-    cerrarModal();
-    try {
-      const res  = await fetch(`/api/admin/moderacion/mini-reportes/${id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': 'Bearer ' + TOKEN }
-      });
-      const json = await res.json();
-      if (json.ok) {
-        mostrarToast('✓ Solicitud cancelada');
-        todos = todos.filter(m => m.id != id);
-        poblarCategoriasSinDuplicar();
-        aplicarFiltros();
-      } else {
-        mostrarToast('Error: ' + (json.mensaje || 'No se pudo cancelar'));
+    // ── Modal: confirmar cancelación ─────────────────────────────
+    function abrirConfirmacion(id) {
+      const m = todos.find(x => x.id == id);
+      if (!m) return;
+      document.getElementById('modal-id').value = id;
+      document.getElementById('modal-preview-tit').textContent = m.titulo || '—';
+      document.getElementById('modal-preview-meta').textContent =
+        `${m.categoria || '—'} · ${(m.nivelRiesgo || '').toUpperCase()} · ${m.nombreUsuario || '—'}`;
+      document.getElementById('chk-revisado').checked = false;
+      document.getElementById('chk-irreversible').checked = false;
+      actualizarBotonModal();
+      abrirModal('modalOverlay');
+    }
+    function actualizarBotonModal() {
+      const ok = document.getElementById('chk-revisado').checked &&
+                 document.getElementById('chk-irreversible').checked;
+      document.getElementById('btn-confirmar-cancelacion').disabled = !ok;
+    }
+    async function confirmarCancelacion() {
+      const id = document.getElementById('modal-id').value;
+      cerrarModal('modalOverlay');
+      try {
+        const res  = await fetch(`/api/admin/moderacion/mini-reportes/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': 'Bearer ' + TOKEN }
+        });
+        const json = await res.json();
+        if (json.ok) {
+          mostrarToast('✓ Solicitud cancelada');
+          todos = todos.filter(m => m.id != id);
+          aplicarFiltros();
+        } else {
+          mostrarToast('Error: ' + (json.mensaje || 'No se pudo cancelar'));
+        }
+      } catch {
+        mostrarToast('Error de conexión');
       }
-    } catch {
-      mostrarToast('Error de conexión');
     }
-  }
-  function poblarCategoriasSinDuplicar() {
-    // no es necesario repoblar el select tras cancelar; se deja la lista de categorías estable
-  }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
-  document.getElementById('modalOverlay').addEventListener('click', e => {
-    if (e.target === e.currentTarget) cerrarModal();
-  });
 
-  function mostrarToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { cerrarModal('modalOverlay'); cerrarModal('modalDetalleSolicitud'); }
+    });
+    ['modalOverlay', 'modalDetalleSolicitud'].forEach(id => {
+      document.getElementById(id).addEventListener('click', e => {
+        if (e.target === e.currentTarget) cerrarModal(id);
+      });
+    });
 
-
-  cargarMiniReportes();
-
+    cargarMiniReportes();
 </script>
 </body>
 </html>
