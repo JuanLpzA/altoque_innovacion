@@ -76,4 +76,7 @@ public class VistasController {
 
     @GetMapping("/admin/usuarios")
     public String adminUsuarios() { return "admin/usuarios"; }
+
+    @GetMapping("/admin/configuracion")
+    public String adminConfiguracion() { return "admin/configuracion"; }
 }

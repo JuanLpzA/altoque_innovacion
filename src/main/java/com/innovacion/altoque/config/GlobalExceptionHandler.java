@@ -1,6 +1,7 @@
 package com.innovacion.altoque.config;
 
 import com.innovacion.altoque.dto.response.ApiResponse;
+import com.innovacion.altoque.exception.LimiteExcedidoException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -31,5 +32,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> general(Exception ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Error interno del servidor"));
+    }
+
+    @ExceptionHandler(LimiteExcedidoException.class)
+    public ResponseEntity<ApiResponse<Void>> limite(LimiteExcedidoException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(ApiResponse.error(ex.getMessage()));
     }
 }

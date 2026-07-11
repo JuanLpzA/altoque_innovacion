@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #f0f5fb;
@@ -16,239 +15,127 @@
             max-width: 480px;
             margin: 0 auto;
         }
-
-        /* ── HEADER igual que inicio ── */
-        .header {
-            background: #1a3a8f;
-            padding: 1.1rem 1.2rem 1.3rem;
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: .75rem;
-        }
-
+        /* ── HEADER ── */
+        .header { background: #1a3a8f; padding: 1.1rem 1.2rem 1.3rem; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; }
+        .header-left { display: flex; align-items: center; gap: .75rem; }
         .back-btn {
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,.35);
-            background: transparent;
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,.35); background: transparent;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: #fff;
-            font-size: 1.1rem;
-            text-decoration: none;
-            flex-shrink: 0;
+            cursor: pointer; color: #fff; font-size: 1.1rem; text-decoration: none; flex-shrink: 0;
         }
-
-        .header-title {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: #fff;
-            letter-spacing: -.01em;
-        }
-
-        .header-sub {
-            font-size: .72rem;
-            color: rgba(255,255,255,.7);
-            margin-top: 2px;
-        }
-
+        .header-title { font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -.01em; }
+        .header-sub { font-size: .72rem; color: rgba(255,255,255,.7); margin-top: 2px; }
         .icon-btn {
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            border: 2px solid rgba(255,255,255,.35);
-            background: transparent;
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,.35); background: transparent;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer;
-            color: #fff;
-            font-size: 1.05rem;
+            cursor: pointer; color: #fff; font-size: 1.05rem;
         }
-
+        /* ── TABS ── */
+        .tabs {
+            display: flex; margin: 1rem 1rem .3rem; background: #fff;
+            border-radius: 12px; padding: .3rem; box-shadow: 0 2px 10px rgba(0,0,0,.06);
+        }
+        .tab-btn {
+            flex: 1; padding: .6rem .5rem; border: none; background: transparent;
+            border-radius: 9px; font-size: .78rem; font-weight: 700; color: #9ca3af;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: .4rem;
+        }
+        .tab-btn.activo { background: #1a3a8f; color: #fff; }
+        .tab-btn i { font-size: 1rem; }
+        .tab-panel { display: none; }
+        .tab-panel.activo { display: block; }
         /* ── LISTA ── */
-        .lista { padding: 1rem; }
-
-        /* ── TARJETA REPORTE ── */
-        .reporte-card {
-            background: #fff;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: .85rem;
-            box-shadow: 0 2px 14px rgba(0,0,0,.07);
+        .lista { padding: .6rem 1rem 1rem; }
+        /* ── TARJETA CASO (reportes consolidados) ── */
+        .caso-card {
+            background: #fff; border-radius: 16px; overflow: hidden; margin-bottom: .85rem;
+            box-shadow: 0 2px 14px rgba(0,0,0,.07); text-decoration: none; display: block;
         }
-
-        .reporte-img-wrap {
-            position: relative;
-            width: 100%;
-            height: 130px;
+        .caso-img-wrap { position: relative; width: 100%; height: 150px; }
+        .caso-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .caso-img-placeholder {
+            width: 100%; height: 100%; background: linear-gradient(135deg, #c8d8ec, #a8bdd8);
+            display: flex; align-items: center; justify-content: center; color: #7a97b8; font-size: 2rem;
         }
-
-        .reporte-img {
-            width: 100%; height: 100%;
-            object-fit: cover; display: block;
-        }
-
-        .reporte-img-placeholder {
-            width: 100%; height: 100%;
-            background: linear-gradient(135deg, #c8d8ec, #a8bdd8);
-            display: flex; align-items: center; justify-content: center;
-            color: #7a97b8; font-size: 2.2rem;
-        }
-
-        /* Badge estado sobre imagen */
         .badge-img {
-            position: absolute;
-            top: 10px; right: 10px;
-            font-size: .68rem;
-            font-weight: 700;
-            padding: .25rem .65rem;
-            border-radius: 99px;
+            position: absolute; top: 10px; right: 10px; font-size: .68rem; font-weight: 700;
+            padding: .25rem .65rem; border-radius: 99px; backdrop-filter: blur(4px);
         }
-
         .badge-PENDIENTE  { background: rgba(239,68,68,.85);  color: #fff; }
         .badge-EN_PROCESO { background: rgba(59,130,246,.85); color: #fff; }
         .badge-RESUELTO   { background: rgba(34,197,94,.85);  color: #fff; }
         .badge-default    { background: rgba(107,114,128,.8); color: #fff; }
-
-        /* Badge nivel riesgo inline */
-        .badge-riesgo {
-            font-size: .62rem;
-            font-weight: 700;
-            padding: .18rem .5rem;
-            border-radius: 99px;
-        }
+        .badge-riesgo { font-size: .62rem; font-weight: 700; padding: .18rem .5rem; border-radius: 99px; }
         .badge-ALTO  { background: #fef2f2; color: #b91c1c; }
         .badge-MEDIO { background: #fffbeb; color: #b45309; }
         .badge-BAJO  { background: #f0fdf4; color: #15803d; }
-
-        .reporte-body { padding: .85rem .9rem .9rem; }
-
-        .reporte-cat {
-            font-size: .7rem;
-            font-weight: 700;
-            color: #1a3a8f;
-            text-transform: uppercase;
-            letter-spacing: .04em;
-            margin-bottom: .3rem;
-            display: flex;
-            align-items: center;
-            gap: .4rem;
+        .caso-body { padding: .85rem .9rem .9rem; }
+        .caso-cat { font-size: .7rem; font-weight: 700; color: #1a3a8f; text-transform: uppercase; letter-spacing: .04em; margin-bottom: .3rem; display: flex; align-items: center; gap: .4rem; }
+        .caso-titulo { font-size: .95rem; font-weight: 700; color: #111827; margin-bottom: .5rem; }
+        .caso-progreso-wrap { margin-bottom: .55rem; }
+        .caso-progreso-label { display: flex; justify-content: space-between; font-size: .68rem; color: #9ca3af; margin-bottom: .25rem; }
+        .progress-bar { background: #e5e7eb; border-radius: 99px; height: 6px; overflow: hidden; }
+        .progress-fill { background: #0fa89a; height: 100%; border-radius: 99px; }
+        .caso-footer { display: flex; justify-content: space-between; align-items: center; margin-top: .4rem; }
+        .caso-personas { display: flex; align-items: center; gap: .3rem; font-size: .72rem; color: #6b7280; font-weight: 600; }
+        .caso-personas i { font-size: .95rem; color: #1a3a8f; }
+        .ver-detalle { font-size: .73rem; font-weight: 700; color: #1a3a8f; }
+        /* ── TARJETA ENVÍO (individual) ── */
+        .envio-card {
+            background: #fff; border-radius: 16px; overflow: hidden; margin-bottom: .8rem;
+            box-shadow: 0 2px 12px rgba(0,0,0,.06); display: flex; text-decoration: none;
         }
-
-        .reporte-titulo {
-            font-size: .95rem;
-            font-weight: 700;
-            color: #111827;
-            margin-bottom: .35rem;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .envio-img { width: 96px; height: 96px; object-fit: cover; flex-shrink: 0; }
+        .envio-img-placeholder {
+            width: 96px; height: 96px; flex-shrink: 0; background: linear-gradient(135deg, #c8d8ec, #a8bdd8);
+            display: flex; align-items: center; justify-content: center; color: #7a97b8; font-size: 1.5rem;
         }
-
-        .reporte-desc {
-            font-size: .78rem;
-            color: #6b7280;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            margin-bottom: .45rem;
+        .envio-body { padding: .7rem .8rem; flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: .3rem; }
+        .envio-titulo { font-size: .86rem; font-weight: 700; color: #111827; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .envio-cat { font-size: .68rem; color: #9ca3af; font-weight: 600; }
+        .envio-estado {
+            display: inline-flex; align-items: center; gap: .25rem; width: fit-content;
+            font-size: .66rem; font-weight: 700; padding: .2rem .5rem; border-radius: 99px; margin-top: .1rem;
         }
-
-        .reporte-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: .35rem;
-        }
-
-        .reporte-dir {
-            display: flex;
-            align-items: center;
-            gap: .3rem;
-            font-size: .72rem;
-            color: #9ca3af;
-        }
-
-        .reporte-dir i { color: #ef4444; font-size: 13px; }
-
-        .reporte-fecha {
-            font-size: .7rem;
-            color: #9ca3af;
-        }
-
-        .empty {
-            text-align: center;
-            color: #9ca3af;
-            padding: 3rem 1rem;
-            font-size: .9rem;
-            line-height: 1.6;
-        }
-
+        .envio-estado.pendiente-caso { background: #fffbeb; color: #b45309; }
+        .envio-estado.en-caso { background: #eff6ff; color: #1d4ed8; }
+        .envio-fecha { font-size: .65rem; color: #9ca3af; margin-top: .1rem; }
+        /* ── EMPTY / SKELETON ── */
+        .empty { text-align: center; color: #9ca3af; padding: 3rem 1rem; font-size: .9rem; line-height: 1.6; }
         .empty a { color: #1a3a8f; font-weight: 700; text-decoration: none; }
-
-        /* ── NAV INFERIOR igual que inicio ── */
+        .skeleton { background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 12px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .skeleton-caso { height: 220px; margin-bottom: .85rem; }
+        .skeleton-envio { height: 96px; margin-bottom: .8rem; }
+        /* ── NAV INFERIOR ── */
         nav {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            max-width: 480px;
-            margin: 0 auto;
-            background: #fff;
-            border-top: 1px solid #e5e7eb;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: .45rem 0 .75rem;
-            z-index: 10;
+            position: fixed; bottom: 0; left: 0; right: 0; max-width: 480px; margin: 0 auto;
+            background: #fff; border-top: 1px solid #e5e7eb;
+            display: flex; justify-content: space-around; align-items: center; padding: .45rem 0 .75rem; z-index: 10;
         }
-
-        nav a {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: .1rem;
-            font-size: .62rem;
-            font-weight: 600;
-            color: #9ca3af;
-            text-decoration: none;
-        }
-
+        nav a { display: flex; flex-direction: column; align-items: center; gap: .1rem; font-size: .62rem; font-weight: 600; color: #9ca3af; text-decoration: none; }
         nav a.activo { color: #1a3a8f; }
         nav a i { font-size: 1.35rem; }
-
         .nav-center {
-            background: #1a3a8f;
-            width: 54px; height: 54px;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            margin-top: -22px;
-            border: 3px solid #fff;
-            box-shadow: 0 4px 16px rgba(26,58,143,.35);
-            text-decoration: none;
+            background: #1a3a8f; width: 54px; height: 54px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin-top: -22px;
+            border: 3px solid #fff; box-shadow: 0 4px 16px rgba(26,58,143,.35); text-decoration: none;
         }
-
         .nav-center i { color: #fff; font-size: 1.5rem; }
     </style>
 </head>
 <body>
-
 <!-- ── HEADER ── -->
 <div class="header">
     <div class="header-top">
         <div class="header-left">
-            <a href="/inicio" class="back-btn" aria-label="Volver">
-                <i class="ti ti-arrow-left"></i>
-            </a>
+            <a href="/inicio" class="back-btn" aria-label="Volver"><i class="ti ti-arrow-left"></i></a>
             <div>
-                <div class="header-title">Mis Reportes</div>
-                <div class="header-sub" id="hdr-sub">Historial de incidencias</div>
+                <div class="header-title">Mis reportes</div>
+                <div class="header-sub" id="hdr-sub">Cargando...</div>
             </div>
         </div>
         <button class="icon-btn" aria-label="Cerrar sesión" onclick="ejecutarCerrarSesion()">
@@ -257,30 +144,38 @@
     </div>
 </div>
 
-<!-- ── LISTA ── -->
-<div class="lista" id="lista">
-    <p class="empty">Cargando...</p>
+<!-- ── TABS ── -->
+<div class="tabs">
+    <button class="tab-btn activo" id="tab-casos" onclick="cambiarTab('casos')">
+        <i class="ti ti-building-community"></i> Casos municipales
+    </button>
+    <button class="tab-btn" id="tab-envios" onclick="cambiarTab('envios')">
+        <i class="ti ti-send"></i> Tus envíos
+    </button>
+</div>
+
+<!-- PANEL: CASOS -->
+<div class="tab-panel activo" id="panel-casos">
+    <div class="lista" id="lista-casos">
+        <div class="skeleton skeleton-caso"></div>
+        <div class="skeleton skeleton-caso"></div>
+    </div>
+</div>
+
+<!-- PANEL: ENVÍOS -->
+<div class="tab-panel" id="panel-envios">
+    <div class="lista" id="lista-envios">
+        <div class="skeleton skeleton-envio"></div>
+        <div class="skeleton skeleton-envio"></div>
+        <div class="skeleton skeleton-envio"></div>
+    </div>
 </div>
 
 <!-- ── NAV INFERIOR ── -->
 <nav>
-    <a href="/inicio" class="activo">
-        <i class="ti ti-home"></i>
-        <span>Inicio</span>
-    </a>
-    <a href="/nuevo-reporte">
-        <div class="nav-center">
-            <i class="ti ti-plus"></i>
-        </div>
-    </a>
-    <a href="#">
-        <i class="ti ti-user"></i>
-        <span>Perfil</span>
-    </a>
-    <!--    <a href="/mis-reportes" class="activo">-->
-    <!--        <i class="ti ti-clipboard-list"></i>-->
-    <!--        <span>Mis reportes</span>-->
-    <!--    </a>-->
+    <a href="/inicio"><i class="ti ti-home"></i><span>Inicio</span></a>
+    <a href="/nuevo-reporte"><div class="nav-center"><i class="ti ti-plus"></i></div></a>
+    <a href="/perfil"><i class="ti ti-user"></i><span>Perfil</span></a>
 </nav>
 
 <script>
@@ -292,7 +187,6 @@
         const d = new Date(iso);
         return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
     }
-
     function estadoBadgeClass(nombre) {
         if (!nombre) return 'badge-default';
         const n = nombre.toUpperCase();
@@ -302,69 +196,115 @@
         return 'badge-default';
     }
 
-    fetch('/api/mini-reportes/mis', {
-        headers: { 'Authorization': 'Bearer ' + token }
-    })
-    .then(r => r.json())
-    .then(json => {
-        const lista = document.getElementById('lista');
-        if (!json.data || json.data.length === 0) {
-            lista.innerHTML = `<p class="empty">Aún no has enviado ningún reporte.<br>
+    function cambiarTab(tab) {
+        document.getElementById('tab-casos').classList.toggle('activo', tab === 'casos');
+        document.getElementById('tab-envios').classList.toggle('activo', tab === 'envios');
+        document.getElementById('panel-casos').classList.toggle('activo', tab === 'casos');
+        document.getElementById('panel-envios').classList.toggle('activo', tab === 'envios');
+    }
+
+    // ── CASOS MUNICIPALES ─────────────────────────────────────
+    function renderCasos(data) {
+        const cont = document.getElementById('lista-casos');
+        if (!data || data.length === 0) {
+            cont.innerHTML = `<p class="empty">Ninguno de tus envíos forma parte de un caso todavía.<br>
+                Cuando se junten suficientes reportes sobre el mismo problema, aparecerá aquí.</p>`;
+            return;
+        }
+        cont.innerHTML = data.map(r => {
+            const badgeCls = estadoBadgeClass(r.estado);
+            const imgHtml = r.fotoPrincipal
+                ? `<img class="caso-img" src="${r.fotoPrincipal}" alt="${r.titulo}">`
+                : `<div class="caso-img-placeholder"><i class="ti ti-photo"></i></div>`;
+            return `
+            <a href="/reporte-detalle?id=${r.id}" class="caso-card">
+                <div class="caso-img-wrap">
+                    ${imgHtml}
+                    ${r.estado ? `<span class="badge-img ${badgeCls}">${r.estado}</span>` : ''}
+                </div>
+                <div class="caso-body">
+                    <div class="caso-cat">${r.categoria || ''} ${r.nivelRiesgo ? `<span class="badge-riesgo badge-${r.nivelRiesgo}">${r.nivelRiesgo}</span>` : ''}</div>
+                    <div class="caso-titulo">${r.titulo}</div>
+                    <div class="caso-progreso-wrap">
+                        <div class="caso-progreso-label"><span>Progreso</span><span>${r.porcentajeAvance || 0}%</span></div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:${r.porcentajeAvance || 0}%"></div></div>
+                    </div>
+                    <div class="caso-footer">
+                        <span class="caso-personas"><i class="ti ti-users"></i> ${r.totalPersonas || 1} persona${r.totalPersonas === 1 ? '' : 's'} reportaron esto</span>
+                        <span class="ver-detalle">Ver caso ›</span>
+                    </div>
+                </div>
+            </a>`;
+        }).join('');
+    }
+
+    async function cargarCasos() {
+        try {
+            const res = await fetch('/api/reportes/mis', { headers: { 'Authorization': 'Bearer ' + token } });
+            const json = await res.json();
+            renderCasos(json.data);
+        } catch {
+            document.getElementById('lista-casos').innerHTML = '<p class="empty">Error al cargar tus casos.</p>';
+        }
+    }
+
+    // ── TUS ENVÍOS ────────────────────────────────────────────
+    function renderEnvios(data) {
+        const cont = document.getElementById('lista-envios');
+        if (!data || data.length === 0) {
+            cont.innerHTML = `<p class="empty">Aún no has enviado ningún reporte.<br>
                 <a href="/nuevo-reporte">Enviar mi primer reporte →</a></p>`;
+            document.getElementById('hdr-sub').textContent = '0 reportes enviados';
             return;
         }
         document.getElementById('hdr-sub').textContent =
-            json.data.length + (json.data.length === 1 ? ' reporte enviado' : ' reportes enviados');
+            data.length + (data.length === 1 ? ' reporte enviado' : ' reportes enviados');
 
-        lista.innerHTML = json.data.map(r => {
-            const badgeCls = estadoBadgeClass(r.estado || '');
-            const imgHtml = r.urlFoto
-                ? `<img class="reporte-img" src="${r.urlFoto}" alt="${r.titulo}">`
-                : `<div class="reporte-img-placeholder"><i class="ti ti-photo"></i></div>`;
-            const estadoLabel = r.estado || '';
-            const nivelHtml = r.nivelRiesgo
-                ? `<span class="badge-riesgo badge-${r.nivelRiesgo}">${r.nivelRiesgo}</span>` : '';
+        cont.innerHTML = data.map(m => {
+            const imgHtml = m.urlFoto
+                ? `<img class="envio-img" src="${m.urlFoto}" alt="${m.titulo}">`
+                : `<div class="envio-img-placeholder"><i class="ti ti-photo"></i></div>`;
+            const enCaso = !!m.idReporte;
+            const estadoHtml = enCaso
+                ? `<span class="envio-estado en-caso"><i class="ti ti-link"></i> Ya forma parte de un caso</span>`
+                : `<span class="envio-estado pendiente-caso"><i class="ti ti-clock"></i> Esperando más reportes similares</span>`;
+            const href = enCaso ? `/reporte-detalle?id=${m.idReporte}` : '#';
+            const clickable = enCaso ? '' : 'style="pointer-events:none"';
+
             return `
-            <div class="reporte-card">
-                <div class="reporte-img-wrap">
-                    ${imgHtml}
-                    ${estadoLabel ? `<span class="badge-img ${badgeCls}">${estadoLabel}</span>` : ''}
+            <a href="${href}" class="envio-card" ${clickable}>
+                ${imgHtml}
+                <div class="envio-body">
+                    <div class="envio-titulo">${m.titulo}</div>
+                    <div class="envio-cat">${m.categoria || ''} ${m.nivelRiesgo ? '· ' + m.nivelRiesgo : ''}</div>
+                    ${estadoHtml}
+                    <div class="envio-fecha">${formatFecha(m.fechaCreacion)}</div>
                 </div>
-                <div class="reporte-body">
-                    <div class="reporte-cat">
-                        ${r.categoria || ''} ${nivelHtml}
-                    </div>
-                    <div class="reporte-titulo">${r.titulo}</div>
-                    <div class="reporte-desc">${r.descripcion || ''}</div>
-                    <div class="reporte-footer">
-                        <div class="reporte-dir">
-                            <i class="ti ti-map-pin"></i>
-                            <span>${r.direccionAprox || 'Sin dirección'}</span>
-                        </div>
-                        <span class="reporte-fecha">${formatFecha(r.fechaCreacion)}</span>
-                    </div>
-                </div>
-            </div>`;
+            </a>`;
         }).join('');
-    })
-    .catch(() => {
-        document.getElementById('lista').innerHTML =
-            '<p class="empty">Error al cargar tus reportes.</p>';
-    });
+    }
+
+    async function cargarEnvios() {
+        try {
+            const res = await fetch('/api/mini-reportes/mis', { headers: { 'Authorization': 'Bearer ' + token } });
+            const json = await res.json();
+            renderEnvios(json.data);
+        } catch {
+            document.getElementById('lista-envios').innerHTML = '<p class="empty">Error al cargar tus envíos.</p>';
+        }
+    }
+
+    cargarCasos();
+    cargarEnvios();
 
     async function ejecutarCerrarSesion() {
         try {
             const t = localStorage.getItem('token');
-            if (t) {
-                await fetch('/api/auth/logout', {
-                    method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + t }
-                });
-            }
-        } catch (e) {
-            console.error("Error al notificar al servidor:", e);
-        } finally {
+            if (t) await fetch('/api/auth/logout', { method: 'POST', headers: { 'Authorization': 'Bearer ' + t } });
+        } catch (e) { console.error("Error al notificar al servidor:", e); }
+        finally {
             localStorage.clear();
+            sessionStorage.clear();
             window.location.href = '/login';
         }
     }

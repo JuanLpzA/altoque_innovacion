@@ -383,6 +383,36 @@
             gap: .45rem;
             margin-top: .6rem;
         }
+
+
+        .ubicacion-alerta {
+            display: none;
+            align-items: center;
+            gap: .5rem;
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fde68a;
+            border-radius: 12px;
+            padding: .65rem .85rem;
+            margin-top: .7rem;
+            font-size: .8rem;
+            font-weight: 600;
+        }
+        .ubicacion-alerta.visible { display: flex; }
+        .ubicacion-alerta i { font-size: 1rem; flex-shrink: 0; }
+        .ubicacion-alerta span { flex: 1; line-height: 1.3; }
+        .ubicacion-alerta-btn {
+            border: none;
+            background: #92400e;
+            color: #fff;
+            font-size: .74rem;
+            font-weight: 700;
+            padding: .4rem .7rem;
+            border-radius: 8px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .ubicacion-alerta-btn:active { opacity: .8; }
     </style>
 </head>
 <body>
@@ -422,6 +452,13 @@
             Continuar <i class="ti ti-arrow-right"></i>
         </button>
     </div>
+
+    <div class="ubicacion-alerta" id="ubicacionAlerta">
+        <i class="ti ti-map-pin-off"></i>
+        <span>Activa tu ubicación para poder tomar la foto</span>
+        <button class="ubicacion-alerta-btn" onclick="solicitarUbicacion()">Activar</button>
+    </div>
+
     <p class="camara-hint">
         <i class="ti ti-map-pin"></i>
         Fotografía el lugar exacto del incidente
@@ -647,29 +684,92 @@
     }
 
     // ── UBICACIÓN ─────────────────────────────────────────
-    if (navigator.geolocation) {
+    let ubicacionValida = false;
+
+    function actualizarAvisoUbicacion(visible) {
+    document.getElementById('ubicacionAlerta').classList.toggle('visible', visible);
+    }
+
+    document.getElementById('btnCapturar').disabled = true;
+    actualizarAvisoUbicacion(true); // visible desde el arranque hasta que llegue la ubicación
+    solicitarUbicacion();
+
+    function actualizarUbicacion(lat, lng) {
+        ubicacion.lat = lat; ubicacion.lng = lng;
+        document.getElementById('latitud').value = lat;
+        document.getElementById('longitud').value = lng;
+        ubicacionValida = true;
+        document.getElementById('btnCapturar').disabled = false;
+        actualizarAvisoUbicacion(false);
+        document.getElementById('direccion').value = 'Obteniendo dirección...';
+        buscarDireccion(lat, lng);
+    }
+
+    function buscarDireccion(lat, lng, intento = 1) {
+        fetch(`/api/geo/reverse?lat=${lat}&lng=${lng}`)
+            .then(r => {
+                console.log('[geo] status HTTP:', r.status);
+                return r.json();
+            })
+            .then(j => {
+                console.log('[geo] respuesta:', j);
+                if (j.ok && j.data) {
+                    document.getElementById('direccion').value = j.data;
+                } else if (intento < 2) {
+                    setTimeout(() => buscarDireccion(lat, lng, intento + 1), 1500);
+                } else {
+                    document.getElementById('direccion').value = 'Zona no identificada';
+                }
+            })
+            .catch(err => {
+                console.error('[geo] error de red:', err);
+                if (intento < 2) {
+                    setTimeout(() => buscarDireccion(lat, lng, intento + 1), 1500);
+                } else {
+                    document.getElementById('direccion').value = 'Zona no identificada';
+                }
+            });
+    }
+
+    async function solicitarUbicacion() {
+        if (!navigator.geolocation) {
+            actualizarAvisoUbicacion(true);
+            mostrarModal('error', 'Ubicación no disponible',
+                'Tu navegador no soporta geolocalización. No es posible continuar sin ella.');
+            return;
+        }
+        if (navigator.permissions) {
+            try {
+                const estado = await navigator.permissions.query({ name: 'geolocation' });
+                if (estado.state === 'denied') {
+                    actualizarAvisoUbicacion(true); // ← mostrar aviso persistente
+                    mostrarModal('warning', 'Ubicación bloqueada',
+                        'Bloqueaste el acceso a tu ubicación. Actívala manualmente en los permisos del navegador o de la app (Configuración > Sitio/App > Ubicación) y presiona reintentar.',
+                        { labelPrimario: 'Reintentar', callbackPrimario: solicitarUbicacion });
+                    return;
+                }
+            } catch { /* Permissions API no soportada, seguimos con getCurrentPosition */ }
+        }
         navigator.geolocation.getCurrentPosition(
-            pos => {
-                ubicacion.lat = pos.coords.latitude;
-                ubicacion.lng = pos.coords.longitude;
-                document.getElementById('latitud').value  = ubicacion.lat;
-                document.getElementById('longitud').value = ubicacion.lng;
-                fetch(`https://nominatim.openstreetmap.org/reverse?lat=${ubicacion.lat}&lon=${ubicacion.lng}&format=json`)
-                    .then(r => r.json())
-                    .then(d => {
-                        const dir = d.address;
-                        const aprox = [dir.road, dir.suburb, dir.city_district].filter(Boolean).join(', ');
-                        document.getElementById('direccion').value = aprox || d.display_name;
-                    })
-                    .catch(() => {});
+            pos => actualizarUbicacion(pos.coords.latitude, pos.coords.longitude),
+            err => {
+                ubicacionValida = false;
+                document.getElementById('btnCapturar').disabled = true;
+                actualizarAvisoUbicacion(true); // ← mostrar aviso persistente
+                if (err.code === err.PERMISSION_DENIED) {
+                    mostrarModal('warning', 'Ubicación requerida',
+                        'Necesitamos tu ubicación para registrar el reporte en el lugar correcto. Actívala y vuelve a intentar.',
+                        { labelPrimario: 'Reintentar', callbackPrimario: solicitarUbicacion });
+                } else {
+                    mostrarModal('warning', 'No se pudo obtener tu ubicación',
+                        'Verifica tu GPS o conexión e inténtalo nuevamente.',
+                        { labelPrimario: 'Reintentar', callbackPrimario: solicitarUbicacion });
+                }
             },
-            () => {
-                ubicacion.lat = -6.7714; ubicacion.lng = -79.8409;
-                document.getElementById('latitud').value  = ubicacion.lat;
-                document.getElementById('longitud').value = ubicacion.lng;
-            }
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
     }
+    solicitarUbicacion();
 
     // ── CATEGORÍAS ────────────────────────────────────────
     fetch('/api/categorias')
@@ -837,6 +937,12 @@
         const lng         = document.getElementById('longitud').value;
         const direccion   = document.getElementById('direccion').value;
 
+        if (!ubicacionValida || !lat || !lng) {
+            mostrarModal('error', 'Falta tu ubicación', 'No podemos registrar el reporte sin tu ubicación. Actívala e inténtalo de nuevo.',
+                { labelPrimario: 'Activar ubicación', callbackPrimario: () => solicitarUbicacion() });
+            return;
+        }
+
         if (!titulo || !descripcion || !idCategoria || !idNivel) {
             mostrarModal('error', 'Campos incompletos', 'Completa el título, la categoría y la descripción antes de enviar.');
             return;
@@ -871,6 +977,10 @@
                         labelPrimario: 'Ver mis reportes',
                         callbackPrimario: () => window.location.href = '/inicio'
                     });
+            } else if (res.status === 429) {
+                mostrarModal('warning', 'Límite de reportes alcanzado',
+                    json.mensaje || 'Has alcanzado el límite de reportes permitido. Intenta más tarde.',
+                    { labelPrimario: 'Entendido' });
             } else {
                 mostrarModal('error', 'No se pudo enviar', json.mensaje || 'Ocurrió un error al enviar el reporte.');
             }

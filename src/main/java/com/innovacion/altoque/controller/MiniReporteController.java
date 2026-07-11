@@ -4,9 +4,11 @@ import com.innovacion.altoque.dto.request.MiniReporteRequest;
 import com.innovacion.altoque.dto.response.AnalisisIAResponse;
 import com.innovacion.altoque.dto.response.ApiResponse;
 import com.innovacion.altoque.dto.response.MiniReporteResponse;
+import com.innovacion.altoque.dto.response.MisEstadisticasResponse;
 import com.innovacion.altoque.model.MiniReporte;
 import com.innovacion.altoque.model.Usuario;
 import com.innovacion.altoque.repository.MiniReporteRepository;
+import com.innovacion.altoque.repository.ReporteMiniReporteRepository;
 import com.innovacion.altoque.service.AnalisisIAService;
 import com.innovacion.altoque.service.CloudinaryService;
 import com.innovacion.altoque.service.MiniReporteService;
@@ -30,6 +32,7 @@ public class MiniReporteController {
     private final AnalisisIAService analisisIAService;
     private final MiniReporteService miniReporteService;
     private final MiniReporteRepository miniReporteRepository;
+    private final ReporteMiniReporteRepository reporteMiniReporteRepository;
 
     @PostMapping("/analizar-foto")
     public ResponseEntity<ApiResponse<AnalisisIAResponse>> analizarFoto(
@@ -58,10 +61,6 @@ public class MiniReporteController {
         }
     }
 
-    /**
-     * Paso 2: El ciudadano confirma (o edita) los datos y envía el reporte.
-     * La URL de la foto ya viene del paso anterior (guardada en el front).
-     */
     @PostMapping
     public ResponseEntity<ApiResponse<MiniReporteResponse>> crear(
             @Valid @RequestBody MiniReporteRequest req,
@@ -76,13 +75,17 @@ public class MiniReporteController {
     @GetMapping("/mis")
     public ResponseEntity<ApiResponse<List<MiniReporteResponse>>> misMiniReportes(
             @AuthenticationPrincipal Usuario usuario) {
-
-        List<MiniReporteResponse> lista = miniReporteRepository
-                .findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId())
-                .stream()
-                .map(miniReporteService::toResponse)
-                .collect(Collectors.toList());
-
+        List<MiniReporte> minis = miniReporteRepository.findByUsuarioIdOrderByFechaCreacionDesc(usuario.getId());
+        List<MiniReporteResponse> lista = miniReporteService.toResponseBatch(minis, reporteMiniReporteRepository);
         return ResponseEntity.ok(ApiResponse.ok("OK", lista));
+    }
+
+
+    @GetMapping("/mis-estadisticas")
+    public ResponseEntity<ApiResponse<MisEstadisticasResponse>> misEstadisticas(
+            @AuthenticationPrincipal Usuario usuario) {
+        long total = miniReporteRepository.countByUsuarioId(usuario.getId());
+        long resueltos = reporteMiniReporteRepository.countMiniReportesResueltosPorUsuario(usuario.getId());
+        return ResponseEntity.ok(ApiResponse.ok("OK", new MisEstadisticasResponse(total, resueltos)));
     }
 }

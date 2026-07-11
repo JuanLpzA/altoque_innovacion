@@ -1,5 +1,6 @@
 package com.innovacion.altoque.service;
 
+import com.innovacion.altoque.dto.response.MiReporteResumenResponse;
 import com.innovacion.altoque.dto.response.ReporteDetalleResponse;
 import com.innovacion.altoque.dto.response.ReporteMapaResponse;
 import com.innovacion.altoque.model.*;
@@ -8,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.stream.Collectors;
+import com.innovacion.altoque.dto.response.ReporteCercanoResponse;
+import com.innovacion.altoque.utils.GeoUtils;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -165,6 +169,95 @@ public class ReporteService {
             dto.setZonaReferencia(r.getZonaReferencia());
             dto.setPorcentajeAvance((int) r.getPorcentajeAvance());
             dto.setTotalMiniReportes(conteoPorReporte.getOrDefault(r.getId(), 0L));
+            dto.setFechaCreacion(r.getFechaCreacion());
+            return dto;
+        }).collect(Collectors.toList());
+    }
+
+
+
+
+
+
+    public List<ReporteCercanoResponse> obtenerTopCercanos(BigDecimal lat, BigDecimal lng, int limite) {
+        double latD = lat.doubleValue();
+        double lngD = lng.doubleValue();
+
+        double[] radiosMetros = {2000, 5000, 10000, 20000};
+        List<Reporte> candidatos = List.of();
+
+        for (double radioM : radiosMetros) {
+            BigDecimal radioGrados = BigDecimal.valueOf(radioM / 111320.0);
+            candidatos = reporteRepository.findEnRadio(lat, lng, radioGrados);
+            if (candidatos.size() >= limite) break;
+        }
+
+        if (candidatos.isEmpty()) return List.of();
+
+        List<Integer> ids = candidatos.stream().map(Reporte::getId).toList();
+        Map<Integer, Long> personasPorReporte = reporteMiniReporteRepository
+                .countUsuariosDistintosPorReporte(ids)
+                .stream()
+                .collect(Collectors.toMap(f -> (Integer) f[0], f -> (Long) f[1]));
+
+        List<ReporteMiniReporte> relaciones = reporteMiniReporteRepository.findByReporteIdInWithUsuario(ids);
+        Map<Integer, String> fotoPorReporte = relaciones.stream()
+                .filter(r -> r.getMiniReporte().getUrlFoto() != null && !r.getMiniReporte().getUrlFoto().isBlank())
+                .collect(Collectors.toMap(
+                        r -> r.getReporte().getId(),
+                        r -> r.getMiniReporte().getUrlFoto(),
+                        (a, b) -> a // si hay varias, nos quedamos con la primera
+                ));
+
+        return candidatos.stream()
+                .map(r -> {
+                    double distancia = GeoUtils.distanciaMetros(
+                            latD, lngD, r.getLatitudCentro().doubleValue(), r.getLongitudCentro().doubleValue());
+                    ReporteCercanoResponse dto = new ReporteCercanoResponse();
+                    dto.setId(r.getId());
+                    dto.setTitulo(r.getTitulo());
+                    dto.setCategoria(r.getCategoria().getNombre());
+                    dto.setNivelRiesgo(r.getNivelRiesgo().getNombre());
+                    dto.setEstado(r.getEstado().getNombre());
+                    dto.setFotoPrincipal(fotoPorReporte.get(r.getId()));
+                    dto.setZonaReferencia(r.getZonaReferencia());
+                    dto.setDistanciaMetros(Math.round(distancia));
+                    dto.setTotalPersonas(personasPorReporte.getOrDefault(r.getId(), 0L));
+                    dto.setFechaCreacion(r.getFechaCreacion());
+                    return dto;
+                })
+                .sorted(Comparator.comparingDouble(ReporteCercanoResponse::getDistanciaMetros))
+                .limit(limite)
+                .collect(Collectors.toList());
+    }
+
+
+
+
+    public List<MiReporteResumenResponse> obtenerMisReportes(Integer usuarioId) {
+        List<Reporte> reportes = reporteRepository.findDistinctByUsuarioId(usuarioId);
+        if (reportes.isEmpty()) return List.of();
+
+        List<Integer> ids = reportes.stream().map(Reporte::getId).toList();
+        Map<Integer, Long> personasPorReporte = reporteMiniReporteRepository
+                .countUsuariosDistintosPorReporte(ids).stream()
+                .collect(Collectors.toMap(f -> (Integer) f[0], f -> (Long) f[1]));
+
+        List<ReporteMiniReporte> relaciones = reporteMiniReporteRepository.findByReporteIdInWithUsuario(ids);
+        Map<Integer, String> fotoPorReporte = relaciones.stream()
+                .filter(r -> r.getMiniReporte().getUrlFoto() != null && !r.getMiniReporte().getUrlFoto().isBlank())
+                .collect(Collectors.toMap(r -> r.getReporte().getId(), r -> r.getMiniReporte().getUrlFoto(), (a, b) -> a));
+
+        return reportes.stream().map(r -> {
+            MiReporteResumenResponse dto = new MiReporteResumenResponse();
+            dto.setId(r.getId());
+            dto.setTitulo(r.getTitulo());
+            dto.setCategoria(r.getCategoria().getNombre());
+            dto.setNivelRiesgo(r.getNivelRiesgo().getNombre());
+            dto.setEstado(r.getEstado().getNombre());
+            dto.setPorcentajeAvance((int) r.getPorcentajeAvance());
+            dto.setFotoPrincipal(fotoPorReporte.get(r.getId()));
+            dto.setTotalPersonas(personasPorReporte.getOrDefault(r.getId(), 0L));
             dto.setFechaCreacion(r.getFechaCreacion());
             return dto;
         }).collect(Collectors.toList());

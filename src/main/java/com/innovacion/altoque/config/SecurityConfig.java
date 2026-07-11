@@ -31,12 +31,14 @@ public class SecurityConfig {
                         .requestMatchers("/css/**", "/js/**", "/img/**").permitAll()
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/categorias", "/api/niveles-riesgo").permitAll()
-                        .requestMatchers("/api/reportes/cercanos").permitAll()
+                        .requestMatchers("/api/reportes/cercanos", "/api/reportes/top-cercanos").permitAll()
+                        .requestMatchers("/api/geo/reverse").permitAll()
                         .requestMatchers("/api/admin/auth/**").permitAll()
                         .requestMatchers("/api/admin/password/**").permitAll() // establecer/resetear contraseña vía token
                         // Gestión de usuarios (crear cuentas, activar/desactivar, resetear) solo para admin
                         .requestMatchers("/api/admin/usuarios/**").hasRole("MUNICIPALIDAD_ADMIN")
                         // Resto del panel municipal: admin u operador
+                        .requestMatchers("/api/admin/configuracion/**").hasRole("MUNICIPALIDAD_ADMIN")
                         .requestMatchers("/api/admin/**").hasAnyRole("MUNICIPALIDAD_ADMIN", "MUNICIPALIDAD_OPERADOR")
                         .requestMatchers("/api/avances/**").hasAnyRole("MUNICIPALIDAD_ADMIN", "MUNICIPALIDAD_OPERADOR")
                         .requestMatchers("/api/**").authenticated()
