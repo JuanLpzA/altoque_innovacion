@@ -11,8 +11,9 @@
   document.addEventListener('DOMContentLoaded', () => {
     const nombreEl = document.getElementById('sb-nombre');
     if (nombreEl) {
-      nombreEl.textContent =
-        (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+      const nombreCompleto = (localStorage.getItem('nombre') || '') + ' ' + (localStorage.getItem('apellido') || '');
+      nombreEl.textContent = nombreCompleto;
+      nombreEl.title = nombreCompleto;
     }
     const seccionAdmin = document.getElementById('seccion-administrador');
     if (seccionAdmin && rol === 'municipalidad_admin') {
@@ -48,18 +49,18 @@ async function cerrarSesion() {
       .admin-loader-overlay {
         position: absolute;
         inset: 0;
-        min-height: 220px;
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(255,255,255,.78);
+        background: rgba(255,255,255,.82);
         backdrop-filter: blur(2px);
         -webkit-backdrop-filter: blur(2px);
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
         transition: opacity .18s ease;
-        z-index: 500;
+        z-index: 5000;
+        border-radius: inherit;
       }
       .admin-loader-overlay.is-visible {
         opacity: 1;
@@ -95,22 +96,33 @@ async function cerrarSesion() {
     document.head.appendChild(style);
   }
 
+
+  function getLoaderHost() {
+    const modalBox = document.querySelector('.modal-overlay.open .modal');
+    if (modalBox) return modalBox;
+    return document.querySelector('.content') || document.querySelector('.main') || document.body;
+  }
+
   function ensureOverlay() {
-    if (overlayEl) return overlayEl;
     injectStyles();
-    const host = document.querySelector('.content') || document.querySelector('.main') || document.body;
+    const host = getLoaderHost();
     if (getComputedStyle(host).position === 'static') {
       host.style.position = 'relative';
     }
-    overlayEl = document.createElement('div');
-    overlayEl.className = 'admin-loader-overlay';
-    overlayEl.innerHTML = `
-      <div class="admin-loader-box">
-        <div class="admin-loader-ring"></div>
-        <div class="admin-loader-text">Cargando información…</div>
-      </div>
-    `;
-    host.appendChild(overlayEl);
+    if (!overlayEl) {
+      overlayEl = document.createElement('div');
+      overlayEl.className = 'admin-loader-overlay';
+      overlayEl.innerHTML = `
+        <div class="admin-loader-box">
+          <div class="admin-loader-ring"></div>
+          <div class="admin-loader-text">Cargando información…</div>
+        </div>
+      `;
+    }
+
+    if (overlayEl.parentElement !== host) {
+      host.appendChild(overlayEl);
+    }
     return overlayEl;
   }
 
