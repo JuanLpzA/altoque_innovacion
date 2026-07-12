@@ -6,7 +6,6 @@
   <title>Altoque – Panel Municipal</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       min-height: 100vh;
@@ -16,7 +15,6 @@
       position: relative;
       overflow: hidden;
     }
-
     /* Fondo municipalidad */
     .bg-photo {
       position: fixed;
@@ -27,7 +25,6 @@
       filter: brightness(.55);
       z-index: 0;
     }
-
     /* Card principal — igual proporción que la referencia */
     .card {
       position: relative;
@@ -38,8 +35,19 @@
       border-radius: 4px;
       overflow: hidden;
       box-shadow: 0 8px 40px rgba(0,0,0,.45);
+      animation: card-in .35s ease;
     }
-
+    @keyframes card-in {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card.shake { animation: shake .4s; }
+    @keyframes shake {
+      10%, 90% { transform: translateX(-1px); }
+      20%, 80% { transform: translateX(2px); }
+      30%, 50%, 70% { transform: translateX(-4px); }
+      40%, 60% { transform: translateX(4px); }
+    }
     /* Barra superior: rojo | amarillo | teal | azul  (colores Altoque en vez de bandera) */
     .top-bar {
       height: 7px;
@@ -50,25 +58,21 @@
     .top-bar span:nth-child(2) { background: #f0c30f; }
     .top-bar span:nth-child(3) { background: #0fa89a; }   /* teal Altoque */
     .top-bar span:nth-child(4) { background: #1a3a8f; }   /* navy Altoque */
-
     /* Cabecera */
     .card-header {
       padding: 2rem 3rem 1.4rem;
       text-align: center;
     }
-
     .logo-wrapper {
       width: 90px;
       height: 90px;
       margin: 0 auto 1rem;
     }
-
     .logo-wrapper img {
       width: 100%;
       height: 100%;
       object-fit: contain;
     }
-
     .muni-name {
       font-size: .95rem;
       font-weight: 700;
@@ -78,7 +82,6 @@
       margin-bottom: .4rem;
       text-transform: uppercase;
     }
-
     /* Badge Altoque — único diferenciador visual */
     .altoque-badge {
       display: inline-block;
@@ -93,49 +96,59 @@
       margin-bottom: .1rem;
     }
     .altoque-badge span { color: #0fa89a; }
-
     .system-sub {
       font-size: .82rem;
       color: #555;
       margin-top: .45rem;
     }
-
     /* Cuerpo del formulario */
     .card-body {
       padding: .4rem 3rem 2.4rem;
+      position: relative;
     }
-
-    /* Mensaje error */
-    .error-msg {
+    /* Mensajes de estado */
+    .status-msg {
       display: none;
+      align-items: flex-start;
+      gap: .5rem;
       border-left: 4px solid #e53e3e;
       color: #c53030;
       background: #fff5f5;
-      padding: .55rem .85rem;
+      padding: .6rem .85rem;
       font-size: .82rem;
+      line-height: 1.4;
       border-radius: 2px;
       margin-bottom: 1rem;
     }
-
+    .status-msg.show { display: flex; }
+    .status-msg.success {
+      border-left-color: #15803d;
+      color: #15803d;
+      background: #f0fdf4;
+    }
+    .status-msg svg { flex-shrink: 0; margin-top: .1rem; }
     /* Campos */
     .field { margin-bottom: 1.1rem; }
-
     .field-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: .38rem;
     }
-
     .field label {
       display: block;
       font-size: .83rem;
       font-weight: 600;
       color: #222;
     }
-
+    .field-error-text {
+      font-size: .68rem;
+      font-weight: 600;
+      color: #c53030;
+      display: none;
+    }
+    .field-error-text.show { display: block; }
     .input-wrap { position: relative; }
-
     .input-wrap input {
       width: 100%;
       padding: .72rem 2.4rem .72rem .9rem;
@@ -145,15 +158,22 @@
       color: #111;
       background: #fafafa;
       outline: none;
-      transition: border-color .18s, box-shadow .18s;
+      transition: border-color .18s, box-shadow .18s, background .18s;
     }
-
     .input-wrap input:focus {
       border-color: #1a3a8f;
       background: #fff;
       box-shadow: 0 0 0 3px rgba(26,58,143,.09);
     }
-
+    .input-wrap input.input-error {
+      border-color: #e53e3e;
+      background: #fff5f5;
+    }
+    .input-wrap input:disabled {
+      background: #f3f4f6;
+      color: #9ca3af;
+      cursor: not-allowed;
+    }
     .input-icon {
       position: absolute;
       right: .8rem;
@@ -162,8 +182,9 @@
       color: #aaa;
       cursor: pointer;
       display: flex;
+      transition: color .15s;
     }
-
+    .input-icon:hover { color: #1a3a8f; }
     /* Captcha */
     .captcha-row {
       display: flex;
@@ -171,16 +192,13 @@
       gap: .6rem;
       margin-bottom: .55rem;
     }
-
     .captcha-canvas-wrap {
       flex: 1;
       border-bottom: 2px solid #111;
       padding: .2rem 0;
       background: transparent;
     }
-
     #captchaCanvas { display: block; }
-
     .btn-refresh {
       width: 38px;
       height: 38px;
@@ -192,11 +210,12 @@
       align-items: center;
       justify-content: center;
       color: #1a3a8f;
-      transition: background .15s;
+      transition: background .15s, transform .3s;
       flex-shrink: 0;
     }
     .btn-refresh:hover { background: #eef2ff; }
-
+    .btn-refresh.spin svg { animation: spin-once .4s ease; }
+    @keyframes spin-once { to { transform: rotate(180deg); } }
     /* Botón ingresar */
     .btn-submit {
       width: 100%;
@@ -210,20 +229,43 @@
       cursor: pointer;
       margin-top: .2rem;
       letter-spacing: .04em;
-      transition: background .15s;
+      transition: background .15s, opacity .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .55rem;
     }
-    .btn-submit:hover { background: #153db0; }
+    .btn-submit:hover:not(:disabled) { background: #153db0; }
+    .btn-submit:disabled { opacity: .75; cursor: not-allowed; }
+    .btn-submit.is-success { background: #15803d; }
+    .btn-spinner {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 2.5px solid rgba(255,255,255,.35);
+      border-top-color: #fff;
+      animation: spin .7s linear infinite;
+      display: none;
+      flex-shrink: 0;
+    }
+    .btn-submit.loading .btn-spinner { display: inline-block; }
+    .btn-submit.loading .btn-label,
+    .btn-submit.is-success .btn-label-default { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Hint de intentos fallidos */
+    .attempts-hint {
+      font-size: .72rem;
+      color: #9ca3af;
+      text-align: center;
+      margin-top: .8rem;
+    }
   </style>
 </head>
 <body>
-
 <div class="bg-photo"></div>
-
-<div class="card">
+<div class="card" id="loginCard">
   <div class="top-bar">
     <span></span><span></span><span></span><span></span>
   </div>
-
   <div class="card-header">
     <div class="logo-wrapper">
       <!-- Thymeleaf resuelve /static/logo_mpch.png correctamente así: -->
@@ -233,80 +275,87 @@
     <div class="altoque-badge">AL<span>TOQUE</span> &nbsp;·&nbsp; Panel Municipal</div>
     <div class="system-sub">Sistema de Reportes de Incidencias v1.0</div>
   </div>
-
   <div class="card-body">
-    <div class="error-msg" id="errorMsg"></div>
-
-    <div class="field">
-      <div class="field-header">
-        <label for="email">Usuario</label>
-      </div>
-      <div class="input-wrap">
-        <input type="email" id="email" placeholder="Ingrese su correo institucional" autocomplete="email">
-        <span class="input-icon">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-          </svg>
-        </span>
-      </div>
+    <div class="status-msg" id="statusMsg">
+      <svg id="statusIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <span id="statusText"></span>
     </div>
-
-    <div class="field">
-      <div class="field-header">
-        <label for="pass">Contraseña</label>
-      </div>
-      <div class="input-wrap">
-        <input type="password" id="pass" placeholder="Ingrese su Contraseña" autocomplete="current-password">
-        <span class="input-icon" onclick="togglePass()" title="Mostrar/ocultar">
-          <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-          </svg>
-        </span>
-      </div>
-    </div>
-
-    <!-- Captcha: igual al de la referencia — texto sobre línea, botón refresh al lado -->
-    <div class="field">
-      <div class="captcha-row">
-        <div class="captcha-canvas-wrap">
-          <canvas id="captchaCanvas" width="260" height="44"></canvas>
+    <form id="loginForm" novalidate>
+      <div class="field">
+        <div class="field-header">
+          <label for="email">Usuario</label>
+          <span class="field-error-text" id="emailErrorText">Ingresa un correo válido</span>
         </div>
-        <button type="button" class="btn-refresh" onclick="generarCaptcha()" title="Nuevo código">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"/>
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-          </svg>
-        </button>
+        <div class="input-wrap">
+          <input type="email" id="email" placeholder="Ingrese su correo institucional" autocomplete="email" autofocus>
+          <span class="input-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </span>
+        </div>
       </div>
-      <div class="input-wrap" style="margin-top:.5rem">
-        <input type="text" id="captchaInput" placeholder="Ingrese el captcha"
-               maxlength="6" autocomplete="off"
-               style="text-transform:uppercase; letter-spacing:.12em;">
+      <div class="field">
+        <div class="field-header">
+          <label for="pass">Contraseña</label>
+        </div>
+        <div class="input-wrap">
+          <input type="password" id="pass" placeholder="Ingrese su Contraseña" autocomplete="current-password">
+          <span class="input-icon" onclick="togglePass()" title="Mostrar/ocultar">
+            <svg id="eyeIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </span>
+        </div>
       </div>
-    </div>
-
-    <button class="btn-submit" onclick="iniciarSesion()">&#187; Ingresar</button>
+      <!-- Captcha: igual al de la referencia — texto sobre línea, botón refresh al lado -->
+      <div class="field">
+        <div class="captcha-row">
+          <div class="captcha-canvas-wrap">
+            <canvas id="captchaCanvas" width="260" height="44"></canvas>
+          </div>
+          <button type="button" class="btn-refresh" id="btnRefreshCaptcha" onclick="refrescarCaptchaManual()" title="Nuevo código">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="23 4 23 10 17 10"/>
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+            </svg>
+          </button>
+        </div>
+        <div class="input-wrap" style="margin-top:.5rem">
+          <input type="text" id="captchaInput" placeholder="Ingrese el captcha"
+                 maxlength="6" autocomplete="off"
+                 style="text-transform:uppercase; letter-spacing:.12em;">
+        </div>
+      </div>
+      <button type="submit" class="btn-submit" id="btnSubmit">
+        <span class="btn-spinner"></span>
+        <span class="btn-label">
+          <span class="btn-label-default">&#187; Ingresar</span>
+          <span class="btn-label-success" style="display:none">&#10003; Bienvenido</span>
+        </span>
+      </button>
+    </form>
+    <div class="attempts-hint" id="attemptsHint"></div>
   </div>
 </div>
-
 <script>
-  // ── Captcha ──────────────────────────────────────────────────────────────────
+  // ── Estado ───────────────────────────────────────────────────────────────────
   let captchaCode = '';
-
+  let enviando = false;
+  let intentosFallidos = 0;
+  // ── Captcha ──────────────────────────────────────────────────────────────────
   function generarCaptcha() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     captchaCode = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-
     const canvas = document.getElementById('captchaCanvas');
     const ctx = canvas.getContext('2d');
     const W = canvas.width, H = canvas.height;
-
     ctx.clearRect(0, 0, W, H);
-
     // Fondo limpio (igual que la referencia: blanco puro)
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, W, H);
-
     // Letras en negro bold (como la referencia: ZAYW5Z en negro)
     const step = W / captchaCode.length;
     captchaCode.split('').forEach((ch, i) => {
@@ -324,40 +373,75 @@
       ctx.fillText(ch, 0, 0);
       ctx.restore();
     });
-
     document.getElementById('captchaInput').value = '';
   }
-
+  function refrescarCaptchaManual() {
+    const btn = document.getElementById('btnRefreshCaptcha');
+    btn.classList.add('spin');
+    setTimeout(() => btn.classList.remove('spin'), 400);
+    generarCaptcha();
+    document.getElementById('captchaInput').focus();
+  }
   // ── Mostrar/ocultar contraseña ───────────────────────────────────────────────
   function togglePass() {
     const inp = document.getElementById('pass');
-    inp.type = inp.type === 'password' ? 'text' : 'password';
+    const eye = document.getElementById('eyeIcon');
+    const isHidden = inp.type === 'password';
+    inp.type = isHidden ? 'text' : 'password';
+    eye.innerHTML = isHidden
+      ? '<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.6 21.6 0 0 1 5.06-6.06M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.62"/><path d="M1 1l22 22"/><path d="M9.9 9.9a3 3 0 1 0 4.2 4.2"/>'
+      : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
   }
-
+  // ── Validación en vivo del correo ───────────────────────────────────────────
+  const emailInput = document.getElementById('email');
+  emailInput.addEventListener('blur', () => {
+    const val = emailInput.value.trim();
+    const valido = val === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+    emailInput.classList.toggle('input-error', !valido);
+    document.getElementById('emailErrorText').classList.toggle('show', !valido);
+  });
+  emailInput.addEventListener('input', () => {
+    emailInput.classList.remove('input-error');
+    document.getElementById('emailErrorText').classList.remove('show');
+  });
   // ── Login ────────────────────────────────────────────────────────────────────
-
-
+  document.getElementById('loginForm').addEventListener('submit', e => {
+    e.preventDefault();
+    iniciarSesion();
+  });
   async function iniciarSesion() {
-    const email    = document.getElementById('email').value.trim();
-    const pass     = document.getElementById('pass').value.trim();
+    if (enviando) return;
+    const emailEl  = document.getElementById('email');
+    const passEl   = document.getElementById('pass');
+    const email    = emailEl.value.trim();
+    const pass     = passEl.value.trim();
     const captchaV = document.getElementById('captchaInput').value.trim().toUpperCase();
-    const err      = document.getElementById('errorMsg');
-    err.style.display = 'none';
-
-    if (!email || pass.length < 4) {
-      mostrarError('Verifica tu correo y contraseña.');
+    ocultarStatus();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      emailEl.classList.add('input-error');
+      document.getElementById('emailErrorText').classList.add('show');
+      mostrarStatus('Ingresa un correo institucional válido.', 'error');
+      emailEl.focus();
+      return;
+    }
+    if (pass.length < 4) {
+      mostrarStatus('La contraseña debe tener al menos 4 caracteres.', 'error');
+      passEl.focus();
       return;
     }
     if (!captchaV) {
-      mostrarError('Por favor ingresa el código captcha.');
+      mostrarStatus('Por favor ingresa el código captcha.', 'error');
+      document.getElementById('captchaInput').focus();
       return;
     }
     if (captchaV !== captchaCode) {
-      mostrarError('El código captcha es inválido.');
+      mostrarStatus('El código captcha es incorrecto. Se generó uno nuevo.', 'error');
       generarCaptcha();
+      document.getElementById('captchaInput').focus();
+      sacudirCard();
       return;
     }
-
+    setCargando(true);
     try {
       const res  = await fetch('/api/admin/auth/login', {
         method: 'POST',
@@ -366,28 +450,79 @@
       });
       const json = await res.json();
       if (json.ok) {
+        intentosFallidos = 0;
         const data = json.data;
         localStorage.setItem('token',    data.token);
         localStorage.setItem('nombre',   data.nombre);
         localStorage.setItem('apellido', data.apellido);
         localStorage.setItem('rol',      data.rol);
-        window.location.href = '/admin/dashboard';
+        mostrarExito(data.nombre);
+        setTimeout(() => { window.location.href = '/admin/dashboard'; }, 700);
       } else {
-        mostrarError(json.mensaje || 'Credenciales incorrectas.');
-        generarCaptcha();
+        manejarFallo(json.mensaje || 'Credenciales incorrectas.');
       }
     } catch {
-      mostrarError('Error de conexión. Intenta nuevamente.');
+      manejarFallo('Error de conexión. Verifica tu internet e intenta nuevamente.');
     }
   }
-
-  function mostrarError(msg) {
-    const err = document.getElementById('errorMsg');
-    err.textContent = msg;
-    err.style.display = 'block';
+  function manejarFallo(mensaje) {
+    intentosFallidos++;
+    setCargando(false);
+    // El correo se mantiene siempre; solo se limpia y refoca la contraseña,
+    // que es el dato más probable de haber sido tecleado mal.
+    const passEl = document.getElementById('pass');
+    passEl.value = '';
+    passEl.focus();
+    mostrarStatus(mensaje, 'error');
+    generarCaptcha();
+    sacudirCard();
+    const hint = document.getElementById('attemptsHint');
+    if (intentosFallidos >= 3) {
+      hint.textContent = `Llevas ${intentosFallidos} intentos fallidos. Verifica tus credenciales o contacta al administrador del sistema.`;
+    } else {
+      hint.textContent = '';
+    }
   }
-
-  document.addEventListener('keydown', e => { if (e.key === 'Enter') iniciarSesion(); });
+  function sacudirCard() {
+    const card = document.getElementById('loginCard');
+    card.classList.remove('shake');
+    // Forzar reflow para poder re-disparar la animación
+    void card.offsetWidth;
+    card.classList.add('shake');
+  }
+  function setCargando(activo) {
+    enviando = activo;
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = activo;
+    btn.classList.toggle('loading', activo);
+    document.getElementById('email').disabled = activo;
+    document.getElementById('pass').disabled = activo;
+    document.getElementById('captchaInput').disabled = activo;
+    document.getElementById('btnRefreshCaptcha').disabled = activo;
+  }
+  function mostrarExito(nombre) {
+    const btn = document.getElementById('btnSubmit');
+    btn.classList.remove('loading');
+    btn.classList.add('is-success');
+    btn.querySelector('.btn-label-success').style.display = 'inline';
+    mostrarStatus(`¡Bienvenido${nombre ? ', ' + nombre : ''}! Redirigiendo al panel...`, 'success');
+  }
+  function mostrarStatus(msg, tipo) {
+    const el   = document.getElementById('statusMsg');
+    const icon = document.getElementById('statusIcon');
+    document.getElementById('statusText').textContent = msg;
+    el.classList.remove('success');
+    if (tipo === 'success') {
+      el.classList.add('success');
+      icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
+    } else {
+      icon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
+    }
+    el.classList.add('show');
+  }
+  function ocultarStatus() {
+    document.getElementById('statusMsg').classList.remove('show');
+  }
   generarCaptcha();
 </script>
 </body>

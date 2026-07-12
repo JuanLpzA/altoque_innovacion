@@ -19,7 +19,8 @@
       --muted: #9ca3af;
       --border: #f3f4f6;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); min-height: 100vh; display: flex; }
+    html, body { height: 100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); height: 100vh; overflow: hidden; display: flex; }
     .avatar-sm { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.13); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
     .avatar-sm i { color: #fff; font-size: .95rem; }
     .user-info { flex: 1; min-width: 0; }
@@ -27,56 +28,69 @@
     .user-role { color: rgba(255,255,255,.4); font-size: .67rem; }
     .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: 1rem; padding: .2rem; transition: color .15s; }
     .btn-logout:hover { color: #fff; }
-    .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-    .topbar { background: var(--card); padding: .9rem 1.8rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+    .main { flex: 1; height: 100vh; display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+    .topbar { background: var(--card); padding: .9rem 1.8rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 10; }
     .topbar-title { font-size: 1rem; font-weight: 700; color: var(--text); }
-
     /* ── MINI DASHBOARD ── */
     .mini-dash {
-      display: flex; gap: .8rem; padding: .9rem 1.8rem;
-      background: var(--card); border-bottom: 1px solid var(--border);
-      overflow-x: auto;
+      display: flex; gap: .8rem; padding: 1rem 1.8rem .3rem;
+      overflow-x: auto; flex-shrink: 0;
     }
     .mini-card {
-      flex: 1; min-width: 130px;
-      background: #f9fafb; border-radius: 12px;
-      padding: .75rem .9rem;
-      display: flex; flex-direction: column; gap: .15rem;
+      flex: 1; min-width: 175px;
+      background: var(--card); border-radius: 14px;
+      border-top: 3px solid transparent;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+      padding: .85rem 1.05rem;
+      display: flex; align-items: center; gap: .7rem;
+      transition: box-shadow .15s, transform .15s;
     }
-    .mini-card-val { font-size: 1.35rem; font-weight: 800; color: var(--text); }
-    .mini-card-label { font-size: .68rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
-    .mini-card.alto    .mini-card-val { color: #b91c1c; }
-    .mini-card.activos .mini-card-val { color: #1d4ed8; }
-    .mini-card.resuelto .mini-card-val { color: #15803d; }
-
+    .mini-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.09); transform: translateY(-1px); }
+    .mini-icon { width: 38px; height: 38px; border-radius: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.05rem; }
+    .mini-info { min-width: 0; }
+    .mini-card-val { font-size: 1.32rem; font-weight: 900; color: var(--text); line-height: 1.1; }
+    .mini-card-label { font-size: .66rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-top: .15rem; }
+    .mi-total    { background: #f3f4f6; color: #6b7280; }
+    .mi-activos  { background: #eff6ff; color: #1d4ed8; }
+    .mi-alto     { background: #fef2f2; color: #b91c1c; }
+    .mi-minis    { background: #fffbeb; color: #b45309; }
+    .mi-resuelto { background: #f0fdf4; color: #15803d; }
+    .mini-card.activos  { border-top-color: #1d4ed8; }
+    .mini-card.alto     { border-top-color: #b91c1c; }
+    .mini-card.resuelto { border-top-color: #15803d; }
     /* ── FILTROS ── */
     .filtros-bar {
       display: flex; align-items: center; gap: .6rem; flex-wrap: wrap;
-      padding: .8rem 1.8rem; background: var(--card); border-bottom: 1px solid var(--border);
+      margin: .8rem 1.8rem .9rem;
+      padding: .8rem 1.1rem;
+      background: var(--card); border-radius: 14px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05);
+      flex-shrink: 0;
     }
     .filtros-bar label { font-size: .68rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; margin-right: -.3rem; }
     .filtros-bar select {
       font-size: .8rem; padding: .4rem .6rem; border-radius: 8px;
       border: 1px solid #e5e7eb; background: #fff; color: var(--text); cursor: pointer;
     }
-    .chk-wrap { display: flex; align-items: center; gap: .35rem; font-size: .8rem; color: #374151; margin-left: auto; }
+    .filtros-bar select:focus { border-color: var(--sidebar-bg); outline: none; }
     .filtros-resumen { font-size: .75rem; color: var(--muted); margin-left: .5rem; }
     .btn-reset-filtros {
       font-size: .75rem; font-weight: 600; color: var(--sidebar-bg);
       background: none; border: 1px solid #dbe3f5; border-radius: 8px;
-      padding: .35rem .7rem; cursor: pointer;
+      padding: .35rem .7rem; cursor: pointer; margin-left: auto;
     }
     .btn-reset-filtros:hover { background: #f0f5fb; }
-
     /* ── LAYOUT MAPA ── */
-    .mapa-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; }
-    #mapa { flex: 1; height: 100%; min-height: 0; }
-
+    .mapa-layout { display: flex; flex: 1; overflow: hidden; min-height: 0; margin: 0 1.8rem 1.4rem; border-radius: 16px; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+    .mapa-wrap { position: relative; flex: 1; height: 100%; min-height: 0; overflow: hidden; border-radius: 16px 0 0 16px; }
+    .mapa-layout.sin-panel .mapa-wrap { border-radius: 16px; }
+    #mapa { width: 100%; height: 100%; }
     /* ── PANEL LATERAL DETALLE ── */
     .detalle-panel {
-      width: 320px; flex-shrink: 0; background: var(--card);
+      width: 340px; flex-shrink: 0; background: var(--card);
       border-left: 1px solid var(--border); display: flex; flex-direction: column;
-      overflow-y: auto; transition: width .25s;
+      overflow-y: auto; transition: width .25s ease;
+      border-radius: 0 16px 16px 0;
     }
     .detalle-panel.oculto { width: 0; overflow: hidden; border: none; }
     .detalle-head { padding: 1.1rem 1.2rem .8rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: .7rem; }
@@ -85,8 +99,17 @@
     .detalle-titulo { font-size: .95rem; font-weight: 800; color: var(--text); margin-top: .2rem; }
     .btn-cerrar { background: #f3f4f6; border: none; border-radius: 8px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; color: #6b7280; font-size: .95rem; }
     .btn-cerrar:hover { background: #e5e7eb; }
-    .detalle-foto { width: 100%; height: 160px; object-fit: cover; background: #f3f4f6; }
-    .detalle-foto-placeholder { width: 100%; height: 160px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; }
+    /* Visor de foto adaptable — nunca recorta fotos verticales */
+    .detalle-foto-visor {
+      width: 100%; max-height: 260px; min-height: 120px;
+      background: #0f172a; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; cursor: zoom-in;
+    }
+    .detalle-foto-visor img {
+      max-width: 100%; max-height: 260px; width: auto; height: auto;
+      object-fit: contain; display: block;
+    }
+    .detalle-foto-placeholder { width: 100%; height: 140px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; }
     .detalle-foto-placeholder i { font-size: 2.5rem; color: #d1d5db; }
     .detalle-body { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: .7rem; }
     .detalle-badges { display: flex; gap: .4rem; flex-wrap: wrap; }
@@ -101,7 +124,7 @@
     .detalle-desc { font-size: .8rem; color: #6b7280; line-height: 1.6; }
     .detalle-avance-label { font-size: .72rem; font-weight: 600; color: var(--muted); }
     .detalle-avance-bar { height: 8px; background: #f3f4f6; border-radius: 99px; overflow: hidden; margin-top: .3rem; }
-    .detalle-avance-fill { height: 100%; background: var(--accent); border-radius: 99px; }
+    .detalle-avance-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width .4s ease; }
     .detalle-meta { display: flex; flex-direction: column; gap: .35rem; }
     .detalle-meta-row { display: flex; align-items: flex-start; gap: .5rem; font-size: .78rem; color: #374151; }
     .detalle-meta-row i { font-size: .85rem; color: var(--muted); flex-shrink: 0; margin-top: .1rem; }
@@ -111,14 +134,19 @@
     .mini-chip .mc-tit { color: var(--muted); font-size: .72rem; }
     .btn-ver-reporte { display: block; text-align: center; background: var(--sidebar-bg); color: #fff; border: none; border-radius: 10px; padding: .65rem; font-size: .84rem; font-weight: 700; cursor: pointer; text-decoration: none; margin: 0 1.2rem 1.2rem; transition: background .15s; }
     .btn-ver-reporte:hover { background: #153070; }
-
     /* ── Leyenda ── */
-    .leyenda { position: absolute; bottom: 1.5rem; left: 1.5rem; background: var(--card); border-radius: 10px; padding: .75rem 1rem; box-shadow: 0 4px 16px rgba(0,0,0,.12); z-index: 1000; display: flex; flex-direction: column; gap: .4rem; font-size: .75rem; color: #374151; }
+    .leyenda { position: absolute; bottom: 1.2rem; left: 1.2rem; background: var(--card); border-radius: 12px; padding: .75rem 1rem; box-shadow: 0 4px 16px rgba(0,0,0,.14); z-index: 1000; display: flex; flex-direction: column; gap: .4rem; font-size: .75rem; color: #374151; }
     .ley-item { display: flex; align-items: center; gap: .5rem; }
     .ley-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
     .ley-nota { font-size: .65rem; color: var(--muted); max-width: 170px; line-height: 1.4; margin-top: .15rem; padding-top: .35rem; border-top: 1px solid var(--border); }
-
-
+    /* ── Modal de foto ampliada ── */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; align-items: center; justify-content: center; z-index: 3000; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .foto-zoom-close {
+      position: absolute; top: -14px; right: -14px; background: #fff; border: none; border-radius: 50%;
+      width: 36px; height: 36px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.3);
+      display: flex; align-items: center; justify-content: center;
+    }
   </style>
 </head>
 <body>
@@ -129,31 +157,44 @@
   <div class="topbar">
     <div class="topbar-title">Mapa de incidencias</div>
   </div>
-
   <!-- MINI DASHBOARD -->
   <div class="mini-dash">
     <div class="mini-card">
-      <div class="mini-card-val" id="md-total">0</div>
-      <div class="mini-card-label">Mostrados en mapa</div>
+      <div class="mini-icon mi-total"><i class="ti ti-map-2"></i></div>
+      <div class="mini-info">
+        <div class="mini-card-val" id="md-total">0</div>
+        <div class="mini-card-label">Mostrados en mapa</div>
+      </div>
     </div>
     <div class="mini-card activos">
-      <div class="mini-card-val" id="md-activos">0</div>
-      <div class="mini-card-label">Activos (pend. + proceso)</div>
+      <div class="mini-icon mi-activos"><i class="ti ti-activity"></i></div>
+      <div class="mini-info">
+        <div class="mini-card-val" id="md-activos">0</div>
+        <div class="mini-card-label">Activos (pend. + proceso)</div>
+      </div>
     </div>
     <div class="mini-card alto">
-      <div class="mini-card-val" id="md-alto">0</div>
-      <div class="mini-card-label">Nivel alto sin resolver</div>
+      <div class="mini-icon mi-alto"><i class="ti ti-alert-triangle"></i></div>
+      <div class="mini-info">
+        <div class="mini-card-val" id="md-alto">0</div>
+        <div class="mini-card-label">Nivel alto sin resolver</div>
+      </div>
     </div>
     <div class="mini-card">
-      <div class="mini-card-val" id="md-minis">0</div>
-      <div class="mini-card-label">Mini-reportes acumulados</div>
+      <div class="mini-icon mi-minis"><i class="ti ti-stack-2"></i></div>
+      <div class="mini-info">
+        <div class="mini-card-val" id="md-minis">0</div>
+        <div class="mini-card-label">Mini-reportes acumulados</div>
+      </div>
     </div>
     <div class="mini-card resuelto">
-      <div class="mini-card-val" id="md-resueltos">0</div>
-      <div class="mini-card-label">Resueltos (este mes)</div>
+      <div class="mini-icon mi-resuelto"><i class="ti ti-circle-check"></i></div>
+      <div class="mini-info">
+        <div class="mini-card-val" id="md-resueltos">0</div>
+        <div class="mini-card-label">Resueltos (este mes)</div>
+      </div>
     </div>
   </div>
-
   <!-- FILTROS -->
   <div class="filtros-bar">
     <label for="f-estado">Estado</label>
@@ -165,12 +206,10 @@
       <option value="rechazado">Solo rechazados</option>
       <option value="todos">Todos los estados</option>
     </select>
-
     <label for="f-categoria">Categoría</label>
     <select id="f-categoria">
       <option value="todas">Todas</option>
     </select>
-
     <label for="f-riesgo">Nivel</label>
     <select id="f-riesgo">
       <option value="todos">Todos</option>
@@ -178,14 +217,12 @@
       <option value="MEDIO">Medio</option>
       <option value="BAJO">Bajo</option>
     </select>
-
-    <button class="btn-reset-filtros" onclick="resetFiltros()">Limpiar filtros</button>
     <span class="filtros-resumen" id="filtros-resumen"></span>
+    <button class="btn-reset-filtros" onclick="resetFiltros()">Limpiar filtros</button>
   </div>
-
-  <div class="mapa-layout">
+  <div class="mapa-layout sin-panel" id="mapa-layout">
     <!-- MAPA -->
-    <div style="position:relative;flex:1; height:100%; min-height:0;">
+    <div class="mapa-wrap">
       <div id="mapa"></div>
       <div class="leyenda">
         <div style="font-size:.68rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.2rem">Leyenda</div>
@@ -225,13 +262,17 @@
     </div>
   </div>
 </div>
-
+<!-- MODAL FOTO AMPLIADA -->
+<div class="modal-overlay" id="modalFotoZoom">
+  <div style="position:relative; max-width:92vw; max-height:92vh;">
+    <button class="foto-zoom-close" onclick="cerrarFotoZoom()"><i class="ti ti-x"></i></button>
+    <img id="foto-zoom-img" src="" style="max-width:92vw; max-height:92vh; object-fit:contain; border-radius:10px; display:block;">
+  </div>
+</div>
 <script src="/js/admin-guard.js"></script>
 <script>
   // Guard
   const TOKEN = window.ADMIN_TOKEN;
-
-
   function estadoColor(estado) {
     const e = (estado || '').toLowerCase();
     return e.includes('resuelto')  ? '#22c55e'
@@ -251,9 +292,21 @@
     if (!f) return '—';
     return new Date(f).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
   }
-
+  function abrirFotoZoom(url) {
+    if (!url) return;
+    document.getElementById('foto-zoom-img').src = url;
+    document.getElementById('modalFotoZoom').classList.add('open');
+  }
+  function cerrarFotoZoom() {
+    document.getElementById('modalFotoZoom').classList.remove('open');
+  }
+  document.getElementById('modalFotoZoom').addEventListener('click', e => {
+    if (e.target === e.currentTarget) cerrarFotoZoom();
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') cerrarFotoZoom();
+  });
   const RADIO_PUNTO = 12; // radio fijo para todos los círculos, igual que antes
-
   // Agrupa reportes cuyas coordenadas caen muy cerca entre sí (mismo "clúster" visual)
   // y les da a cada uno un pequeño offset en abanico alrededor del punto real,
   // para que nunca queden exactamente uno encima del otro.
@@ -261,17 +314,14 @@
     const UMBRAL = 0.00035; // ~35-40m, suficiente para separar visualmente sin desplazar de la zona real
     const usados = new Array(lista.length).fill(false);
     const resultado = [];
-
     for (let i = 0; i < lista.length; i++) {
       if (usados[i]) continue;
       const base = lista[i];
       const latI = parseFloat(base.latitudCentro ?? base.latitud);
       const lngI = parseFloat(base.longitudCentro ?? base.longitud);
       if (isNaN(latI) || isNaN(lngI)) { usados[i] = true; continue; }
-
       const grupo = [{ r: base, idx: i }];
       usados[i] = true;
-
       for (let j = i + 1; j < lista.length; j++) {
         if (usados[j]) continue;
         const otro = lista[j];
@@ -283,7 +333,6 @@
           usados[j] = true;
         }
       }
-
       if (grupo.length === 1) {
         resultado.push({ r: base, lat: latI, lng: lngI });
       } else {
@@ -301,18 +350,15 @@
     }
     return resultado;
   }
-
   let mapaInstance = null;
   let TODOS = [];        // dataset completo sin filtrar
   let marcadores = [];   // referencias a capas activas en el mapa
-
   async function cargarDatos() {
     const res  = await fetch('/api/admin/reportes', { headers: { 'Authorization': 'Bearer ' + TOKEN } });
     const json = await res.json();
     TODOS = json.data || [];
     poblarCategorias();
   }
-
   function poblarCategorias() {
     const sel = document.getElementById('f-categoria');
     const cats = [...new Set(TODOS.map(r => r.categoria).filter(Boolean))].sort();
@@ -322,12 +368,10 @@
       sel.appendChild(opt);
     });
   }
-
   function aplicarFiltros(lista) {
     const fEstado = document.getElementById('f-estado').value;
     const fCat    = document.getElementById('f-categoria').value;
     const fRiesgo = document.getElementById('f-riesgo').value;
-
     return lista.filter(r => {
       const estado = (r.estado || '').toLowerCase();
       let pasaEstado = true;
@@ -337,14 +381,11 @@
       else if (fEstado === 'resuelto')  pasaEstado = estado.includes('resuelto');
       else if (fEstado === 'rechazado') pasaEstado = estado.includes('rechazado');
       // 'todos' -> pasaEstado se queda true
-
       const pasaCat    = fCat === 'todas' || r.categoria === fCat;
       const pasaRiesgo = fRiesgo === 'todos' || (r.nivelRiesgo || '').toUpperCase() === fRiesgo;
-
       return pasaEstado && pasaCat && pasaRiesgo;
     });
   }
-
   function actualizarMiniDashboard(lista) {
     const totalMinis = lista.reduce((acc, r) => acc + (r.totalMiniReportes || 0), 0);
     const activos = lista.filter(r => {
@@ -362,32 +403,24 @@
       const f = new Date(r.fechaCreacion);
       return f.getMonth() === hoy.getMonth() && f.getFullYear() === hoy.getFullYear();
     }).length;
-
     document.getElementById('md-total').textContent     = lista.length;
     document.getElementById('md-activos').textContent    = activos;
     document.getElementById('md-alto').textContent       = altoSinResolver;
     document.getElementById('md-minis').textContent      = totalMinis;
     document.getElementById('md-resueltos').textContent  = resueltosMes;
-
     document.getElementById('filtros-resumen').textContent =
       `Mostrando ${lista.length} de ${TODOS.length} reportes`;
   }
-
   function renderMapa() {
     const filtrados = aplicarFiltros(TODOS);
     actualizarMiniDashboard(filtrados);
-
     // limpiar marcadores previos
     marcadores.forEach(m => mapaInstance.removeLayer(m));
     marcadores = [];
-
     const dispersos = dispersarCercanos(filtrados);
-
     dispersos.forEach(({ r, lat, lng }) => {
       if (isNaN(lat) || isNaN(lng)) return;
-
       const color = estadoColor(r.estado);
-
       const circle = L.circleMarker([lat, lng], {
         radius: RADIO_PUNTO,
         fillColor: color,
@@ -399,7 +432,6 @@
       marcadores.push(circle);
     });
   }
-
   async function initMapa() {
     await cargarDatos();
     const primero = TODOS[0];
@@ -410,54 +442,61 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(mapaInstance);
-
     renderMapa();
-
     ['f-estado', 'f-categoria', 'f-riesgo'].forEach(id => {
       document.getElementById(id).addEventListener('change', renderMapa);
     });
+    // Mantiene el tamaño del mapa siempre correcto, incluso mientras
+    // el panel lateral está animando su ancho (evita el "bug" de altura
+    // que ocurría con un único setTimeout fijo).
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => {
+        if (mapaInstance) mapaInstance.invalidateSize();
+      });
+      ro.observe(document.querySelector('.mapa-wrap'));
+    }
+    // Respaldo: al terminar la transición de ancho del panel, fuerza un ajuste final.
+    document.getElementById('detalle-panel').addEventListener('transitionend', e => {
+      if (e.propertyName === 'width' && mapaInstance) mapaInstance.invalidateSize();
+    });
   }
-
   function resetFiltros() {
     document.getElementById('f-estado').value = 'activos';
     document.getElementById('f-categoria').value = 'todas';
     document.getElementById('f-riesgo').value = 'todos';
     renderMapa();
   }
-
   function abrirDetalle(r) {
-    const panel = document.getElementById('detalle-panel');
+    const panel  = document.getElementById('detalle-panel');
+    const layout = document.getElementById('mapa-layout');
     panel.classList.remove('oculto');
-    setTimeout(() => mapaInstance.invalidateSize(), 260);
+    layout.classList.remove('sin-panel');
     document.getElementById('det-num').textContent    = `Reporte #${r.id}`;
     document.getElementById('det-titulo').textContent = r.titulo || '—';
     document.getElementById('det-link').href          = `/admin/reporte-detalle?id=${r.id}`;
-
     const fotoWrap = document.getElementById('det-foto-wrap');
     if (r.fotoPrincipal) {
-      fotoWrap.innerHTML = `<img class="detalle-foto" src="${r.fotoPrincipal}" alt="foto"
-        onerror="this.parentElement.innerHTML='<div class=detalle-foto-placeholder><i class=ti ti-photo></i></div>'">`;
+      fotoWrap.innerHTML = `
+        <div class="detalle-foto-visor" onclick="abrirFotoZoom('${r.fotoPrincipal}')">
+          <img src="${r.fotoPrincipal}" alt="foto"
+               onerror="this.closest('.detalle-foto-visor').outerHTML='<div class=detalle-foto-placeholder><i class=ti ti-photo></i></div>'">
+        </div>`;
     } else {
       fotoWrap.innerHTML = `<div class="detalle-foto-placeholder"><i class="ti ti-photo"></i></div>`;
     }
-
     document.getElementById('det-badges').innerHTML = `
       <span class="badge badge-${badgeClase(r.estado)}">${r.estado || '—'}</span>
       <span class="badge badge-${badgeRiesgoClase(r.nivelRiesgo)}">${(r.nivelRiesgo || '').toUpperCase()}</span>
     `;
-
     document.getElementById('det-desc').textContent = r.descripcionConsolidada || '—';
-
     const pct = r.porcentajeAvance || 0;
     document.getElementById('det-avance-pct').textContent  = pct;
     document.getElementById('det-avance-fill').style.width = pct + '%';
-
     document.getElementById('det-meta').innerHTML = `
       <div class="detalle-meta-row"><i class="ti ti-tag"></i><span>${r.categoria || '—'}</span></div>
       <div class="detalle-meta-row"><i class="ti ti-map-pin"></i><span>${r.zonaReferencia || 'Sin zona registrada'}</span></div>
       <div class="detalle-meta-row"><i class="ti ti-calendar"></i><span>${formatFecha(r.fechaCreacion)}</span></div>
     `;
-
     // Mini reportes vinculados (todos, no solo el primero)
     const minis = r.miniReportes || [];
     document.getElementById('det-mini-count').textContent = minis.length;
@@ -473,17 +512,12 @@
           </div>
         `).join('');
   }
-
   function cerrarDetalle() {
     document.getElementById('detalle-panel').classList.add('oculto');
+    document.getElementById('mapa-layout').classList.add('sin-panel');
     if (mapaInstance) mapaInstance.invalidateSize();
   }
-
-
-
   initMapa();
-
-
 </script>
 </body>
 </html>
